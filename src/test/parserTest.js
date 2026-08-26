@@ -63,6 +63,19 @@ function runTests() {
   const p1Details = problems.find(p => p.problemNumber === 1);
   assert(p1Details && p1Details.allLanguages.length === 3, 'Problem 1 has all 3 languages (Java, Python, C++) recorded');
 
+  // Test 6: Verify accurate difficulty lookup for standard problems
+  const easyFile1 = parseProblemFile({ path: '0026-remove-duplicates-from-sorted-array/0026-remove-duplicates-from-sorted-array.java', type: 'blob' });
+  assert(easyFile1 && easyFile1.difficulty === 'Easy', 'Problem 26 accurately classified as Easy');
+
+  const easyFile2 = parseProblemFile({ path: '0206-reverse-linked-list/Solution.py', type: 'blob' });
+  assert(easyFile2 && easyFile2.difficulty === 'Easy', 'Problem 206 accurately classified as Easy');
+
+  const easyFile3 = parseProblemFile({ path: '0217-contains-duplicate/0217-contains-duplicate.cpp', type: 'blob' });
+  assert(easyFile3 && easyFile3.difficulty === 'Easy', 'Problem 217 accurately classified as Easy');
+
+  const hardFile1 = parseProblemFile({ path: '0023-merge-k-sorted-lists/0023-merge-k-sorted-lists.java', type: 'blob' });
+  assert(hardFile1 && hardFile1.difficulty === 'Hard', 'Problem 23 accurately classified as Hard');
+
   console.log(`\nResults: ${passed} Passed, ${failed} Failed`);
   return failed === 0;
 }
