@@ -13,8 +13,11 @@ import { parseGitHubRepoUrl } from '../utils/helpers';
  */
 async function fetchRawFileContent(owner, repo, branch, filePath) {
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 2000);
     const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${filePath}`;
-    const res = await fetch(rawUrl);
+    const res = await fetch(rawUrl, { signal: controller.signal });
+    clearTimeout(timeoutId);
     if (res.ok) {
       return await res.text();
     }

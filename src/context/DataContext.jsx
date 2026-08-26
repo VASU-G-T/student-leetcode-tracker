@@ -505,12 +505,8 @@ export function DataProvider({ children }) {
           [id]: syncResult.problems
         }));
 
-        // Real-time Cloud Save
-        if (isFirebaseConfigured && db) {
-          try {
-            await setDoc(doc(db, 'students', id), syncResult.student, { merge: true });
-          } catch (e) {}
-        }
+        // Permanent Real-time Cloud Save
+        await syncStudentToCloud(id, syncResult.student);
 
         showToast(`Synced ${syncResult.stats.totalSolved} problems for ${student.name}`, 'success');
       } else {
@@ -546,14 +542,16 @@ export function DataProvider({ children }) {
       const updatedMap = new Map();
       const newProblemsMap = { ...problemsByStudent };
 
-      results.forEach(res => {
+      for (const res of results) {
         if (res.student) {
           updatedMap.set(res.student.id, res.student);
           if (res.problems && res.problems.length > 0) {
             newProblemsMap[res.student.id] = res.problems;
           }
+          // Save each synced student permanently to Cloud
+          syncStudentToCloud(res.student.id, res.student).catch(() => {});
         }
-      });
+      }
 
       const now = new Date().toISOString();
       setStudents(prev => prev.map(s => updatedMap.get(s.id) || s));
