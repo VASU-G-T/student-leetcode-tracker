@@ -19,7 +19,9 @@ import {
   subscribeToActivities,
   syncStudentToCloud,
   deleteStudentFromCloud,
-  syncProjectsToCloud
+  syncProjectsToCloud,
+  fetchAllStudentsFromCloud,
+  fetchAllProjectsFromCloud
 } from '../services/cloudSync';
 import { 
   INITIAL_STUDENTS, 
@@ -109,7 +111,40 @@ export function DataProvider({ children }) {
         setSettings(localSettings ? JSON.parse(localSettings) : INITIAL_SETTINGS);
         setLastGlobalSync(localLastSync || null);
 
-        // 2. Setup Real-Time Cloud Listeners
+        // 2. Fetch directly from Cloud Database on startup
+        try {
+          const directCloudStudents = await fetchAllStudentsFromCloud();
+          if (directCloudStudents && directCloudStudents.length > 0) {
+            const mergedCloud = directCloudStudents.map(s => {
+              let updated = { ...s };
+              if (!updated.goal || updated.goal === 200 || updated.goal === 250) updated.goal = 4033;
+              if (updated.id === 'vasu_gt_creator' || updated.registerNumber === 'VASU-ECE' || updated.username === 'VASU-G-T') {
+                updated.registerNumber = '922525106360';
+              }
+              return updated;
+            });
+            if (!mergedCloud.some(s => s.id === CREATOR_PROFILE.id || s.username === CREATOR_PROFILE.username || s.registerNumber === '922525106360')) {
+              mergedCloud.unshift(CREATOR_PROFILE);
+            }
+            setStudents(mergedCloud);
+          } else {
+            // Seed creator profile to cloud if brand new
+            syncStudentToCloud(CREATOR_PROFILE.id, CREATOR_PROFILE).catch(() => {});
+          }
+
+          const directCloudProjects = await fetchAllProjectsFromCloud();
+          if (directCloudProjects && Object.keys(directCloudProjects).length > 0) {
+            setProjectsByStudent(prev => ({
+              ...prev,
+              ...directCloudProjects,
+              [CREATOR_PROFILE.id]: directCloudProjects[CREATOR_PROFILE.id] || CREATOR_PROJECTS
+            }));
+          }
+        } catch (e) {
+          console.warn('Initial direct cloud fetch fallback:', e);
+        }
+
+        // 3. Setup Real-Time Live Cloud Listeners (instant sync across all devices)
         unsubStudents = subscribeToStudents((cloudStudents) => {
           if (cloudStudents && cloudStudents.length > 0) {
             const cleaned = cloudStudents.map(s => {
@@ -127,28 +162,28 @@ export function DataProvider({ children }) {
           }
         });
 
-          unsubProjects = subscribeToProjects((cloudProjects) => {
-            if (cloudProjects && Object.keys(cloudProjects).length > 0) {
-              setProjectsByStudent(prev => ({
-                ...prev,
-                ...cloudProjects,
-                [CREATOR_PROFILE.id]: cloudProjects[CREATOR_PROFILE.id] || CREATOR_PROJECTS
-              }));
-            }
-          });
+        unsubProjects = subscribeToProjects((cloudProjects) => {
+          if (cloudProjects && Object.keys(cloudProjects).length > 0) {
+            setProjectsByStudent(prev => ({
+              ...prev,
+              ...cloudProjects,
+              [CREATOR_PROFILE.id]: cloudProjects[CREATOR_PROFILE.id] || CREATOR_PROJECTS
+            }));
+          }
+        });
 
-          unsubSettings = subscribeToSettings((cloudSettings) => {
-            if (cloudSettings) {
-              setSettings(prev => ({ ...prev, ...cloudSettings }));
-            }
-          });
+        unsubSettings = subscribeToSettings((cloudSettings) => {
+          if (cloudSettings) {
+            setSettings(prev => ({ ...prev, ...cloudSettings }));
+          }
+        });
 
-          unsubActivities = subscribeToActivities((cloudActivities) => {
-            if (cloudActivities && cloudActivities.length > 0) {
-              setActivities(cloudActivities);
-            }
-          });
-        } catch (err) {
+        unsubActivities = subscribeToActivities((cloudActivities) => {
+          if (cloudActivities && cloudActivities.length > 0) {
+            setActivities(cloudActivities);
+          }
+        });
+      } catch (err) {
         console.error('Error initializing data store:', err);
       } finally {
         setLoading(false);

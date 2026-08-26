@@ -12,8 +12,84 @@ import {
   deleteDoc, 
   onSnapshot 
 } from 'firebase/firestore';
-import { ref, onValue, set, push, remove } from 'firebase/database';
+import { ref, onValue, set, push, remove, get } from 'firebase/database';
 import { db, rtdb, isFirebaseConfigured } from './firebase';
+
+/**
+ * Sanitize object for Firebase Realtime Database / Firestore (no undefined or null values)
+ */
+export function sanitizeForCloud(obj) {
+  if (!obj || typeof obj !== 'object') return obj;
+  return JSON.parse(JSON.stringify(obj, (key, value) => {
+    if (value === undefined || value === null) return '';
+    return value;
+  }));
+}
+
+/**
+ * Fetch all students from cloud once (for fast initial load)
+ */
+export async function fetchAllStudentsFromCloud() {
+  if (!isFirebaseConfigured) return [];
+
+  // 1. Try Realtime Database
+  if (rtdb) {
+    try {
+      const snap = await get(ref(rtdb, 'students'));
+      if (snap.exists()) {
+        const val = snap.val();
+        return Object.keys(val).map(k => ({ id: k, ...val[k] }));
+      }
+    } catch (e) {
+      console.warn('Failed to fetch students from RTDB:', e);
+    }
+  }
+
+  // 2. Try Firestore
+  if (db) {
+    try {
+      const snap = await getDocs(collection(db, 'students'));
+      if (!snap.empty) {
+        return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      }
+    } catch (e) {
+      console.warn('Failed to fetch students from Firestore:', e);
+    }
+  }
+
+  return [];
+}
+
+/**
+ * Fetch all projects from cloud once
+ */
+export async function fetchAllProjectsFromCloud() {
+  if (!isFirebaseConfigured) return {};
+
+  if (rtdb) {
+    try {
+      const snap = await get(ref(rtdb, 'projects'));
+      if (snap.exists()) {
+        return snap.val() || {};
+      }
+    } catch (e) {}
+  }
+
+  if (db) {
+    try {
+      const snap = await getDocs(collection(db, 'projects'));
+      if (!snap.empty) {
+        const map = {};
+        snap.docs.forEach(d => {
+          map[d.id] = d.data()?.projects || [];
+        });
+        return map;
+      }
+    } catch (e) {}
+  }
+
+  return {};
+}
 
 /**
  * Setup real-time listener for students
@@ -24,7 +100,25 @@ export function subscribeToStudents(onUpdate, onError) {
   let unsubFirestore = () => {};
   let unsubRtdb = () => {};
 
-  // 1. Listen via Firestore
+  // 1. Listen via Realtime Database
+  if (rtdb) {
+    try {
+      const studentsRef = ref(rtdb, 'students');
+      unsubRtdb = onValue(studentsRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          const studentsList = Object.keys(data).map(k => ({ id: k, ...data[k] }));
+          onUpdate(studentsList);
+        } else {
+          onUpdate([]);
+        }
+      }, (err) => {
+        console.warn('RTDB students sync error:', err);
+      });
+    } catch (err) {}
+  }
+
+  // 2. Listen via Firestore
   if (db) {
     try {
       const studentsCol = collection(db, 'students');
@@ -35,22 +129,6 @@ export function subscribeToStudents(onUpdate, onError) {
         }
       }, (err) => {
         console.warn('Firestore students sync error:', err);
-      });
-    } catch (err) {}
-  }
-
-  // 2. Listen via Realtime Database
-  if (rtdb) {
-    try {
-      const studentsRef = ref(rtdb, 'students');
-      unsubRtdb = onValue(studentsRef, (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-          const studentsList = Object.keys(data).map(k => ({ id: k, ...data[k] }));
-          onUpdate(studentsList);
-        }
-      }, (err) => {
-        console.warn('RTDB students sync error:', err);
       });
     } catch (err) {}
   }
@@ -66,17 +144,23 @@ export function subscribeToStudents(onUpdate, onError) {
  */
 export async function syncStudentToCloud(studentId, studentData) {
   if (!isFirebaseConfigured) return;
-
-  if (db) {
-    try {
-      await setDoc(doc(db, 'students', studentId), studentData, { merge: true });
-    } catch (e) {}
-  }
+  const cleanData = sanitizeForCloud(studentData);
 
   if (rtdb) {
     try {
-      await set(ref(rtdb, `students/${studentId}`), studentData);
-    } catch (e) {}
+      await set(ref(rtdb, `students/${studentId}`), cleanData);
+      console.log('🟢 Student synced to RTDB:', studentId);
+    } catch (e) {
+      console.warn('RTDB student sync error:', e);
+    }
+  }
+
+  if (db) {
+    try {
+      await setDoc(doc(db, 'students', studentId), cleanData, { merge: true });
+    } catch (e) {
+      console.warn('Firestore student sync error:', e);
+    }
   }
 }
 
@@ -86,15 +170,16 @@ export async function syncStudentToCloud(studentId, studentData) {
 export async function deleteStudentFromCloud(studentId) {
   if (!isFirebaseConfigured) return;
 
-  if (db) {
-    try {
-      await deleteDoc(doc(db, 'students', studentId));
-    } catch (e) {}
-  }
-
   if (rtdb) {
     try {
       await remove(ref(rtdb, `students/${studentId}`));
+    } catch (e) {}
+  }
+
+  if (db) {
+    try {
+      await deleteDoc(doc(db, 'students', studentId));
+      await deleteDoc(doc(db, 'projects', studentId));
     } catch (e) {}
   }
 }
@@ -107,6 +192,18 @@ export function subscribeToProjects(onUpdate, onError) {
 
   let unsubFirestore = () => {};
   let unsubRtdb = () => {};
+
+  if (rtdb) {
+    try {
+      const projectsRef = ref(rtdb, 'projects');
+      unsubRtdb = onValue(projectsRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          onUpdate(data);
+        }
+      }, (err) => {});
+    } catch (err) {}
+  }
 
   if (db) {
     try {
@@ -125,18 +222,6 @@ export function subscribeToProjects(onUpdate, onError) {
     } catch (err) {}
   }
 
-  if (rtdb) {
-    try {
-      const projectsRef = ref(rtdb, 'projects');
-      unsubRtdb = onValue(projectsRef, (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-          onUpdate(data);
-        }
-      }, (err) => {});
-    } catch (err) {}
-  }
-
   return () => {
     unsubFirestore();
     unsubRtdb();
@@ -148,16 +233,17 @@ export function subscribeToProjects(onUpdate, onError) {
  */
 export async function syncProjectsToCloud(studentId, projectsList) {
   if (!isFirebaseConfigured) return;
-
-  if (db) {
-    try {
-      await setDoc(doc(db, 'projects', studentId), { studentId, projects: projectsList, updatedAt: new Date().toISOString() });
-    } catch (e) {}
-  }
+  const cleanList = sanitizeForCloud(projectsList);
 
   if (rtdb) {
     try {
-      await set(ref(rtdb, `projects/${studentId}`), projectsList);
+      await set(ref(rtdb, `projects/${studentId}`), cleanList);
+    } catch (e) {}
+  }
+
+  if (db) {
+    try {
+      await setDoc(doc(db, 'projects', studentId), { studentId, projects: cleanList, updatedAt: new Date().toISOString() });
     } catch (e) {}
   }
 }
@@ -171,6 +257,16 @@ export function subscribeToSettings(onUpdate, onError) {
   let unsubFirestore = () => {};
   let unsubRtdb = () => {};
 
+  if (rtdb) {
+    try {
+      const settingsRef = ref(rtdb, 'settings/global');
+      unsubRtdb = onValue(settingsRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) onUpdate(data);
+      }, (err) => {});
+    } catch (err) {}
+  }
+
   if (db) {
     try {
       const settingsDocRef = doc(db, 'settings', 'global');
@@ -178,16 +274,6 @@ export function subscribeToSettings(onUpdate, onError) {
         if (docSnap.exists()) {
           onUpdate(docSnap.data());
         }
-      }, (err) => {});
-    } catch (err) {}
-  }
-
-  if (rtdb) {
-    try {
-      const settingsRef = ref(rtdb, 'settings/global');
-      unsubRtdb = onValue(settingsRef, (snapshot) => {
-        const data = snapshot.val();
-        if (data) onUpdate(data);
       }, (err) => {});
     } catch (err) {}
   }
@@ -207,19 +293,6 @@ export function subscribeToActivities(onUpdate, onError) {
   let unsubFirestore = () => {};
   let unsubRtdb = () => {};
 
-  if (db) {
-    try {
-      const actCol = collection(db, 'activity');
-      unsubFirestore = onSnapshot(actCol, (snapshot) => {
-        if (!snapshot.empty) {
-          const acts = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-          acts.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
-          onUpdate(acts.slice(0, 30));
-        }
-      }, (err) => {});
-    } catch (err) {}
-  }
-
   if (rtdb) {
     try {
       const actRef = ref(rtdb, 'activity');
@@ -227,6 +300,19 @@ export function subscribeToActivities(onUpdate, onError) {
         const data = snapshot.val();
         if (data) {
           const acts = Object.keys(data).map(k => ({ id: k, ...data[k] }));
+          acts.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+          onUpdate(acts.slice(0, 30));
+        }
+      }, (err) => {});
+    } catch (err) {}
+  }
+
+  if (db) {
+    try {
+      const actCol = collection(db, 'activity');
+      unsubFirestore = onSnapshot(actCol, (snapshot) => {
+        if (!snapshot.empty) {
+          const acts = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
           acts.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
           onUpdate(acts.slice(0, 30));
         }
