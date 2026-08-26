@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-[#0b0f17] text-slate-100 font-sans;
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(30, 41, 59, 0.3) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(15, 23, 42, 0.4) 0px, transparent 50%);
+    background-attachment: fixed;
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #0f172a;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-slate-900/80 backdrop-blur-md border border-slate-800/80 rounded-xl shadow-lg shadow-black/20;
+  }
+  
+  .glass-card-hover {
+    @apply glass-card transition-all duration-200 hover:border-slate-700/80 hover:bg-slate-900/95 hover:shadow-xl hover:shadow-black/30;
+  }
+
+  .badge-easy {
+    @apply bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium;
+  }
+
+  .badge-medium {
+    @apply bg-amber-500/10 text-amber-400 border border-amber-500/20 font-medium;
+  }
+
+  .badge-hard {
+    @apply bg-rose-500/10 text-rose-400 border border-rose-500/20 font-medium;
+  }
+
+  .input-field {
+    @apply w-full bg-slate-950/70 border border-slate-800 rounded-lg px-3.5 py-2 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/80 transition-all text-sm;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-semibold rounded-lg shadow-sm shadow-amber-500/20 transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed text-sm active:scale-[0.98];
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium rounded-lg border border-slate-700 hover:border-slate-600 transition-all duration-150 text-sm active:scale-[0.98];
+  }
+
+  .btn-danger {
+    @apply inline-flex items-center justify-center px-4 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 font-medium rounded-lg transition-all duration-150 text-sm active:scale-[0.98];
+  }
+}

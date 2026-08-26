@@ -1,0 +1,40 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if user is authenticated admin
+    function isAdmin() {
+      return request.auth != null;
+    }
+
+    // Students collection: Public can read, only Admin can write
+    match /students/{studentId} {
+      allow read: if true;
+      allow write: if isAdmin();
+      
+      // Subcollection for solved problems
+      match /problems/{problemId} {
+        allow read: if true;
+        allow write: if isAdmin();
+      }
+    }
+
+    // Activity feed collection: Public can read, only Admin can write
+    match /activity/{activityId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Settings collection: Public can read, only Admin can write
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Sync logs collection: Public can read, only Admin can write
+    match /sync_logs/{logId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}
