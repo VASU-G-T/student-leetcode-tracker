@@ -123,19 +123,6 @@ export default function AdminAddStudent() {
     }
   };
 
-  const handleFillExample = () => {
-    setName('G T Vasudevan');
-    setRegisterNumber('ECE001');
-    setDepartment('ECE');
-    setYear('2nd Year');
-    setSection('Sec A');
-    setEmail('vasudevan@college.edu');
-    setGithubUsername('Vasudevan123');
-    setGithubRepoUrl('https://github.com/Vasudevan123/leetcode');
-    setLeetcodeUsername('vasudevan123');
-    setGoal(200);
-  };
-
   return (
     <div className="max-w-3xl mx-auto space-y-6 animate-fade-in pb-16">
       {/* Top Header */}
@@ -147,15 +134,6 @@ export default function AdminAddStudent() {
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Students</span>
         </Link>
-
-        <button
-          type="button"
-          onClick={handleFillExample}
-          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-mono hover:bg-amber-500/20 transition-colors"
-        >
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>Fill Example Data</span>
-        </button>
       </div>
 
       <div className="glass-card p-6 sm:p-8 border-slate-800 shadow-2xl relative">
