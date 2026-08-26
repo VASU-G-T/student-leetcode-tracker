@@ -5,15 +5,16 @@ import {
   Medal, 
   Download, 
   SlidersHorizontal, 
-  Sparkles,
-  Award,
-  Layers
+  Sparkles, 
+  Award, 
+  Layers 
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import LeaderboardTable from '../components/leaderboard/LeaderboardTable';
 import FilterDropdown from '../components/common/FilterDropdown';
 import SearchBar from '../components/common/SearchBar';
 import { useData } from '../context/DataContext';
+import { exportLeaderboardCsv } from '../utils/exportCsv';
 
 export default function PublicLeaderboard() {
   const { students, settings } = useData();
@@ -72,13 +73,24 @@ export default function PublicLeaderboard() {
             </p>
           </div>
 
-          <button
-            onClick={triggerCelebration}
-            className="btn-primary flex items-center gap-2 shadow-md shadow-sky-500/20"
-          >
-            <Sparkles className="w-4 h-4" />
-            <span>Celebrate Leaders</span>
-          </button>
+          <div className="flex flex-wrap items-center gap-2.5">
+            <button
+              onClick={() => exportLeaderboardCsv(filteredStudents)}
+              className="btn-secondary flex items-center gap-2 font-semibold text-slate-700 hover:text-sky-700 shadow-sm"
+              title="Export leaderboard to clean Excel / CSV format"
+            >
+              <Download className="w-4 h-4 text-sky-600" />
+              <span>Export Excel / CSV</span>
+            </button>
+
+            <button
+              onClick={triggerCelebration}
+              className="btn-primary flex items-center gap-2 shadow-md shadow-sky-500/20"
+            >
+              <Sparkles className="w-4 h-4" />
+              <span>Celebrate Leaders</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -131,10 +143,7 @@ export default function PublicLeaderboard() {
       </div>
 
       {/* Leaderboard Table */}
-      <LeaderboardTable
-        students={filteredStudents}
-        showExport={true}
-      />
+      <LeaderboardTable students={filteredStudents} />
     </div>
   );
 }

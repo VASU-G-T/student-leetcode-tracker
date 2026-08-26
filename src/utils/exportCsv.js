@@ -1,21 +1,34 @@
 /**
- * Export data to CSV file download
+ * Export data to Clean, Excel-Compatible CSV / Spreadsheet Table
+ * Uses UTF-8 BOM (\uFEFF) to ensure Microsoft Excel and Google Sheets
+ * instantly separate each data point into distinct table columns without double-quotes.
  */
+
+import { getStudentActivityMetrics } from './helpers.js';
+
 export function exportToCsv(filename, headers, rows) {
   if (!rows || !rows.length) return;
 
-  const escapeCsv = (val) => {
-    if (val === null || val === undefined) return '""';
-    const str = String(val).replace(/"/g, '""');
-    return `"${str}"`;
+  // Clean cell formatter: Only quote if cell contains comma, newline, or existing quote
+  const formatCell = (val) => {
+    if (val === null || val === undefined || val === '') return '';
+    const str = String(val).trim();
+    if (str.includes(',') || str.includes('\n') || str.includes('\r') || str.includes('"')) {
+      return `"${str.replace(/"/g, '""')}"`;
+    }
+    return str;
   };
 
-  const csvContent = [
-    headers.map(escapeCsv).join(','),
-    ...rows.map(row => row.map(escapeCsv).join(','))
-  ].join('\r\n');
+  // Build clean CSV rows
+  const csvLines = [
+    headers.map(formatCell).join(','),
+    ...rows.map(row => row.map(formatCell).join(','))
+  ];
 
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const csvContent = csvLines.join('\r\n');
+
+  // \uFEFF Byte Order Mark forces Excel to parse UTF-8 with proper comma column separation
+  const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.setAttribute('href', url);
@@ -26,10 +39,8 @@ export function exportToCsv(filename, headers, rows) {
   URL.revokeObjectURL(url);
 }
 
-import { getStudentActivityMetrics } from './helpers';
-
 /**
- * Export Leaderboard to CSV
+ * Export Clean Leaderboard Table to Excel / CSV
  */
 export function exportLeaderboardCsv(students) {
   const headers = [
@@ -54,22 +65,23 @@ export function exportLeaderboardCsv(students) {
     const metrics = getStudentActivityMetrics(s);
     return [
       idx + 1,
-      s.name,
-      s.registerNumber,
-      s.department,
-      s.year,
-      s.section,
-      s.totalSolved || 0,
-      metrics.today,
-      metrics.week,
-      metrics.month,
-      metrics.streak,
-      s.easySolved || 0,
-      s.mediumSolved || 0,
-      s.hardSolved || 0,
-      s.githubRepoUrl
+      s.name || 'Student',
+      s.registerNumber || s.regNo || s.username || '-',
+      s.department || 'ECE',
+      s.year || '2nd Year',
+      s.section || 'Sec F',
+      s.totalSolved ?? 0,
+      metrics.today ?? 0,
+      metrics.week ?? 0,
+      metrics.month ?? 0,
+      metrics.streak ?? 0,
+      s.easySolved ?? 0,
+      s.mediumSolved ?? 0,
+      s.hardSolved ?? 0,
+      s.githubRepoUrl || ''
     ];
   });
 
-  exportToCsv(`LeetTrack_Leaderboard_${new Date().toISOString().split('T')[0]}`, headers, rows);
+  const todayStr = new Date().toISOString().split('T')[0];
+  exportToCsv(`ECE_LeetCode_Leaderboard_${todayStr}`, headers, rows);
 }
