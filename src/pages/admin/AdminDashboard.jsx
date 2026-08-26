@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Users, 
@@ -12,7 +12,10 @@ import {
   CheckCircle2,
   ArrowRight,
   Download,
-  Sparkles
+  Sparkles,
+  FileText,
+  FileSpreadsheet,
+  ChevronDown
 } from 'lucide-react';
 import StatCard from '../../components/common/StatCard';
 import DifficultyChart from '../../components/dashboard/DifficultyChart';
@@ -20,7 +23,11 @@ import ActivityFeed from '../../components/dashboard/ActivityFeed';
 import StudentTable from '../../components/students/StudentTable';
 import { useData } from '../../context/DataContext';
 import { formatRelativeTime } from '../../utils/helpers';
-import { exportLeaderboardCsv } from '../../utils/exportCsv';
+import { 
+  exportLeaderboardWordDoc, 
+  exportLeaderboardExcel, 
+  exportLeaderboardCsv 
+} from '../../utils/exportCsv';
 
 export default function AdminDashboard() {
   const { 
@@ -34,6 +41,19 @@ export default function AdminDashboard() {
     syncingStudentId, 
     deleteStudent 
   } = useData();
+
+  const [isExportOpen, setIsExportOpen] = useState(false);
+  const exportRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (exportRef.current && !exportRef.current.contains(event.target)) {
+        setIsExportOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const stats = useMemo(() => {
     const totalStudents = students.length;
@@ -105,13 +125,52 @@ export default function AdminDashboard() {
               <span>Add Student</span>
             </Link>
 
-            <button
-              onClick={() => exportLeaderboardCsv(students)}
-              className="p-2.5 rounded-xl bg-white border border-slate-200 text-slate-600 hover:text-sky-700 hover:border-sky-300 transition-colors shadow-sm"
-              title="Export all student data to CSV"
-            >
-              <Download className="w-4 h-4" />
-            </button>
+            {/* Export Dropdown */}
+            <div className="relative" ref={exportRef}>
+              <button
+                onClick={() => setIsExportOpen(!isExportOpen)}
+                className="p-2.5 rounded-xl bg-white border border-slate-200 text-slate-600 hover:text-sky-700 hover:border-sky-300 transition-colors shadow-sm flex items-center gap-1.5"
+                title="Export report in Word Table, Excel, or CSV"
+              >
+                <Download className="w-4 h-4 text-sky-600" />
+                <ChevronDown className="w-3 h-3 text-slate-400" />
+              </button>
+
+              {isExportOpen && (
+                <div className="absolute right-0 mt-2 w-52 bg-white border border-sky-100 rounded-2xl shadow-xl z-50 p-1.5 animate-slide-up">
+                  <button
+                    onClick={() => {
+                      exportLeaderboardWordDoc(students);
+                      setIsExportOpen(false);
+                    }}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:text-sky-700 hover:bg-sky-50 rounded-xl transition-colors text-left"
+                  >
+                    <FileText className="w-4 h-4 text-blue-600 shrink-0" />
+                    <span>Word Document (.doc)</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      exportLeaderboardExcel(students);
+                      setIsExportOpen(false);
+                    }}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:text-emerald-700 hover:bg-emerald-50 rounded-xl transition-colors text-left mt-0.5"
+                  >
+                    <FileSpreadsheet className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>Excel Table (.xls)</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      exportLeaderboardCsv(students);
+                      setIsExportOpen(false);
+                    }}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:text-sky-700 hover:bg-sky-50 rounded-xl transition-colors text-left mt-0.5"
+                  >
+                    <Download className="w-4 h-4 text-sky-600 shrink-0" />
+                    <span>Clean CSV (.csv)</span>
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
