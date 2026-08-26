@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { 
   Code2, 
   ExternalLink, 
@@ -6,14 +6,29 @@ import {
   Filter, 
   FileCode, 
   Sparkles,
-  Download
+  Download,
+  ChevronDown,
+  FileText,
+  FileSpreadsheet
 } from 'lucide-react';
-import { exportToCsv } from '../../utils/exportCsv';
+import { exportStudentProblemsWordDoc, exportStudentProblemsExcel } from '../../utils/exportCsv';
 
 export default function ProblemTable({ problems = [], studentName = 'Student' }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDifficulty, setSelectedDifficulty] = useState('');
   const [selectedLanguage, setSelectedLanguage] = useState('');
+  const [isExportOpen, setIsExportOpen] = useState(false);
+  const exportRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (exportRef.current && !exportRef.current.contains(event.target)) {
+        setIsExportOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Extract all distinct languages present in solved problems
   const availableLanguages = useMemo(() => {
@@ -48,18 +63,6 @@ export default function ProblemTable({ problems = [], studentName = 'Student' })
     });
   }, [problems, searchTerm, selectedDifficulty, selectedLanguage]);
 
-  const handleExport = () => {
-    const headers = ['Problem Number', 'Title', 'Difficulty', 'Languages', 'GitHub URL'];
-    const rows = filteredProblems.map(p => [
-      p.problemNumber,
-      p.title,
-      p.difficulty,
-      p.allLanguages ? p.allLanguages.join(', ') : p.language,
-      p.githubUrl
-    ]);
-    exportToCsv(`${studentName}_Solved_Problems`, headers, rows);
-  };
-
   const difficultyBadges = {
     Easy: 'bg-emerald-50 text-emerald-700 border-emerald-200 font-semibold',
     Medium: 'bg-sky-50 text-sky-700 border-sky-200 font-semibold',
@@ -83,14 +86,54 @@ export default function ProblemTable({ problems = [], studentName = 'Student' })
             </span>
           </div>
 
+          {/* Export Dropdown Menu */}
           {problems.length > 0 && (
-            <button
-              onClick={handleExport}
-              className="btn-secondary !py-1.5 !px-3 text-xs flex items-center gap-1.5 font-semibold text-sky-700 hover:text-sky-800"
-            >
-              <Download className="w-3.5 h-3.5 text-sky-600" />
-              <span>Export List</span>
-            </button>
+            <div className="relative" ref={exportRef}>
+              <button
+                onClick={() => setIsExportOpen(!isExportOpen)}
+                className="btn-secondary !py-1.5 !px-3 text-xs flex items-center gap-1.5 font-bold text-sky-700 hover:text-sky-800 bg-sky-50/80 hover:bg-sky-100/90 border-sky-200 shadow-sm"
+              >
+                <Download className="w-3.5 h-3.5 text-sky-600" />
+                <span>Export Report</span>
+                <ChevronDown className={`w-3 h-3 text-sky-600 transition-transform duration-200 ${isExportOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {isExportOpen && (
+                <div className="absolute right-0 mt-2 w-64 bg-white border border-sky-100 rounded-2xl shadow-xl z-50 p-2 animate-slide-up">
+                  <button
+                    onClick={() => {
+                      exportStudentProblemsWordDoc(studentName, filteredProblems);
+                      setIsExportOpen(false);
+                    }}
+                    className="w-full flex items-start gap-3 p-2.5 rounded-xl hover:bg-sky-50 transition-colors text-left group"
+                  >
+                    <div className="p-2 rounded-lg bg-blue-50 text-blue-600 border border-blue-100 group-hover:bg-blue-100 transition-colors shrink-0">
+                      <FileText className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="text-xs font-bold text-slate-800 group-hover:text-blue-700">Word Document (.doc)</div>
+                      <div className="text-[11px] text-slate-400 font-medium mt-0.5">Formatted Word Table with Styles</div>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      exportStudentProblemsExcel(studentName, filteredProblems);
+                      setIsExportOpen(false);
+                    }}
+                    className="w-full flex items-start gap-3 p-2.5 rounded-xl hover:bg-emerald-50 transition-colors text-left group mt-1"
+                  >
+                    <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-100 group-hover:bg-emerald-100 transition-colors shrink-0">
+                      <FileSpreadsheet className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="text-xs font-bold text-slate-800 group-hover:text-emerald-700">Excel / Sheet Table (.xls)</div>
+                      <div className="text-[11px] text-slate-400 font-medium mt-0.5">Native Multi-Column Spreadsheet</div>
+                    </div>
+                  </button>
+                </div>
+              )}
+            </div>
           )}
         </div>
 
@@ -109,121 +152,109 @@ export default function ProblemTable({ problems = [], studentName = 'Student' })
           </div>
 
           {/* Difficulty Filter */}
-          <select
-            value={selectedDifficulty}
-            onChange={(e) => setSelectedDifficulty(e.target.value)}
-            className="input-field py-2 text-xs bg-white text-slate-700 font-semibold border-slate-200 focus:border-sky-500 shadow-sm cursor-pointer"
-          >
-            <option value="">Difficulty: All</option>
-            <option value="Easy">Easy</option>
-            <option value="Medium">Medium</option>
-            <option value="Hard">Hard</option>
-          </select>
+          <div className="relative">
+            <select
+              value={selectedDifficulty}
+              onChange={(e) => setSelectedDifficulty(e.target.value)}
+              className="input-field py-2 text-xs w-full bg-white text-slate-800 border-slate-200 focus:border-sky-500 shadow-sm"
+            >
+              <option value="">All Difficulties</option>
+              <option value="Easy">Easy</option>
+              <option value="Medium">Medium</option>
+              <option value="Hard">Hard</option>
+            </select>
+          </div>
 
           {/* Language Filter */}
-          <select
-            value={selectedLanguage}
-            onChange={(e) => setSelectedLanguage(e.target.value)}
-            className="input-field py-2 text-xs bg-white text-slate-700 font-semibold border-slate-200 focus:border-sky-500 shadow-sm cursor-pointer"
-          >
-            <option value="">Language: All</option>
-            {availableLanguages.map(lang => (
-              <option key={lang} value={lang}>{lang}</option>
-            ))}
-          </select>
+          <div className="relative">
+            <select
+              value={selectedLanguage}
+              onChange={(e) => setSelectedLanguage(e.target.value)}
+              className="input-field py-2 text-xs w-full bg-white text-slate-800 border-slate-200 focus:border-sky-500 shadow-sm"
+            >
+              <option value="">All Tech Stacks / Languages</option>
+              {availableLanguages.map(l => (
+                <option key={l} value={l}>{l}</option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
-      {/* Table */}
-      {filteredProblems.length === 0 ? (
-        <div className="p-12 text-center text-slate-400 bg-white">
-          <FileCode className="w-10 h-10 mx-auto text-sky-300 mb-2" />
-          <p className="text-sm font-bold text-slate-700">No problems found</p>
-          <p className="text-xs text-slate-500 mt-1">
-            {problems.length === 0 
-              ? "No LeetCode solutions detected in this repository yet. Make sure LeetSync has pushed files." 
-              : "Try adjusting your search or difficulty filter."}
-          </p>
-        </div>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-sky-100 bg-sky-50/70 text-[11px] font-bold text-slate-600 uppercase tracking-wider">
-                <th className="py-3.5 px-4 w-16 text-center">#</th>
-                <th className="py-3.5 px-4">Problem</th>
-                <th className="py-3.5 px-4">Difficulty</th>
-                <th className="py-3.5 px-4">Language</th>
-                <th className="py-3.5 px-4 text-right">GitHub</th>
+      {/* Table Content */}
+      <div className="overflow-x-auto">
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr className="border-b border-sky-100 bg-sky-50/70 text-[11px] font-bold text-slate-600 uppercase tracking-wider">
+              <th className="py-3 px-4 w-16 text-center">#</th>
+              <th className="py-3 px-4">Problem</th>
+              <th className="py-3 px-4 text-center">Difficulty</th>
+              <th className="py-3 px-4">Tech Stack</th>
+              <th className="py-3 px-4 text-right">GitHub Solution</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-sky-100/60 font-sans text-xs">
+            {filteredProblems.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="py-12 text-center text-slate-400">
+                  No problems match your current search / filter criteria.
+                </td>
               </tr>
-            </thead>
-            <tbody className="divide-y divide-sky-100/70 text-sm bg-white">
-              {filteredProblems.map((problem) => {
-                const languages = problem.allLanguages && problem.allLanguages.length > 0 
-                  ? problem.allLanguages 
-                  : [problem.language || 'Code'];
-
-                return (
-                  <tr 
-                    key={problem.id || `p_${problem.problemNumber}`}
-                    className="hover:bg-sky-50/50 transition-colors group"
-                  >
-                    {/* Problem Number */}
-                    <td className="py-3.5 px-4 text-center font-mono text-xs font-bold text-slate-500">
-                      {problem.problemNumber}
-                    </td>
-
-                    {/* Title */}
-                    <td className="py-3.5 px-4">
-                      <span className="font-bold text-slate-900 group-hover:text-sky-600 transition-colors">
-                        {problem.title}
-                      </span>
-                    </td>
-
-                    {/* Difficulty */}
-                    <td className="py-3.5 px-4">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border font-mono ${difficultyBadges[problem.difficulty] || difficultyBadges.Medium}`}>
-                        {problem.difficulty}
-                      </span>
-                    </td>
-
-                    {/* Languages Used */}
-                    <td className="py-3.5 px-4">
-                      <div className="flex flex-wrap gap-1.5">
-                        {languages.map((lang, idx) => (
-                          <span
-                            key={idx}
-                            className="px-2 py-0.5 rounded-md bg-sky-50 text-sky-700 text-[11px] font-mono font-bold border border-sky-200 shadow-sm"
-                          >
+            ) : (
+              filteredProblems.map((p, idx) => (
+                <tr 
+                  key={p.problemNumber || idx}
+                  className="hover:bg-sky-50/40 transition-colors group"
+                >
+                  <td className="py-3 px-4 text-center font-mono font-bold text-sky-700">
+                    {p.problemNumber || idx + 1}
+                  </td>
+                  <td className="py-3 px-4 font-bold text-slate-900 group-hover:text-sky-700 transition-colors">
+                    {p.title}
+                  </td>
+                  <td className="py-3 px-4 text-center">
+                    <span className={`inline-block px-2.5 py-0.5 rounded-full text-[11px] border ${difficultyBadges[p.difficulty] || 'bg-slate-100 text-slate-700 border-slate-200'}`}>
+                      {p.difficulty}
+                    </span>
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="flex flex-wrap gap-1">
+                      {p.allLanguages && p.allLanguages.length > 0 ? (
+                        p.allLanguages.map((lang, lIdx) => (
+                          <span key={lIdx} className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-sky-50 border border-sky-200 text-sky-800 text-[10px] font-mono font-medium">
+                            <FileCode className="w-2.5 h-2.5 text-sky-600" />
                             {lang}
                           </span>
-                        ))}
-                      </div>
-                    </td>
-
-                    {/* GitHub Direct Link */}
-                    <td className="py-3.5 px-4 text-right">
-                      {problem.githubUrl ? (
-                        <a
-                          href={problem.githubUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-sky-50 hover:bg-sky-600 hover:text-white text-sky-700 text-xs font-semibold transition-colors border border-sky-200 shadow-sm"
-                        >
-                          <span>View Code</span>
-                          <ExternalLink className="w-3 h-3" />
-                        </a>
+                        ))
                       ) : (
-                        <span className="text-xs text-slate-400 font-mono">N/A</span>
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-sky-50 border border-sky-200 text-sky-800 text-[10px] font-mono font-medium">
+                          <FileCode className="w-2.5 h-2.5 text-sky-600" />
+                          {p.language || 'Java'}
+                        </span>
                       )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
+                    </div>
+                  </td>
+                  <td className="py-3 px-4 text-right">
+                    {p.githubUrl ? (
+                      <a
+                        href={p.githubUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 text-xs font-semibold text-sky-600 hover:text-sky-800 hover:underline"
+                      >
+                        <span>View Code</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    ) : (
+                      <span className="text-slate-400 text-xs">--</span>
+                    )}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

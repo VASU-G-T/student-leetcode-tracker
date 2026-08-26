@@ -1,21 +1,19 @@
 /**
  * Export Utilities for LeetTrack
  * Direct Google Sheets & Microsoft Excel Table Exporter (.xls) and Word Document (.doc)
- * Replaces raw CSV with formatted spreadsheet tables that open directly into clean columns.
+ * Replaces raw CSV with formatted spreadsheet & word tables that open directly into clean columns.
  */
 
-import { getStudentActivityMetrics } from './helpers.js';
+import { getStudentActivityMetrics, formatDateTime } from './helpers.js';
 
 /**
  * Export Leaderboard directly as an Excel / Google Sheet Spreadsheet Table (.xls)
- * Formats every column cleanly with ample spacing, text preservation for Register Numbers, and zero quotes.
  */
 export function exportLeaderboardExcel(students) {
   if (!students || !students.length) return;
 
   const now = new Date();
   const dateStr = now.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-  const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
 
   const tableRowsHtml = students.map((s, idx) => {
     const metrics = getStudentActivityMetrics(s);
@@ -52,18 +50,6 @@ export function exportLeaderboardExcel(students) {
     <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
     <head>
       <meta charset="utf-8">
-      <!--[if gte mso 9]>
-      <xml>
-        <x:ExcelWorkbook>
-          <x:ExcelWorksheets>
-            <x:ExcelWorksheet>
-              <x:Name>Form Responses 1</x:Name>
-              <x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>
-            </x:ExcelWorksheet>
-          </x:ExcelWorksheets>
-        </x:ExcelWorkbook>
-      </xml>
-      <![endif]-->
       <style>
         body { font-family: 'Google Sans', Arial, Roboto, sans-serif; }
         th { 
@@ -228,29 +214,155 @@ export function exportLeaderboardWordDoc(students) {
 }
 
 /**
- * Universal export alias that uses Sheet (.xls) as the primary format
+ * Export Individual Student's Solved Problems as a Word Document (.doc) Table
  */
+export function exportStudentProblemsWordDoc(studentName, problems) {
+  if (!problems || !problems.length) return;
+
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
+  const tableRowsHtml = problems.map((p, idx) => {
+    const diffColor = p.difficulty === 'Easy' ? '#047857' : p.difficulty === 'Medium' ? '#0284c7' : '#e11d48';
+    const diffBg = p.difficulty === 'Easy' ? '#ecfdf5' : p.difficulty === 'Medium' ? '#f0f9ff' : '#fff1f2';
+    const langs = p.allLanguages && p.allLanguages.length ? p.allLanguages.join(', ') : (p.language || 'Java');
+    const solvedDate = p.solvedAt ? new Date(p.solvedAt).toLocaleDateString('en-GB') : 'Verified';
+
+    return `
+      <tr style="background-color: ${idx % 2 === 0 ? '#ffffff' : '#f8fafc'};">
+        <td style="padding: 8px; text-align: center; font-weight: bold; border: 1px solid #cbd5e1;">${idx + 1}</td>
+        <td style="padding: 8px; text-align: center; font-family: monospace; font-weight: bold; color: #0284c7; border: 1px solid #cbd5e1;">#${p.problemNumber || idx + 1}</td>
+        <td style="padding: 8px; font-weight: bold; color: #0f172a; border: 1px solid #cbd5e1;">${p.title}</td>
+        <td style="padding: 8px; text-align: center; font-weight: bold; color: ${diffColor}; background-color: ${diffBg}; border: 1px solid #cbd5e1;">${p.difficulty}</td>
+        <td style="padding: 8px; text-align: center; border: 1px solid #cbd5e1;">${langs}</td>
+        <td style="padding: 8px; text-align: center; font-size: 9pt; color: #475569; border: 1px solid #cbd5e1;">${solvedDate}</td>
+        <td style="padding: 8px; border: 1px solid #cbd5e1; font-size: 8.5pt;">
+          <a href="${p.githubUrl || '#'}" style="color: #0284c7; text-decoration: underline;">GitHub Solution</a>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  const wordHtml = `
+    <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+    <head>
+      <meta charset='utf-8'>
+      <title>${studentName} - Solved LeetCode Problems</title>
+      <style>
+        body { font-family: 'Segoe UI', Calibri, Arial, sans-serif; margin: 20px; color: #0f172a; }
+        .header-title { color: #0284c7; font-size: 18pt; font-weight: bold; margin-bottom: 3px; }
+        .header-subtitle { color: #64748b; font-size: 10pt; margin-top: 0; margin-bottom: 14px; }
+        table { border-collapse: collapse; width: 100%; font-size: 9.5pt; border: 1px solid #cbd5e1; }
+        th { background-color: #0284c7; color: #ffffff; padding: 9px 8px; text-align: center; font-size: 9.5pt; font-weight: bold; border: 1px solid #0369a1; }
+        th.left { text-align: left; }
+      </style>
+    </head>
+    <body>
+      <div class="header-title">${studentName} • Solved LeetCode Solutions (${problems.length})</div>
+      <div class="header-subtitle">Verified GitHub Solutions Record • Generated ${dateStr}</div>
+      <table border="1" cellpadding="0" cellspacing="0">
+        <thead>
+          <tr style="background-color: #0284c7; color: #ffffff;">
+            <th style="width: 45px;">S.No</th>
+            <th style="width: 70px;">Prob #</th>
+            <th class="left">Problem Title</th>
+            <th style="width: 90px;">Difficulty</th>
+            <th style="width: 100px;">Tech Stack</th>
+            <th style="width: 110px;">Submission Date</th>
+            <th style="width: 130px;">GitHub Link</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${tableRowsHtml}
+        </tbody>
+      </table>
+    </body>
+    </html>
+  `;
+
+  const blob = new Blob(['\uFEFF' + wordHtml], { type: 'application/msword;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', `${studentName.replace(/\s+/g, '_')}_Solved_Problems_${now.toISOString().split('T')[0]}.doc`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
+/**
+ * Export Individual Student's Solved Problems as an Excel Table (.xls)
+ */
+export function exportStudentProblemsExcel(studentName, problems) {
+  if (!problems || !problems.length) return;
+
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
+  const tableRowsHtml = problems.map((p, idx) => {
+    const langs = p.allLanguages && p.allLanguages.length ? p.allLanguages.join(', ') : (p.language || 'Java');
+    const solvedDate = p.solvedAt ? new Date(p.solvedAt).toLocaleDateString('en-GB') : 'Verified';
+
+    return `
+      <tr style="background-color: ${idx % 2 === 0 ? '#ffffff' : '#f8fafc'};">
+        <td style="padding: 8px; text-align: center; font-weight: bold; border: 1px solid #cbd5e1;">${idx + 1}</td>
+        <td style="padding: 8px; text-align: center; font-family: monospace; font-weight: bold; color: #0284c7; border: 1px solid #cbd5e1;">#${p.problemNumber || idx + 1}</td>
+        <td style="padding: 8px; font-weight: bold; border: 1px solid #cbd5e1;">${p.title}</td>
+        <td style="padding: 8px; text-align: center; font-weight: bold; border: 1px solid #cbd5e1;">${p.difficulty}</td>
+        <td style="padding: 8px; text-align: center; border: 1px solid #cbd5e1;">${langs}</td>
+        <td style="padding: 8px; text-align: center; border: 1px solid #cbd5e1;">${solvedDate}</td>
+        <td style="padding: 8px; border: 1px solid #cbd5e1;"><a href="${p.githubUrl || '#'}">${p.githubUrl || ''}</a></td>
+      </tr>
+    `;
+  }).join('');
+
+  const excelHtml = `
+    <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+    <head>
+      <meta charset="utf-8">
+      <style>
+        th { background-color: #5b21b6; color: #ffffff; font-weight: bold; padding: 10px 8px; border: 1px solid #4c1d95; text-align: center; }
+        td { border: 1px solid #cbd5e1; vertical-align: middle; }
+      </style>
+    </head>
+    <body>
+      <h2 style="color: #5b21b6;">${studentName} - Solved LeetCode Solutions (${dateStr})</h2>
+      <table border="1">
+        <thead>
+          <tr>
+            <th>S.No</th>
+            <th>Problem #</th>
+            <th>Title</th>
+            <th>Difficulty</th>
+            <th>Tech Stack</th>
+            <th>Submission Date</th>
+            <th>GitHub Repository URL</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${tableRowsHtml}
+        </tbody>
+      </table>
+    </body>
+    </html>
+  `;
+
+  const blob = new Blob(['\uFEFF' + excelHtml], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', `${studentName.replace(/\s+/g, '_')}_Solved_Problems_${now.toISOString().split('T')[0]}.xls`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
 export function exportLeaderboardCsv(students) {
   exportLeaderboardExcel(students);
 }
 
 export function exportToCsv(filename, headers, rows) {
-  // Alias to Excel sheet export
-  const students = rows.map(r => ({
-    name: r[1],
-    registerNumber: r[2],
-    department: r[3],
-    year: r[4],
-    section: r[5],
-    totalSolved: r[6],
-    todaySolved: r[7],
-    weekSolved: r[8],
-    monthSolved: r[9],
-    streak: r[10],
-    easySolved: r[11],
-    mediumSolved: r[12],
-    hardSolved: r[13],
-    githubRepoUrl: r[14]
-  }));
-  exportLeaderboardExcel(students);
+  exportLeaderboardExcel(rows);
 }
