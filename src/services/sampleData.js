@@ -22,10 +22,14 @@ export const CREATOR_PROFILE = {
   isCreator: true,
   skills: ['React', 'JavaScript', 'Tailwind CSS', 'Vite', 'Node.js', 'Firebase', 'GitHub REST API', 'Embedded C', 'IoT', 'C++', 'Python', 'LeetCode DSA'],
   accessStatus: 'active',
-  totalSolved: 33,
-  easySolved: 18,
-  mediumSolved: 14,
-  hardSolved: 1,
+  totalSolved: 40,
+  easySolved: 30,
+  mediumSolved: 8,
+  hardSolved: 2,
+  todaySolved: 9,
+  weekSolved: 11,
+  monthSolved: 40,
+  streak: 3,
   goal: 4033,
   lastSynced: new Date().toISOString(),
   createdAt: new Date().toISOString()
@@ -38,7 +42,7 @@ export const CREATOR_PROJECTS = [
     description: 'An automated platform tracking student LeetCode submissions via LeetSync GitHub repositories with section analytics, live leaderboards, and portfolio showcasing.',
     techStack: ['React', 'Tailwind CSS', 'Vite', 'Firebase', 'GitHub Trees API', 'Chart.js'],
     githubUrl: 'https://github.com/VASU-G-T/student-leetcode-tracker',
-    liveUrl: 'https://github.com/VASU-G-T/student-leetcode-tracker',
+    liveUrl: 'https://student-leetcode-tracker-vasu-g-ts-projects.vercel.app',
     imageUrl: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&auto=format&fit=crop&q=80',
     category: 'Web Application',
     createdAt: new Date().toISOString()
@@ -66,55 +70,55 @@ export const INITIAL_ACTIVITY = [
     studentId: 'vasu_gt_creator',
     studentName: 'G T VASUDEVAN',
     type: 'solved',
-    problemNumber: 1,
-    problemTitle: 'Two Sum',
-    difficulty: 'Easy',
+    problemNumber: 41,
+    problemTitle: 'First Missing Positive',
+    difficulty: 'Hard',
     language: 'Java',
-    timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString()
+    timestamp: '2026-08-26T10:02:06Z'
   },
   {
     id: 'act_init_2',
-    studentId: 'student_1787731483951_yrz9g',
-    studentName: 'SIVARANJAN M P',
+    studentId: 'vasu_gt_creator',
+    studentName: 'G T VASUDEVAN',
     type: 'solved',
-    problemNumber: 1929,
-    problemTitle: 'Concatenation of Array',
+    problemNumber: 485,
+    problemTitle: 'Max Consecutive Ones',
     difficulty: 'Easy',
-    language: 'Python',
-    timestamp: new Date(Date.now() - 45 * 60 * 1000).toISOString()
+    language: 'Java',
+    timestamp: '2026-08-26T09:43:21Z'
   },
   {
     id: 'act_init_3',
     studentId: 'vasu_gt_creator',
     studentName: 'G T VASUDEVAN',
     type: 'solved',
-    problemNumber: 15,
-    problemTitle: '3Sum',
-    difficulty: 'Medium',
-    language: 'C++',
-    timestamp: new Date(Date.now() - 2 * 3600 * 1000).toISOString()
+    problemNumber: 283,
+    problemTitle: 'Move Zeroes',
+    difficulty: 'Easy',
+    language: 'Java',
+    timestamp: '2026-08-26T09:31:58Z'
   },
   {
     id: 'act_init_4',
-    studentId: 'student_1787731483951_yrz9g',
-    studentName: 'SIVARANJAN M P',
+    studentId: 'vasu_gt_creator',
+    studentName: 'G T VASUDEVAN',
     type: 'solved',
-    problemNumber: 206,
-    problemTitle: 'Reverse Linked List',
+    problemNumber: 136,
+    problemTitle: 'Single Number',
     difficulty: 'Easy',
     language: 'Java',
-    timestamp: new Date(Date.now() - 5 * 3600 * 1000).toISOString()
+    timestamp: '2026-08-26T09:31:35Z'
   },
   {
     id: 'act_init_5',
     studentId: 'vasu_gt_creator',
     studentName: 'G T VASUDEVAN',
     type: 'solved',
-    problemNumber: 42,
-    problemTitle: 'Trapping Rain Water',
-    difficulty: 'Hard',
-    language: 'Python',
-    timestamp: new Date(Date.now() - 12 * 3600 * 1000).toISOString()
+    problemNumber: 412,
+    problemTitle: 'Fizz Buzz',
+    difficulty: 'Easy',
+    language: 'Java',
+    timestamp: '2026-08-26T09:27:25Z'
   }
 ];
 

@@ -3,9 +3,9 @@
  * High-speed LeetCode parser & instant Cloud database sync (completes in under 2 seconds).
  */
 
-import { fetchRepositoryFiles } from './githubService';
-import { parseRepositoryTree, extractDifficultyFromReadme } from './leetcodeParser';
-import { parseGitHubRepoUrl } from '../utils/helpers';
+import { fetchRepositoryFiles } from './githubService.js';
+import { parseRepositoryTree, extractDifficultyFromReadme } from './leetcodeParser.js';
+import { parseGitHubRepoUrl, getStudentActivityMetrics } from '../utils/helpers.js';
 
 /**
  * Fast raw file fetcher with strict 1.5s timeout to prevent network stalls
@@ -40,13 +40,13 @@ export async function syncStudentRepository(student, forceRefresh = false) {
   const { owner, repo } = parsedUrl;
 
   try {
-    // 1. Instant GitHub Trees fetch (0.3s)
-    const { files, repoInfo, fromCache } = await fetchRepositoryFiles(student.githubRepoUrl, forceRefresh);
+    // 1. Instant GitHub Trees and Commits fetch (0.3s)
+    const { files, commits, repoInfo, fromCache } = await fetchRepositoryFiles(student.githubRepoUrl, forceRefresh);
 
-    // 2. High-speed Problem parsing & difficulty determination (0.01s)
-    const { problems, stats: initialStats } = parseRepositoryTree(files, repoInfo);
+    // 2. High-speed Problem parsing & difficulty & commit date determination (0.01s)
+    const { problems, stats: initialStats } = parseRepositoryTree(files, repoInfo, commits);
 
-    // 3. Fast README difficulty enhancement (only for problems needing extra check, capped to top 5)
+    // 3. Fast README difficulty enhancement (only for problems needing extra check, capped to top 8)
     const readmeFilesMap = new Map();
     for (const f of files) {
       const lower = (f.path || '').toLowerCase();
@@ -93,11 +93,18 @@ export async function syncStudentRepository(student, forceRefresh = false) {
       else easySolved++; // Default fallback
     }
 
+    // Compute exact velocity metrics (Today, 1 Week, 1 Month, Streak)
+    const velocity = getStudentActivityMetrics(student, problems);
+
     const exactStats = {
       totalSolved: problems.length,
       easySolved,
       mediumSolved,
-      hardSolved
+      hardSolved,
+      todaySolved: velocity.today,
+      weekSolved: velocity.week,
+      monthSolved: velocity.month,
+      streak: velocity.streak
     };
 
     const now = new Date().toISOString();
@@ -111,6 +118,10 @@ export async function syncStudentRepository(student, forceRefresh = false) {
       easySolved: exactStats.easySolved,
       mediumSolved: exactStats.mediumSolved,
       hardSolved: exactStats.hardSolved,
+      todaySolved: exactStats.todaySolved,
+      weekSolved: exactStats.weekSolved,
+      monthSolved: exactStats.monthSolved,
+      streak: exactStats.streak,
       lastSynced: now,
       syncStatus: 'success',
       syncError: null

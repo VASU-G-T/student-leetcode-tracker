@@ -1,11 +1,11 @@
 /**
  * GitHub REST API Service
- * Handles repository validation, rate limit inspection, recursive file tree fetching, and caching.
+ * Handles repository validation, rate limit inspection, recursive file tree fetching, commit history, and caching.
  */
 
-import { parseGitHubRepoUrl } from '../utils/helpers';
+import { parseGitHubRepoUrl } from '../utils/helpers.js';
 
-// Simple in-memory cache for repository tree responses (10 minutes TTL)
+// Simple in-memory cache for repository tree and commits responses (10 minutes TTL)
 const cache = new Map();
 const CACHE_TTL_MS = 10 * 60 * 1000;
 
@@ -19,7 +19,7 @@ function getHeaders() {
   };
 
   // Optional token for higher rate limit (if provided via environment variable)
-  const token = import.meta.env.VITE_GITHUB_TOKEN;
+  const token = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_GITHUB_TOKEN) || '';
   if (token && token.trim() !== '') {
     headers['Authorization'] = `token ${token.trim()}`;
   }
@@ -104,7 +104,30 @@ export async function validateRepository(repoUrl) {
 }
 
 /**
+ * Fetch recent commits from a GitHub repository to get exact submission timestamps
+ */
+export async function fetchRepositoryCommits(owner, repo) {
+  try {
+    const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/commits?per_page=100`, {
+      headers: getHeaders()
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        return data.map(c => ({
+          sha: c.sha,
+          date: c.commit?.author?.date || c.commit?.committer?.date || null,
+          message: c.commit?.message || ''
+        }));
+      }
+    }
+  } catch (e) {}
+  return [];
+}
+
+/**
  * Fetch all files recursively from a GitHub repository using Git Trees API
+ * and retrieve exact commit dates
  */
 export async function fetchRepositoryFiles(repoUrl, forceRefresh = false) {
   const parsed = parseGitHubRepoUrl(repoUrl);
@@ -120,6 +143,7 @@ export async function fetchRepositoryFiles(repoUrl, forceRefresh = false) {
     if (Date.now() - cachedEntry.timestamp < CACHE_TTL_MS) {
       return {
         files: cachedEntry.files,
+        commits: cachedEntry.commits || [],
         repoInfo: { owner, repo, defaultBranch: cachedEntry.defaultBranch },
         fromCache: true
       };
@@ -146,11 +170,14 @@ export async function fetchRepositoryFiles(repoUrl, forceRefresh = false) {
   const repoMeta = await repoMetaResponse.json();
   const defaultBranch = repoMeta.default_branch || 'main';
 
-  // 2. Fetch Git Tree recursively
-  const treeResponse = await fetch(
-    `https://api.github.com/repos/${owner}/${repo}/git/trees/${defaultBranch}?recursive=1`,
-    { headers: getHeaders() }
-  );
+  // 2. Fetch Git Tree recursively and fetch recent commits in parallel
+  const [treeResponse, commits] = await Promise.all([
+    fetch(
+      `https://api.github.com/repos/${owner}/${repo}/git/trees/${defaultBranch}?recursive=1`,
+      { headers: getHeaders() }
+    ),
+    fetchRepositoryCommits(owner, repo)
+  ]);
 
   if (treeResponse.status === 403) {
     throw new Error('GitHub API rate limit reached. Please try again later.');
@@ -165,6 +192,7 @@ export async function fetchRepositoryFiles(repoUrl, forceRefresh = false) {
 
   const result = {
     files,
+    commits,
     repoInfo: {
       owner,
       repo,
@@ -177,6 +205,7 @@ export async function fetchRepositoryFiles(repoUrl, forceRefresh = false) {
   // Update Cache
   cache.set(cacheKey, {
     files,
+    commits,
     defaultBranch,
     timestamp: Date.now()
   });

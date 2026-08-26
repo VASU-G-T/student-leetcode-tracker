@@ -129,25 +129,40 @@ export function generateStudentSlug(student) {
 }
 
 /**
- * Compute Today, 1 Week (7D), 1 Month (30D), and Streak metrics for a student
+ * Compute Exact Today, 1 Week (7D), 1 Month (30D), and Consecutive Streak metrics for a student
+ * directly derived from actual problem solved dates with zero mock/random approximations.
  */
 export function getStudentActivityMetrics(student, problems = []) {
-  const total = student?.totalSolved || (Array.isArray(problems) ? problems.length : 0) || 0;
-  if (total === 0) {
-    return { today: 0, week: 0, month: 0, streak: 0 };
-  }
-
   // If explicit metrics already exist on student object
-  if (typeof student?.todaySolved === 'number' && typeof student?.weekSolved === 'number' && typeof student?.monthSolved === 'number') {
+  if (
+    typeof student?.todaySolved === 'number' && 
+    typeof student?.weekSolved === 'number' && 
+    typeof student?.monthSolved === 'number' && 
+    typeof student?.streak === 'number'
+  ) {
     return {
       today: student.todaySolved,
       week: student.weekSolved,
       month: student.monthSolved,
-      streak: student.streak || (student.todaySolved > 0 ? 3 : 1)
+      streak: student.streak
+    };
+  }
+
+  const probList = Array.isArray(problems) && problems.length > 0
+    ? problems
+    : (Array.isArray(student?.problems) ? student.problems : []);
+
+  if (probList.length === 0) {
+    return {
+      today: student?.todaySolved || 0,
+      week: student?.weekSolved || 0,
+      month: student?.monthSolved || 0,
+      streak: student?.streak || 0
     };
   }
 
   const now = new Date();
+  const nowTime = now.getTime();
   const oneDayMs = 24 * 60 * 60 * 1000;
   const sevenDaysMs = 7 * oneDayMs;
   const thirtyDaysMs = 30 * oneDayMs;
@@ -156,25 +171,62 @@ export function getStudentActivityMetrics(student, problems = []) {
   let week = 0;
   let month = 0;
 
-  if (Array.isArray(problems) && problems.length > 0) {
-    for (const p of problems) {
-      if (p.solvedAt) {
-        const timeDiff = now - new Date(p.solvedAt);
-        if (timeDiff <= oneDayMs) today++;
-        if (timeDiff <= sevenDaysMs) week++;
-        if (timeDiff <= thirtyDaysMs) month++;
+  const activeDates = new Set();
+
+  for (const p of probList) {
+    if (p.solvedAt) {
+      const pDate = new Date(p.solvedAt);
+      const pTime = pDate.getTime();
+      if (!isNaN(pTime)) {
+        const diff = nowTime - pTime;
+        if (diff >= 0 && diff <= oneDayMs) {
+          today++;
+        }
+        if (diff >= 0 && diff <= sevenDaysMs) {
+          week++;
+        }
+        if (diff >= 0 && diff <= thirtyDaysMs) {
+          month++;
+        }
+
+        // Format YYYY-MM-DD in local time
+        const year = pDate.getFullYear();
+        const m = String(pDate.getMonth() + 1).padStart(2, '0');
+        const d = String(pDate.getDate()).padStart(2, '0');
+        activeDates.add(`${year}-${m}-${d}`);
       }
     }
   }
 
-  // Realistic dynamic derivation if problem timestamps are homogenous
-  if (month === 0) {
-    month = Math.min(total, Math.max(1, Math.round(total * 0.8)));
-    week = Math.min(month, Math.max(1, Math.round(total * 0.3)));
-    today = Math.min(week, Math.max(0, Math.round(total * 0.08)));
+  // Calculate consecutive day streak
+  let streak = 0;
+  let checkDate = new Date();
+
+  // Check if today was active
+  const todayStr = `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(2, '0')}-${String(checkDate.getDate()).padStart(2, '0')}`;
+  
+  if (activeDates.has(todayStr)) {
+    streak++;
+    checkDate.setDate(checkDate.getDate() - 1);
+  } else {
+    // If not active today, check if yesterday was active to maintain streak
+    checkDate.setDate(checkDate.getDate() - 1);
+    const yesterdayStr = `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(2, '0')}-${String(checkDate.getDate()).padStart(2, '0')}`;
+    if (!activeDates.has(yesterdayStr)) {
+      return { today, week, month, streak: 0 };
+    }
   }
 
-  const streak = student?.streak || (today > 0 ? Math.min(14, Math.max(2, Math.round(week / 2))) : (week > 0 ? 1 : 0));
+  // Count backwards day by day
+  while (true) {
+    const dateStr = `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(2, '0')}-${String(checkDate.getDate()).padStart(2, '0')}`;
+    if (activeDates.has(dateStr)) {
+      streak++;
+      checkDate.setDate(checkDate.getDate() - 1);
+    } else {
+      break;
+    }
+  }
 
   return {
     today,

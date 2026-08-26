@@ -162,7 +162,7 @@ function detectDifficulty(path, filename, problemNumber) {
 /**
  * Extract exact difficulty level from a problem's README.md file
  * LeetSync / LeetHub formats:
- * - Badges: https://img.shields.io/badge/Difficulty-Easy-brightgreen
+ * - Badges: https://img.shields.io/badge/Difficulty-Easy-brightgreen, alt="Difficulty: Easy"
  * - HTML: <h3>Easy</h3>, <strong>Easy</strong>
  * - Text: Difficulty Easy, Difficulty: Easy, **Difficulty:** Easy
  */
@@ -274,11 +274,11 @@ export function parseProblemFile(file, repoInfo) {
   // Pattern 1: Number followed by dot or space and title (e.g. "1. Two Sum.java", "1 - Two Sum.py", "121. Best Time...")
   const pattern1 = /^(\d+)[\.\s\-_]+(.+)$/;
   
-  // Pattern 2: LeetSync directory folder name (e.g., path: "0001-two-sum/...", parts[0] or parts[1] is "0001-two-sum")
-  const leetSyncFolder = parts.find(p => /^\d{3,5}-[\w-]+$/.test(p));
+  // Pattern 2: LeetSync directory folder name (e.g., path: "0001-two-sum/...", parts[0] or parts[1] is "0001-two-sum" or "1-two-sum")
+  const leetSyncFolder = parts.find(p => /^\d{1,5}-[\w-]+$/.test(p));
 
-  // Pattern 3: Zero-padded slug filename (e.g. "0001-two-sum.py")
-  const pattern3 = /^(\d{3,5})-([a-z0-9\-]+)$/i;
+  // Pattern 3: Zero-padded slug filename (e.g. "0001-two-sum.py" or "1-two-sum.java")
+  const pattern3 = /^(\d{1,5})-([a-z0-9\-]+)$/i;
 
   const match1 = rawBaseName.match(pattern1);
   const match3 = rawBaseName.match(pattern3);
@@ -290,7 +290,7 @@ export function parseProblemFile(file, repoInfo) {
     problemNumber = parseInt(match3[1], 10);
     problemTitle = formatTitle(match3[2]);
   } else if (leetSyncFolder) {
-    const folderMatch = leetSyncFolder.match(/^(\d{3,5})-(.+)$/);
+    const folderMatch = leetSyncFolder.match(/^(\d{1,5})-(.+)$/);
     if (folderMatch) {
       problemNumber = parseInt(folderMatch[1], 10);
       problemTitle = formatTitle(folderMatch[2]);
@@ -334,10 +334,46 @@ export function parseProblemFile(file, repoInfo) {
 }
 
 /**
- * Parse an array of repository files and deduplicate problem solutions
- * Multiple solution files for the same problem ID will be merged into 1 solved problem record.
+ * Parse an array of repository files and deduplicate problem solutions,
+ * mapping exact submission dates from GitHub commit history
  */
-export function parseRepositoryTree(files = [], repoInfo = null) {
+export function parseRepositoryTree(files = [], repoInfo = null, commits = []) {
+  // Build lookup map from commit messages and dates
+  const commitDateMap = new Map();
+  let oldestCommitDate = repoInfo?.pushedAt || null;
+
+  if (Array.isArray(commits) && commits.length > 0) {
+    commits.forEach(c => {
+      const msg = (c.message || '').toLowerCase();
+      const date = c.date;
+      if (date) {
+        if (!oldestCommitDate || new Date(date) < new Date(oldestCommitDate)) {
+          oldestCommitDate = date;
+        }
+      }
+
+      // 1. Check for LeetSync commit patterns: "Added README.md file for <Title>", "Added Notes.md file for <Title>"
+      const match = msg.match(/added (?:readme\.md|notes\.md) file for (.+)/i);
+      if (match && date) {
+        const cleanTitle = match[1].trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (!commitDateMap.has(cleanTitle) || new Date(date) > new Date(commitDateMap.get(cleanTitle))) {
+          commitDateMap.set(cleanTitle, date);
+        }
+      }
+
+      // 2. Direct folder/slug pattern in commit message
+      const slugMatches = msg.match(/\b\d{1,5}-([a-z0-9-]+)\b/g);
+      if (slugMatches && date) {
+        slugMatches.forEach(slug => {
+          const cleanSlug = slug.replace(/^\d+-/, '').replace(/[^a-z0-9]/g, '').toLowerCase();
+          if (!commitDateMap.has(cleanSlug)) {
+            commitDateMap.set(cleanSlug, date);
+          }
+        });
+      }
+    });
+  }
+
   const problemsMap = new Map();
 
   for (const file of files) {
@@ -351,6 +387,12 @@ export function parseRepositoryTree(files = [], repoInfo = null) {
 
     const key = parsed.problemNumber;
     
+    // Find exact commit submission date for this problem
+    const cleanTitle = parsed.title.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const folderSlug = parsed.path.split('/')[0].replace(/^\d+-/, '').replace(/[^a-z0-9]/g, '').toLowerCase();
+    
+    let exactSolvedAt = commitDateMap.get(cleanTitle) || commitDateMap.get(folderSlug) || oldestCommitDate || new Date().toISOString();
+
     if (!problemsMap.has(key)) {
       problemsMap.set(key, {
         id: `problem_${parsed.problemNumber}`,
@@ -361,13 +403,16 @@ export function parseRepositoryTree(files = [], repoInfo = null) {
         githubUrl: parsed.githubUrl,
         path: parsed.path,
         allLanguages: [parsed.language],
-        solvedAt: file.committedDate || new Date().toISOString()
+        solvedAt: exactSolvedAt
       });
     } else {
       // Existing solution for same problem: append language if not present
       const existing = problemsMap.get(key);
       if (!existing.allLanguages.includes(parsed.language)) {
         existing.allLanguages.push(parsed.language);
+      }
+      if (exactSolvedAt && (!existing.solvedAt || new Date(exactSolvedAt) > new Date(existing.solvedAt))) {
+        existing.solvedAt = exactSolvedAt;
       }
     }
   }
