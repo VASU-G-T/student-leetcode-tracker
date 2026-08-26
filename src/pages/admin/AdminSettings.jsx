@@ -2,22 +2,19 @@ import React, { useState } from 'react';
 import { 
   Settings, 
   Save, 
-  RefreshCw, 
   Database, 
-  Trash2, 
   ShieldCheck, 
   CheckCircle2, 
-  Sparkles,
-  Info 
+  Server
 } from 'lucide-react';
 import { useData } from '../../context/DataContext';
 import { isFirebaseConfigured } from '../../services/firebase';
 
 export default function AdminSettings() {
-  const { settings, updateSettings, resetToSampleData, clearSampleData, students } = useData();
+  const { settings, updateSettings, students } = useData();
 
-  const [appName, setAppName] = useState(settings.appName || 'LeetTrack');
-  const [tagline, setTagline] = useState(settings.tagline || 'Track. Solve. Improve.');
+  const [appName, setAppName] = useState(settings.appName || 'ECE LeetTrack');
+  const [tagline, setTagline] = useState(settings.tagline || 'ECE Department • Track. Solve. Improve.');
   const [defaultGoal, setDefaultGoal] = useState(settings.defaultGoal || 200);
   const [autoSyncInterval, setAutoSyncInterval] = useState(settings.autoSyncInterval || 15);
   const [defaultDepartment, setDefaultDepartment] = useState(settings.defaultDepartment || 'ECE');
@@ -42,8 +39,6 @@ export default function AdminSettings() {
     }
   };
 
-  const sampleCount = students.filter(s => s.isSample).length;
-
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-fade-in pb-16">
       {/* Header */}
@@ -53,7 +48,7 @@ export default function AdminSettings() {
           <span>Application Settings</span>
         </h1>
         <p className="text-xs sm:text-sm text-slate-400 mt-1">
-          Configure global tracking defaults, auto-sync timers, and sample data controls.
+          Configure global tracking defaults, auto-sync timers, and department configurations for ECE.
         </p>
       </div>
 
@@ -132,17 +127,15 @@ export default function AdminSettings() {
 
             <div>
               <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">
-                Default Department
+                Department
               </label>
-              <select
+              <input
+                type="text"
                 value={defaultDepartment}
-                onChange={(e) => setDefaultDepartment(e.target.value)}
-                className="input-field"
-              >
-                {(settings.departments || ['ECE', 'CSE', 'IT', 'AI&DS']).map(d => (
-                  <option key={d} value={d}>{d}</option>
-                ))}
-              </select>
+                disabled
+                className="input-field opacity-80 cursor-not-allowed font-semibold text-amber-400"
+              />
+              <p className="text-[11px] text-slate-500 mt-1">Configured for Electronics & Communication Engineering.</p>
             </div>
 
             <div>
@@ -180,7 +173,7 @@ export default function AdminSettings() {
             </div>
             <p className="text-xs text-slate-300 mt-2">
               {isFirebaseConfigured 
-                ? 'Connected to Firebase Cloud Firestore & Authentication.' 
+                ? 'Connected to Firebase Cloud Firestore & Authentication (leetcode-tracker-18688).' 
                 : 'Using LocalStorage persistence. Add your Firebase keys in .env for production.'}
             </p>
           </div>
@@ -197,34 +190,6 @@ export default function AdminSettings() {
             </p>
           </div>
         </div>
-      </div>
-
-      {/* Roster Data Management */}
-      <div className="glass-card p-6 border-slate-800 space-y-4">
-        <h2 className="text-sm font-bold uppercase tracking-wider text-white flex items-center gap-2">
-          <Database className="w-4 h-4 text-amber-400" />
-          <span>ECE Student Roster Management</span>
-        </h2>
-        <p className="text-xs text-slate-400">
-          Currently tracking <strong className="text-white font-mono">{students.length}</strong> student profile(s) across ECE Sections (Sec A, Sec B, Sec C, Sec D, Sec E, Sec F).
-        </p>
-
-        {students.length > 0 && (
-          <div className="pt-2">
-            <button
-              type="button"
-              onClick={() => {
-                if (window.confirm("Are you sure you want to clear all student profiles from this tracker?")) {
-                  clearSampleData();
-                }
-              }}
-              className="btn-danger flex items-center gap-2 text-xs"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-              <span>Clear All Student Profiles</span>
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );

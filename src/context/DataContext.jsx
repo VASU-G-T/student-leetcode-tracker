@@ -356,25 +356,7 @@ export function DataProvider({ children }) {
     showToast('Settings updated successfully', 'success');
   };
 
-  /**
-   * Reset to Sample Data
-   */
-  const resetToSampleData = () => {
-    setStudents(INITIAL_STUDENTS);
-    setProblemsByStudent(INITIAL_SAMPLE_PROBLEMS);
-    setActivities(INITIAL_ACTIVITY);
-    setSettings(INITIAL_SETTINGS);
-    setLastGlobalSync(new Date().toISOString());
-    showToast('Sample students and data restored', 'info');
-  };
 
-  /**
-   * Clear sample data
-   */
-  const clearSampleData = () => {
-    setStudents(prev => prev.filter(s => !s.isSample));
-    showToast('Sample students removed', 'info');
-  };
 
   // Setup auto sync interval timer
   useEffect(() => {
@@ -411,9 +393,7 @@ export function DataProvider({ children }) {
     syncAll,
     getStudentById,
     getStudentProblems,
-    updateSettings,
-    resetToSampleData,
-    clearSampleData
+    updateSettings
   };
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
