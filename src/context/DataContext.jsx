@@ -89,8 +89,9 @@ export function DataProvider({ children }) {
           if (!updated.goal || updated.goal === 200 || updated.goal === 250) {
             updated.goal = 4033;
           }
-          if (updated.id === 'vasu_gt_creator' || updated.registerNumber === 'VASU-ECE' || updated.username === 'VASU-G-T') {
+          if (updated.id === 'vasu_gt_creator' || updated.registerNumber === 'VASU-ECE' || updated.username === 'VASU-G-T' || updated.registerNumber === '922525106360') {
             updated.registerNumber = '922525106360';
+            updated.name = 'G T VASUDEVAN';
           }
           return updated;
         });
@@ -118,8 +119,9 @@ export function DataProvider({ children }) {
             const mergedCloud = directCloudStudents.map(s => {
               let updated = { ...s };
               if (!updated.goal || updated.goal === 200 || updated.goal === 250) updated.goal = 4033;
-              if (updated.id === 'vasu_gt_creator' || updated.registerNumber === 'VASU-ECE' || updated.username === 'VASU-G-T') {
+              if (updated.id === 'vasu_gt_creator' || updated.registerNumber === 'VASU-ECE' || updated.username === 'VASU-G-T' || updated.registerNumber === '922525106360') {
                 updated.registerNumber = '922525106360';
+                updated.name = 'G T VASUDEVAN';
               }
               return updated;
             });
@@ -150,8 +152,9 @@ export function DataProvider({ children }) {
             const cleaned = cloudStudents.map(s => {
               let updated = { ...s };
               if (!updated.goal || updated.goal === 200 || updated.goal === 250) updated.goal = 4033;
-              if (updated.id === 'vasu_gt_creator' || updated.registerNumber === 'VASU-ECE' || updated.username === 'VASU-G-T') {
+              if (updated.id === 'vasu_gt_creator' || updated.registerNumber === 'VASU-ECE' || updated.username === 'VASU-G-T' || updated.registerNumber === '922525106360') {
                 updated.registerNumber = '922525106360';
+                updated.name = 'G T VASUDEVAN';
               }
               return updated;
             });

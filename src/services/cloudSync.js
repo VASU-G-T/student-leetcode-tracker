@@ -137,6 +137,14 @@ export function subscribeToStudents(onUpdate, onError) {
   let isSubscribed = true;
   let unsubRtdb = () => {};
 
+  // Instant fetch on subscription mount (0ms latency)
+  fetchFromRest('students').then(freshData => {
+    if (freshData && isSubscribed) {
+      const studentsList = Object.keys(freshData).map(k => ({ id: k, ...freshData[k] }));
+      onUpdate(studentsList);
+    }
+  }).catch(() => {});
+
   // 1. WebSocket listener via RTDB SDK
   if (rtdb) {
     try {
@@ -152,7 +160,7 @@ export function subscribeToStudents(onUpdate, onError) {
     } catch (err) {}
   }
 
-  // 2. High-reliability polling fallback every 4 seconds (guarantees cross-device sync)
+  // 2. High-reliability polling fallback every 3 seconds (guarantees cross-device sync)
   const pollInterval = setInterval(async () => {
     if (!isSubscribed) return;
     try {
@@ -162,7 +170,7 @@ export function subscribeToStudents(onUpdate, onError) {
         onUpdate(studentsList);
       }
     } catch (e) {}
-  }, 4000);
+  }, 3000);
 
   return () => {
     isSubscribed = false;
@@ -223,6 +231,13 @@ export function subscribeToProjects(onUpdate, onError) {
   let isSubscribed = true;
   let unsubRtdb = () => {};
 
+  // Instant fetch on subscription mount
+  fetchFromRest('projects').then(freshData => {
+    if (freshData && isSubscribed) {
+      onUpdate(freshData);
+    }
+  }).catch(() => {});
+
   if (rtdb) {
     try {
       const projectsRef = ref(rtdb, 'projects');
@@ -242,7 +257,7 @@ export function subscribeToProjects(onUpdate, onError) {
         onUpdate(freshData);
       }
     } catch (e) {}
-  }, 4000);
+  }, 3000);
 
   return () => {
     isSubscribed = false;
