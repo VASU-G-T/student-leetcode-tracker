@@ -603,13 +603,27 @@ export function DataProvider({ children }) {
   };
 
   const getStudentById = useCallback((id) => {
-    return students.find(s => s.id === id || s.registerNumber?.toLowerCase() === id?.toLowerCase() || s.username?.toLowerCase() === id?.toLowerCase());
+    if (!id) return null;
+    const cleanId = String(id).trim().toLowerCase();
+    return students.find(s => 
+      String(s.id).toLowerCase() === cleanId || 
+      String(s.registerNumber || '').toLowerCase() === cleanId || 
+      String(s.username || '').toLowerCase() === cleanId ||
+      String(s.githubUsername || '').toLowerCase() === cleanId
+    );
   }, [students]);
 
   const getProblemsByStudentId = useCallback((id) => {
+    if (!id) return [];
     if (problemsByStudent[id]) return problemsByStudent[id];
+    const target = getStudentById(id);
+    if (target && problemsByStudent[target.id]) {
+      return problemsByStudent[target.id];
+    }
     return [];
-  }, [problemsByStudent]);
+  }, [problemsByStudent, getStudentById]);
+
+  const getStudentProblems = getProblemsByStudentId;
 
   return (
     <DataContext.Provider
@@ -635,6 +649,7 @@ export function DataProvider({ children }) {
         deleteStudent,
         getStudentById,
         getProblemsByStudentId,
+        getStudentProblems,
         getStudentProjects,
         addStudentProject,
         updateStudentProject,
