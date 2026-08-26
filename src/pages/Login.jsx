@@ -2,17 +2,15 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { 
   Lock, 
-  Mail, 
-  Code2, 
+  User, 
   ShieldCheck, 
   AlertCircle, 
-  ArrowRight,
-  Sparkles 
+  ArrowRight
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function Login() {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -27,14 +25,14 @@ export default function Login() {
     e.preventDefault();
     setErrorMsg('');
 
-    if (!email.trim() || !password.trim()) {
-      setErrorMsg('Please enter both email and password.');
+    if (!username.trim() || !password.trim()) {
+      setErrorMsg('Please enter both username/email and password.');
       return;
     }
 
     setIsSubmitting(true);
     try {
-      const res = await login(email.trim(), password);
+      const res = await login(username.trim(), password.trim());
       if (res.success) {
         navigate(from, { replace: true });
       } else {
@@ -45,12 +43,6 @@ export default function Login() {
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const handleDemoFill = () => {
-    setEmail('admin@college.edu');
-    setPassword('admin123');
-    setErrorMsg('');
   };
 
   return (
@@ -68,7 +60,7 @@ export default function Login() {
             Admin Authentication
           </h1>
           <p className="text-xs text-slate-400">
-            Sign in to manage students, configure repositories, and trigger GitHub syncs.
+            Sign in to manage ECE student profiles, configure repositories, and trigger GitHub syncs.
           </p>
         </div>
 
@@ -84,16 +76,17 @@ export default function Login() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">
-              Admin Email
+              Admin Username / Email
             </label>
             <div className="relative">
-              <Mail className="w-4 h-4 text-slate-500 absolute left-3.5 top-3 pointer-events-none" />
+              <User className="w-4 h-4 text-slate-500 absolute left-3.5 top-3 pointer-events-none" />
               <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@college.edu"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="vscec.ece"
                 required
+                autoComplete="username"
                 className="input-field pl-10 py-2.5 bg-slate-950/80"
               />
             </div>
@@ -111,6 +104,7 @@ export default function Login() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
+                autoComplete="current-password"
                 className="input-field pl-10 py-2.5 bg-slate-950/80"
               />
             </div>
@@ -125,25 +119,12 @@ export default function Login() {
               <span>Authenticating...</span>
             ) : (
               <>
-                <span>Sign In to Dashboard</span>
+                <span>Sign In to Admin Dashboard</span>
                 <ArrowRight className="w-4 h-4" />
               </>
             )}
           </button>
         </form>
-
-        {/* Demo Fast Fill Button */}
-        <div className="mt-6 pt-4 border-t border-slate-800/80 text-center space-y-2">
-          <p className="text-[11px] text-slate-500">Quick Testing / Demo Access:</p>
-          <button
-            type="button"
-            onClick={handleDemoFill}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-800 text-amber-400 text-xs font-mono border border-amber-500/20 transition-colors"
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Fill Demo Credentials (admin@college.edu)</span>
-          </button>
-        </div>
       </div>
     </div>
   );

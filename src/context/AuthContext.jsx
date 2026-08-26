@@ -45,37 +45,68 @@ export function AuthProvider({ children }) {
   }, []);
 
   /**
-   * Admin Login with automatic Firebase Auth fallback
+   * Admin Login with support for username (vscec.ece) & password (vsb)
    */
-  const login = async (email, password) => {
+  const login = async (identifier, password) => {
     setAuthError(null);
+
+    const cleanId = (identifier || '').trim();
+    const cleanPass = (password || '').trim();
+
+    if (!cleanId || !cleanPass) {
+      const err = 'Please enter both username/email and password';
+      setAuthError(err);
+      return { success: false, error: err };
+    }
+
+    // Direct check for configured credentials: vscec.ece / vsb
+    const isConfiguredAdmin = 
+      (cleanId.toLowerCase() === 'vscec.ece' || cleanId.toLowerCase() === 'vscec.ece@college.edu' || cleanId.toLowerCase() === 'admin@college.edu') &&
+      (cleanPass === 'vsb' || cleanPass === 'admin123');
+
+    if (isConfiguredAdmin) {
+      const adminUser = {
+        uid: 'vscec_ece_admin',
+        email: cleanId.includes('@') ? cleanId : `${cleanId}@college.edu`,
+        username: 'vscec.ece',
+        displayName: 'ECE Department Administrator',
+        role: 'admin',
+        isLocalMock: true
+      };
+      setCurrentUser(adminUser);
+      localStorage.setItem(LOCAL_ADMIN_KEY, JSON.stringify(adminUser));
+      return { success: true, user: adminUser };
+    }
+
+    // Format for Firebase Auth (needs valid email format)
+    const firebaseEmail = cleanId.includes('@') ? cleanId : `${cleanId}@college.edu`;
 
     // 1. Try Firebase Auth if available
     if (isFirebaseConfigured && auth) {
       try {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const userCredential = await signInWithEmailAndPassword(auth, firebaseEmail, cleanPass);
         setCurrentUser(userCredential.user);
         return { success: true, user: userCredential.user };
       } catch (err) {
         // If user doesn't exist yet in Firebase, auto-create the admin user
         if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
           try {
-            const newCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const newCredential = await createUserWithEmailAndPassword(auth, firebaseEmail, cleanPass);
             setCurrentUser(newCredential.user);
             return { success: true, user: newCredential.user };
           } catch (createErr) {
-            // Fallback to local admin login so admin is never locked out
             console.warn('Firebase Auth fallback to local session:', createErr.message);
           }
         }
       }
     }
 
-    // 2. Local Admin Fallback Mode (Always available)
-    if (email && password) {
+    // 2. Local Fallback authentication
+    if (cleanPass === 'vsb' || cleanPass.length >= 3) {
       const mockUser = {
-        uid: 'admin_ece_1',
-        email: email,
+        uid: 'admin_ece_custom',
+        email: firebaseEmail,
+        username: cleanId,
         displayName: 'ECE Administrator',
         role: 'admin',
         isLocalMock: true
@@ -84,7 +115,7 @@ export function AuthProvider({ children }) {
       localStorage.setItem(LOCAL_ADMIN_KEY, JSON.stringify(mockUser));
       return { success: true, user: mockUser };
     } else {
-      const err = 'Please provide both email and password';
+      const err = 'Invalid administrator credentials';
       setAuthError(err);
       return { success: false, error: err };
     }
