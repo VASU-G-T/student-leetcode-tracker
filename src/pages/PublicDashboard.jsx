@@ -14,7 +14,8 @@ import {
   ShieldCheck,
   ExternalLink,
   Award,
-  GraduationCap
+  GraduationCap,
+  Edit3
 } from 'lucide-react';
 import { GithubIcon, LeetCodeIcon } from '../components/common/Icons';
 import StatCard from '../components/common/StatCard';
@@ -22,11 +23,24 @@ import DifficultyChart from '../components/dashboard/DifficultyChart';
 import ActivityFeed from '../components/dashboard/ActivityFeed';
 import LeaderboardTable from '../components/leaderboard/LeaderboardTable';
 import { useData } from '../context/DataContext';
+import { useAuth } from '../context/AuthContext';
 import { formatRelativeTime } from '../utils/helpers';
 import { CREATOR_PROFILE } from '../services/sampleData';
 
 export default function PublicDashboard() {
   const { students, activities, lastGlobalSync, isSyncingAll } = useData();
+  const { currentUser, isAdmin } = useAuth();
+
+  // Find creator student dynamically from roster
+  const creatorStudent = useMemo(() => {
+    return students.find(s => s.id === 'vasu_gt_creator' || s.isCreator || s.username === 'VASU-G-T' || s.registerNumber === 'VASU-ECE') || CREATOR_PROFILE;
+  }, [students]);
+
+  const isCreatorOrAdmin = isAdmin || (currentUser && (
+    currentUser.username?.toLowerCase() === 'vasu-g-t' ||
+    currentUser.studentId === creatorStudent.id ||
+    currentUser.registerNumber === creatorStudent.registerNumber
+  ));
 
   // Aggregate statistics
   const stats = useMemo(() => {
@@ -126,8 +140,8 @@ export default function PublicDashboard() {
           <div className="flex items-center sm:items-start gap-4">
             <div className="relative group shrink-0">
               <img
-                src={CREATOR_PROFILE.profileImage}
-                alt={CREATOR_PROFILE.name}
+                src={creatorStudent.profileImage || `https://api.dicebear.com/7.x/bottts/svg?seed=${creatorStudent.githubUsername || 'creator'}`}
+                alt={creatorStudent.name}
                 className="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl object-cover border-2 border-amber-400 shadow-lg shadow-amber-500/20 bg-slate-900"
               />
               <span className="absolute -bottom-1 -right-1 flex h-3.5 w-3.5">
@@ -139,24 +153,24 @@ export default function PublicDashboard() {
             <div className="space-y-1">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-base sm:text-lg font-bold text-white tracking-tight">
-                  {CREATOR_PROFILE.name}
+                  {creatorStudent.name}
                 </span>
                 <span className="px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-[11px] font-semibold text-amber-400 flex items-center gap-1">
                   <Sparkles className="w-3 h-3" />
                   <span>App Creator & Lead Developer</span>
                 </span>
                 <span className="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-[10px] font-mono text-slate-300">
-                  {CREATOR_PROFILE.department} • {CREATOR_PROFILE.section}
+                  {creatorStudent.department} • {creatorStudent.section}
                 </span>
               </div>
 
               <p className="text-xs text-slate-300 max-w-xl line-clamp-1">
-                {CREATOR_PROFILE.bio}
+                {creatorStudent.bio}
               </p>
 
               {/* Creator Skills */}
               <div className="flex flex-wrap gap-1.5 pt-1">
-                {['React', 'Node.js', 'Vite', 'IoT / Embedded', 'LeetCode DSA', 'Firebase'].map((s, idx) => (
+                {(creatorStudent.skills || ['React', 'Node.js', 'Vite', 'IoT / Embedded', 'LeetCode DSA', 'Firebase']).slice(0, 7).map((s, idx) => (
                   <span
                     key={idx}
                     className="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-[10px] font-mono text-amber-300/90"
@@ -168,15 +182,26 @@ export default function PublicDashboard() {
             </div>
           </div>
 
-          {/* Quick Profile & Projects Action */}
-          <div className="flex items-center gap-2.5 w-full lg:w-auto shrink-0">
+          {/* Actions: View Profile, Edit Profile (if Admin/Creator), and GitHub */}
+          <div className="flex flex-wrap items-center gap-2.5 w-full lg:w-auto shrink-0">
             <Link
-              to={`/student/${CREATOR_PROFILE.registerNumber || CREATOR_PROFILE.id}`}
+              to={`/student/${creatorStudent.registerNumber || creatorStudent.id}`}
               className="btn-primary flex-1 lg:flex-initial !py-2 !px-4 text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-amber-500/20"
             >
               <span>View Creator Profile & Projects</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
+
+            {isCreatorOrAdmin && (
+              <Link
+                to={`/student/edit/${creatorStudent.registerNumber || creatorStudent.id}`}
+                className="btn-secondary !py-2 !px-3 text-xs flex items-center justify-center gap-1.5 text-amber-400 border-amber-500/30 hover:bg-amber-500/10"
+                title="Edit Creator Profile, Photo & Projects"
+              >
+                <Edit3 className="w-3.5 h-3.5" />
+                <span>Edit Profile & Projects</span>
+              </Link>
+            )}
 
             <a
               href="https://github.com/VASU-G-T"

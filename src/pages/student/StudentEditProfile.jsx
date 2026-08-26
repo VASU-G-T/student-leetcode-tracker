@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import { 
   User, 
   Save, 
@@ -21,6 +21,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
 
 export default function StudentEditProfile() {
+  const { id } = useParams();
   const { currentUser, isStudent, isAdmin } = useAuth();
   const { 
     students, 
@@ -33,12 +34,14 @@ export default function StudentEditProfile() {
   } = useData();
   const navigate = useNavigate();
 
-  // Find the student object corresponding to the logged in user
-  const currentStudent = students.find(s => 
-    s.id === currentUser?.studentId || 
-    s.username?.toLowerCase() === currentUser?.username?.toLowerCase() ||
-    s.registerNumber?.toLowerCase() === currentUser?.registerNumber?.toLowerCase()
-  ) || students[0];
+  // Find the student object corresponding to param or logged in user or creator
+  const currentStudent = id
+    ? (students.find(s => s.id === id || s.registerNumber?.toLowerCase() === id.toLowerCase() || s.username?.toLowerCase() === id.toLowerCase()) || students[0])
+    : (students.find(s => 
+        s.id === currentUser?.studentId || 
+        s.username?.toLowerCase() === currentUser?.username?.toLowerCase() ||
+        s.registerNumber?.toLowerCase() === currentUser?.registerNumber?.toLowerCase()
+      ) || students.find(s => s.isCreator || s.id === 'vasu_gt_creator') || students[0]);
 
   const studentId = currentStudent?.id;
 
