@@ -4,6 +4,7 @@ import Navbar from './components/common/Navbar';
 import Sidebar from './components/common/Sidebar';
 import BottomNav from './components/common/BottomNav';
 import Toast from './components/common/Toast';
+import CreatorWelcomeModal from './components/common/CreatorWelcomeModal';
 
 // Public & Student Pages
 import PublicDashboard from './pages/PublicDashboard';
@@ -56,6 +57,9 @@ export default function App() {
     <div className="min-h-screen bg-[#0b0f17] text-slate-100 flex flex-col">
       {/* Toast Notification Container */}
       <Toast />
+
+      {/* Creator Welcome & Follow Modal */}
+      <CreatorWelcomeModal />
 
       {/* Top Navbar */}
       <Navbar onMobileMenuToggle={() => setMobileMenuOpen(prev => !prev)} />
