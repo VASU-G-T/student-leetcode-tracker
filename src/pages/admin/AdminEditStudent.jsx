@@ -28,7 +28,7 @@ export default function AdminEditStudent() {
   const [githubUsername, setGithubUsername] = useState('');
   const [githubRepoUrl, setGithubRepoUrl] = useState('');
   const [leetcodeUsername, setLeetcodeUsername] = useState('');
-  const [goal, setGoal] = useState(200);
+  const [goal, setGoal] = useState(4033);
   const [profileImage, setProfileImage] = useState('');
 
   const [isRepoChanged, setIsRepoChanged] = useState(false);
@@ -46,7 +46,7 @@ export default function AdminEditStudent() {
       setGithubUsername(student.githubUsername || '');
       setGithubRepoUrl(student.githubRepoUrl || '');
       setLeetcodeUsername(student.leetcodeUsername || '');
-      setGoal(student.goal || 200);
+      setGoal(student.goal || 4033);
       setProfileImage(student.profileImage || '');
     }
   }, [student]);

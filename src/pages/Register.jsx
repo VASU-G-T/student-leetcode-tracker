@@ -37,7 +37,7 @@ export default function Register() {
   const [githubUsername, setGithubUsername] = useState('');
   const [githubRepoUrl, setGithubRepoUrl] = useState('');
   const [leetcodeUsername, setLeetcodeUsername] = useState('');
-  const [goal, setGoal] = useState(settings.defaultGoal || 200);
+  const [goal, setGoal] = useState(settings.defaultGoal || 4033);
   const [bio, setBio] = useState('ECE Student • LeetCode & Developer');
   const [profileImage, setProfileImage] = useState('');
 
@@ -144,7 +144,7 @@ export default function Register() {
         githubRepoOwner: validationStatus.owner,
         githubRepoName: validationStatus.repo,
         leetcodeUsername: leetcodeUsername.trim() || username.trim(),
-        goal: parseInt(goal, 10) || 200,
+        goal: parseInt(goal, 10) || settings.defaultGoal || 4033,
         bio: bio.trim(),
         profileImage: profileImage.trim() || `https://api.dicebear.com/7.x/bottts/svg?seed=${githubUsername || username || name}`
       };

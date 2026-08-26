@@ -55,7 +55,7 @@ export default function StudentEditProfile() {
   const [githubUsername, setGithubUsername] = useState('');
   const [githubRepoUrl, setGithubRepoUrl] = useState('');
   const [leetcodeUsername, setLeetcodeUsername] = useState('');
-  const [goal, setGoal] = useState(200);
+  const [goal, setGoal] = useState(4033);
   const [bio, setBio] = useState('');
   const [profileImage, setProfileImage] = useState('');
   const [skillsText, setSkillsText] = useState('');
@@ -79,7 +79,7 @@ export default function StudentEditProfile() {
       setGithubUsername(currentStudent.githubUsername || '');
       setGithubRepoUrl(currentStudent.githubRepoUrl || '');
       setLeetcodeUsername(currentStudent.leetcodeUsername || '');
-      setGoal(currentStudent.goal || 200);
+      setGoal(currentStudent.goal || 4033);
       setBio(currentStudent.bio || '');
       setProfileImage(currentStudent.profileImage || '');
       setSkillsText(Array.isArray(currentStudent.skills) ? currentStudent.skills.join(', ') : 'C++, Python, Java, DSA');
@@ -117,7 +117,7 @@ export default function StudentEditProfile() {
         githubUsername,
         githubRepoUrl,
         leetcodeUsername,
-        goal: parseInt(goal, 10) || 200,
+        goal: parseInt(goal, 10) || 4033,
         bio,
         profileImage,
         skills: skillsText.split(',').map(s => s.trim()).filter(Boolean)

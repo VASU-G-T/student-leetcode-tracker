@@ -26,7 +26,7 @@ export const CREATOR_PROFILE = {
   easySolved: 18,
   mediumSolved: 14,
   hardSolved: 1,
-  goal: 250,
+  goal: 4033,
   lastSynced: new Date().toISOString(),
   createdAt: new Date().toISOString()
 };
@@ -65,7 +65,7 @@ export const INITIAL_ACTIVITY = [];
 export const INITIAL_SETTINGS = {
   appName: 'ECE LeetTrack',
   tagline: 'ECE Department • Track. Solve. Improve.',
-  defaultGoal: 200,
+  defaultGoal: 4033,
   autoSyncInterval: 15, // in minutes
   defaultDepartment: 'ECE',
   leaderboardVisibility: 'public',

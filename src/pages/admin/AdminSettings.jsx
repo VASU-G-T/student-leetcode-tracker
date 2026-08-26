@@ -15,7 +15,7 @@ export default function AdminSettings() {
 
   const [appName, setAppName] = useState(settings.appName || 'ECE LeetTrack');
   const [tagline, setTagline] = useState(settings.tagline || 'ECE Department • Track. Solve. Improve.');
-  const [defaultGoal, setDefaultGoal] = useState(settings.defaultGoal || 200);
+  const [defaultGoal, setDefaultGoal] = useState(settings.defaultGoal || 4033);
   const [autoSyncInterval, setAutoSyncInterval] = useState(settings.autoSyncInterval || 15);
   const [defaultDepartment, setDefaultDepartment] = useState(settings.defaultDepartment || 'ECE');
   const [leaderboardVisibility, setLeaderboardVisibility] = useState(settings.leaderboardVisibility || 'public');
@@ -29,7 +29,7 @@ export default function AdminSettings() {
       await updateSettings({
         appName,
         tagline,
-        defaultGoal: parseInt(defaultGoal, 10),
+        defaultGoal: parseInt(defaultGoal, 10) || 4033,
         autoSyncInterval: parseInt(autoSyncInterval, 10),
         defaultDepartment,
         leaderboardVisibility

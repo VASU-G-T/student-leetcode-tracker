@@ -170,7 +170,7 @@ export default function ProfileHeader({ student, isSyncing, onSync, onAddProject
 
           <ProgressBar 
             current={student.totalSolved || 0} 
-            target={student.goal || 200}
+            target={student.goal || 4033}
             size="md"
           />
 

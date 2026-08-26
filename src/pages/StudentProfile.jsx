@@ -199,12 +199,12 @@ export default function StudentProfile() {
             <div className="space-y-3 text-xs text-slate-300">
               <div className="flex items-center justify-between p-2.5 rounded-lg bg-slate-950/40 border border-slate-800">
                 <span className="text-slate-400">Target Goal</span>
-                <span className="font-mono font-bold text-amber-400">{student.goal || 200} Solved</span>
+                <span className="font-mono font-bold text-amber-400">{student.goal || 4033} Solved</span>
               </div>
               <div className="flex items-center justify-between p-2.5 rounded-lg bg-slate-950/40 border border-slate-800">
                 <span className="text-slate-400">Completion</span>
                 <span className="font-mono font-bold text-emerald-400">
-                  {Math.round(((student.totalSolved || 0) / (student.goal || 200)) * 100)}%
+                  {Math.round(((student.totalSolved || 0) / (student.goal || 4033)) * 100)}%
                 </span>
               </div>
               <div className="flex items-center justify-between p-2.5 rounded-lg bg-slate-950/40 border border-slate-800">

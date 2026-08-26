@@ -29,7 +29,7 @@ export default function AdminAddStudent() {
   const [githubUsername, setGithubUsername] = useState('');
   const [githubRepoUrl, setGithubRepoUrl] = useState('');
   const [leetcodeUsername, setLeetcodeUsername] = useState('');
-  const [goal, setGoal] = useState(settings.defaultGoal || 200);
+  const [goal, setGoal] = useState(settings.defaultGoal || 4033);
   const [profileImage, setProfileImage] = useState('');
 
   // Repo Validation State
@@ -110,7 +110,7 @@ export default function AdminAddStudent() {
         githubRepoOwner: validationStatus.owner,
         githubRepoName: validationStatus.repo,
         leetcodeUsername: leetcodeUsername.trim(),
-        goal: parseInt(goal, 10) || 200,
+        goal: parseInt(goal, 10) || settings.defaultGoal || 4033,
         profileImage: profileImage.trim() || `https://api.dicebear.com/7.x/bottts/svg?seed=${githubUsername || name}`
       };
 

@@ -80,7 +80,7 @@ export default function StudentCard({
         <div className="mb-4">
           <ProgressBar 
             current={student.totalSolved || 0} 
-            target={student.goal || 200}
+            target={student.goal || 4033}
             size="sm"
           />
         </div>

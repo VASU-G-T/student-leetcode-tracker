@@ -173,7 +173,7 @@ export default function LeaderboardTable({ students = [], showExport = true, lim
                   <td className="py-3.5 px-4">
                     <ProgressBar 
                       current={student.totalSolved || 0} 
-                      target={student.goal || 200}
+                      target={student.goal || 4033}
                       size="sm"
                     />
                   </td>

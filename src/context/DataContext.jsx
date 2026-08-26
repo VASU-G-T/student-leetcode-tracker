@@ -103,6 +103,12 @@ export function DataProvider({ children }) {
           const localLastSync = localStorage.getItem(STORAGE_KEYS.LAST_SYNC);
 
           let parsedStudents = localStudents ? JSON.parse(localStudents).filter(s => !s.isSample) : [];
+          parsedStudents = parsedStudents.map(s => {
+            if (!s.goal || s.goal === 200 || s.goal === 250) {
+              return { ...s, goal: 4033 };
+            }
+            return s;
+          });
           if (!parsedStudents.some(s => s.id === CREATOR_PROFILE.id || s.username === CREATOR_PROFILE.username || s.registerNumber === CREATOR_PROFILE.registerNumber)) {
             parsedStudents = [CREATOR_PROFILE, ...parsedStudents];
           }
@@ -181,7 +187,7 @@ export function DataProvider({ children }) {
       easySolved: 0,
       mediumSolved: 0,
       hardSolved: 0,
-      goal: parseInt(studentData.goal, 10) || 200,
+      goal: parseInt(studentData.goal, 10) || settings.defaultGoal || 4033,
       lastSynced: null,
       createdAt: new Date().toISOString()
     };
