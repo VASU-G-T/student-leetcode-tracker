@@ -81,11 +81,13 @@ export default function AdminStudents() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
-            <Users className="w-7 h-7 text-amber-400" />
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2.5">
+            <div className="p-2 rounded-xl bg-sky-50 text-sky-600 border border-sky-200 shadow-sm">
+              <Users className="w-6 h-6" />
+            </div>
             <span>ECE Student Roster Management (Up to 400+)</span>
           </h1>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">
+          <p className="text-xs sm:text-sm text-slate-500 mt-1 font-medium">
             Manage student tracking records across Sec A, Sec B, Sec C, Sec D, Sec E, Sec F ({students.length} Total Registered).
           </p>
         </div>
@@ -93,24 +95,24 @@ export default function AdminStudents() {
         <div className="flex flex-wrap items-center gap-2.5">
           <button
             onClick={() => setIsBulkModalOpen(true)}
-            className="btn-secondary flex items-center gap-1.5 text-xs text-amber-400 border-amber-500/30 hover:bg-amber-500/10"
+            className="btn-secondary flex items-center gap-1.5 text-xs text-sky-700 border-sky-200 hover:bg-sky-50 font-semibold"
             title="Import up to 400+ students via CSV / Excel"
           >
-            <FileSpreadsheet className="w-3.5 h-3.5" />
+            <FileSpreadsheet className="w-3.5 h-3.5 text-sky-600" />
             <span>Bulk Import (CSV)</span>
           </button>
 
           <button
             onClick={() => exportLeaderboardCsv(students)}
-            className="btn-secondary flex items-center gap-1.5 text-xs"
+            className="btn-secondary flex items-center gap-1.5 text-xs font-semibold text-slate-700 hover:text-sky-700"
           >
-            <Download className="w-3.5 h-3.5" />
+            <Download className="w-3.5 h-3.5 text-sky-600" />
             <span>Export Roster</span>
           </button>
 
           <Link
             to="/admin/students/add"
-            className="btn-primary flex items-center gap-2 text-xs font-semibold"
+            className="btn-primary flex items-center gap-2 text-xs font-semibold shadow-md shadow-sky-500/25"
           >
             <UserPlus className="w-4 h-4" />
             <span>+ Add Student</span>
@@ -119,7 +121,7 @@ export default function AdminStudents() {
       </div>
 
       {/* Search & Filter Bar */}
-      <div className="glass-card p-4 space-y-3">
+      <div className="glass-card p-4 space-y-3 bg-white border-sky-100 shadow-sm">
         <div className="flex flex-col lg:flex-row gap-3">
           <div className="flex-1">
             <SearchBar
@@ -167,11 +169,11 @@ export default function AdminStudents() {
         </div>
 
         {/* Section Quick Filters */}
-        <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-slate-800/60">
-          <span className="text-[11px] text-slate-400 mr-1 font-medium">Quick Filter:</span>
+        <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-slate-100">
+          <span className="text-[11px] text-slate-500 mr-1 font-bold">Quick Filter:</span>
           <button
             onClick={() => setSection('')}
-            className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${!section ? 'bg-amber-500 text-slate-950 font-bold' : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'}`}
+            className={`px-3 py-1 rounded-full text-xs font-bold transition-all shadow-sm ${!section ? 'bg-sky-500 text-white shadow-sky-500/25' : 'bg-white text-slate-600 hover:text-sky-700 hover:bg-sky-50 border border-slate-200'}`}
           >
             All Sections
           </button>
@@ -179,7 +181,7 @@ export default function AdminStudents() {
             <button
               key={s}
               onClick={() => setSection(s)}
-              className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${section === s ? 'bg-amber-500 text-slate-950 font-bold' : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'}`}
+              className={`px-3 py-1 rounded-full text-xs font-bold transition-all shadow-sm ${section === s ? 'bg-sky-500 text-white shadow-sky-500/25' : 'bg-white text-slate-600 hover:text-sky-700 hover:bg-sky-50 border border-slate-200'}`}
             >
               {s}
             </button>

@@ -39,7 +39,7 @@ function ProtectedRoute({ children }) {
   if (loading) {
     return (
       <div className="min-h-[50vh] flex items-center justify-center">
-        <div className="w-8 h-8 rounded-full border-2 border-amber-500 border-t-transparent animate-spin" />
+        <div className="w-8 h-8 rounded-full border-2 border-sky-500 border-t-transparent animate-spin" />
       </div>
     );
   }
@@ -55,7 +55,7 @@ export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#0b0f17] text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-[#f0f7ff] text-slate-800 flex flex-col">
       {/* Toast Notification Container */}
       <Toast />
 

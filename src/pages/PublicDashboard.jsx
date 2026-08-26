@@ -101,50 +101,50 @@ export default function PublicDashboard() {
   return (
     <div className="space-y-8 animate-fade-in pb-12">
       {/* Hero Welcome Header */}
-      <div className="glass-card p-6 sm:p-8 relative overflow-hidden border-slate-800 space-y-6">
-        <div className="absolute -right-10 -bottom-10 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="glass-card p-6 sm:p-8 relative overflow-hidden border-sky-100 bg-white space-y-6 shadow-sm">
+        <div className="absolute -right-10 -bottom-10 w-96 h-96 bg-sky-400/10 rounded-full blur-3xl pointer-events-none" />
         
         {/* Top Headline & Actions */}
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-semibold">
-              <Sparkles className="w-3.5 h-3.5" />
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-50 border border-sky-200 text-sky-700 text-xs font-bold shadow-sm">
+              <Sparkles className="w-3.5 h-3.5 text-sky-600" />
               <span>ECE Department • LeetSync Automated Tracker</span>
             </div>
-            <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+            <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
               {greeting}
             </h1>
-            <p className="text-slate-400 text-sm sm:text-base max-w-2xl leading-relaxed">
-              Tracking Electronics & Communication Engineering (ECE) students across <strong className="text-white">Sec A, Sec B, Sec C, Sec D, Sec E, Sec F</strong> automatically via GitHub repositories.
+            <p className="text-slate-600 text-sm sm:text-base max-w-2xl leading-relaxed font-medium">
+              Tracking Electronics & Communication Engineering (ECE) students across <strong className="text-slate-900">Sec A, Sec B, Sec C, Sec D, Sec E, Sec F</strong> automatically via GitHub repositories.
             </p>
           </div>
 
           <div className="flex flex-wrap gap-3">
             <Link
               to="/students"
-              className="btn-primary flex items-center gap-2"
+              className="btn-primary flex items-center gap-2 shadow-md shadow-sky-500/20"
             >
               <span>Explore ECE Students</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
               to="/register"
-              className="btn-secondary flex items-center gap-2 text-amber-400 border-amber-500/30"
+              className="btn-secondary flex items-center gap-2 text-sky-700 font-semibold border-sky-200 hover:border-sky-300 hover:bg-sky-50"
             >
-              <UserPlus className="w-4 h-4" />
+              <UserPlus className="w-4 h-4 text-sky-600" />
               <span>Register Student Profile</span>
             </Link>
           </div>
         </div>
 
         {/* Dedicated App Creator & Lead Developer Profile Spotlight */}
-        <div className="relative z-10 p-5 rounded-2xl bg-slate-950/80 border border-amber-500/30 shadow-xl flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5">
+        <div className="relative z-10 p-5 rounded-2xl bg-gradient-to-br from-sky-50/90 via-white to-blue-50/40 border border-sky-200 shadow-md shadow-sky-500/5 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5">
           <div className="flex items-center sm:items-start gap-4">
             <div className="relative group shrink-0">
               <img
                 src={creatorStudent.profileImage || `https://api.dicebear.com/7.x/bottts/svg?seed=${creatorStudent.githubUsername || 'creator'}`}
                 alt={creatorStudent.name}
-                className="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl object-cover border-2 border-amber-400 shadow-lg shadow-amber-500/20 bg-slate-900"
+                className="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl object-cover border-2 border-sky-400 shadow-md shadow-sky-500/15 bg-white"
               />
               <span className="absolute -bottom-1 -right-1 flex h-3.5 w-3.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -154,19 +154,19 @@ export default function PublicDashboard() {
 
             <div className="space-y-1">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-base sm:text-lg font-bold text-white tracking-tight">
+                <span className="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight">
                   {creatorStudent.name}
                 </span>
-                <span className="px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-[11px] font-semibold text-amber-400 flex items-center gap-1">
-                  <Sparkles className="w-3 h-3" />
+                <span className="px-2.5 py-0.5 rounded-full bg-sky-100 border border-sky-200 text-[11px] font-bold text-sky-800 flex items-center gap-1 shadow-sm">
+                  <Sparkles className="w-3 h-3 text-sky-600" />
                   <span>App Creator & Lead Developer</span>
                 </span>
-                <span className="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-[10px] font-mono text-slate-300">
+                <span className="px-2 py-0.5 rounded bg-white border border-sky-200 text-[10px] font-mono text-slate-700 font-bold">
                   {creatorStudent.department} • {creatorStudent.section}
                 </span>
               </div>
 
-              <p className="text-xs text-slate-300 max-w-xl line-clamp-1">
+              <p className="text-xs text-slate-600 max-w-xl line-clamp-1 leading-relaxed">
                 {creatorStudent.bio}
               </p>
 
@@ -175,7 +175,7 @@ export default function PublicDashboard() {
                 {(creatorStudent.skills || ['React', 'Node.js', 'Vite', 'IoT / Embedded', 'LeetCode DSA', 'Firebase']).slice(0, 7).map((s, idx) => (
                   <span
                     key={idx}
-                    className="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-[10px] font-mono text-amber-300/90"
+                    className="px-2 py-0.5 rounded-md bg-white border border-sky-200 text-[10px] font-mono font-bold text-sky-700 shadow-sm"
                   >
                     {s}
                   </span>
@@ -188,7 +188,7 @@ export default function PublicDashboard() {
           <div className="flex flex-wrap items-center gap-2.5 w-full lg:w-auto shrink-0">
             <Link
               to={`/student/${creatorStudent.registerNumber || creatorStudent.id}`}
-              className="btn-primary flex-1 lg:flex-initial !py-2 !px-4 text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-amber-500/20"
+              className="btn-primary flex-1 lg:flex-initial !py-2 !px-4 text-xs flex items-center justify-center gap-1.5 shadow-md shadow-sky-500/20"
             >
               <span>View Creator Profile & Projects</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -197,10 +197,10 @@ export default function PublicDashboard() {
             {isCreatorOrAdmin && (
               <Link
                 to={`/student/edit/${creatorStudent.registerNumber || creatorStudent.id}`}
-                className="btn-secondary !py-2 !px-3 text-xs flex items-center justify-center gap-1.5 text-amber-400 border-amber-500/30 hover:bg-amber-500/10"
+                className="btn-secondary !py-2 !px-3 text-xs flex items-center justify-center gap-1.5 text-sky-700 border-sky-200 hover:bg-sky-50 font-semibold"
                 title="Edit Creator Profile, Photo & Projects"
               >
-                <Edit3 className="w-3.5 h-3.5" />
+                <Edit3 className="w-3.5 h-3.5 text-sky-600" />
                 <span>Edit Profile & Projects</span>
               </Link>
             )}
@@ -209,12 +209,12 @@ export default function PublicDashboard() {
               href="https://github.com/VASU-G-T"
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-secondary !py-2 !px-3 text-xs flex items-center justify-center gap-1.5 bg-slate-900"
+              className="btn-secondary !py-2 !px-3 text-xs flex items-center justify-center gap-1.5 bg-white text-slate-700 hover:text-sky-700"
               title="GitHub Profile"
             >
-              <GithubIcon className="w-3.5 h-3.5 text-slate-300" />
+              <GithubIcon className="w-3.5 h-3.5 text-slate-700" />
               <span className="hidden sm:inline">GitHub</span>
-              <ExternalLink className="w-3 h-3 text-slate-500" />
+              <ExternalLink className="w-3 h-3 text-slate-400" />
             </a>
           </div>
         </div>
@@ -227,7 +227,7 @@ export default function PublicDashboard() {
           value={stats.totalStudents}
           subtitle="Across Sec A, B, C, D, E, F"
           icon={Users}
-          color="amber"
+          color="sky"
         />
         <StatCard
           title="Total Solved"
@@ -256,12 +256,14 @@ export default function PublicDashboard() {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Layers className="w-4 h-4 text-amber-400" />
-            <h2 className="text-sm font-bold uppercase tracking-wider text-white">
+            <div className="p-1 rounded bg-sky-50 text-sky-600 border border-sky-200">
+              <Layers className="w-4 h-4" />
+            </div>
+            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-800">
               ECE Sections Performance
             </h2>
           </div>
-          <Link to="/analytics" className="text-xs font-semibold text-amber-400 hover:underline">
+          <Link to="/analytics" className="text-xs font-bold text-sky-600 hover:text-sky-700 hover:underline">
             View Analytics →
           </Link>
         </div>
@@ -271,15 +273,15 @@ export default function PublicDashboard() {
             <Link
               key={sec.sectionName}
               to={`/students?section=${encodeURIComponent(sec.sectionName)}`}
-              className="glass-card-hover p-3.5 text-center group cursor-pointer border-slate-800/80"
+              className="glass-card-hover p-3.5 text-center group cursor-pointer border-sky-100 bg-white"
             >
-              <span className="text-xs font-bold font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 group-hover:bg-amber-500/20 transition-colors">
+              <span className="text-xs font-bold font-mono px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 border border-sky-200 group-hover:bg-sky-600 group-hover:text-white transition-colors">
                 {sec.sectionName}
               </span>
-              <p className="text-lg font-extrabold text-white mt-2 font-mono">
+              <p className="text-lg font-extrabold text-slate-900 mt-2 font-mono">
                 {sec.totalSolved}
               </p>
-              <p className="text-[11px] text-slate-400 mt-0.5">
+              <p className="text-[11px] text-slate-500 mt-0.5 font-medium">
                 {sec.count} {sec.count === 1 ? 'student' : 'students'}
               </p>
             </Link>
@@ -307,18 +309,20 @@ export default function PublicDashboard() {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
-              <Trophy className="w-5 h-5 text-amber-400" />
+            <h2 className="text-xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+              <div className="p-1.5 rounded-xl bg-sky-50 text-sky-600 border border-sky-200">
+                <Trophy className="w-5 h-5" />
+              </div>
               <span>ECE Department Leaderboard</span>
             </h2>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-500 font-medium">
               Top performers ranked by total accepted LeetCode solutions.
             </p>
           </div>
 
           <Link
             to="/leaderboard"
-            className="btn-secondary text-xs flex items-center gap-1.5 text-slate-300 hover:text-white"
+            className="btn-secondary text-xs flex items-center gap-1.5 font-semibold text-sky-700 hover:text-sky-800"
           >
             <span>Full Leaderboard</span>
             <ArrowRight className="w-3.5 h-3.5" />

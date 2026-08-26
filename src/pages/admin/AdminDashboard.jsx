@@ -65,23 +65,23 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-8 animate-fade-in pb-16">
       {/* Top Banner */}
-      <div className="glass-card p-6 sm:p-7 border-amber-500/20 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="glass-card p-6 sm:p-7 border-sky-100 bg-white relative overflow-hidden shadow-sm">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-sky-400/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
-              <span className="p-1 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
+              <span className="p-1 rounded-lg bg-sky-50 text-sky-600 border border-sky-200">
                 <ShieldCheck className="w-4 h-4" />
               </span>
-              <span className="text-xs font-mono uppercase tracking-wider text-amber-400 font-semibold">
+              <span className="text-xs font-mono uppercase tracking-wider text-sky-700 font-bold">
                 Admin Control Console
               </span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
               Platform Overview & Sync Engine
             </h1>
-            <p className="text-slate-400 text-xs sm:text-sm max-w-xl">
+            <p className="text-slate-500 text-xs sm:text-sm max-w-xl font-medium">
               Manage student cohorts, inspect GitHub repository trees, and automate LeetCode progress calculation.
             </p>
           </div>
@@ -91,7 +91,7 @@ export default function AdminDashboard() {
             <button
               onClick={syncAll}
               disabled={isSyncingAll}
-              className="btn-primary flex items-center gap-2"
+              className="btn-primary flex items-center gap-2 shadow-md shadow-sky-500/25"
             >
               <RefreshCw className={`w-4 h-4 ${isSyncingAll ? 'animate-spin' : ''}`} />
               <span>{isSyncingAll ? `Syncing (${syncProgress.current}/${syncProgress.total})...` : 'Sync All Repos'}</span>
@@ -99,15 +99,15 @@ export default function AdminDashboard() {
 
             <Link
               to="/admin/students/add"
-              className="btn-secondary flex items-center gap-2"
+              className="btn-secondary flex items-center gap-2 font-semibold text-slate-700 hover:text-sky-700"
             >
-              <UserPlus className="w-4 h-4 text-amber-400" />
+              <UserPlus className="w-4 h-4 text-sky-600" />
               <span>Add Student</span>
             </Link>
 
             <button
               onClick={() => exportLeaderboardCsv(students)}
-              className="p-2.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:text-white transition-colors"
+              className="p-2.5 rounded-xl bg-white border border-slate-200 text-slate-600 hover:text-sky-700 hover:border-sky-300 transition-colors shadow-sm"
               title="Export all student data to CSV"
             >
               <Download className="w-4 h-4" />
@@ -116,14 +116,14 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Top 5 Statistics (per Requirement #5) */}
+      {/* Top 5 Statistics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <StatCard
           title="Total Students"
           value={stats.totalStudents}
           subtitle="Enrolled cohort"
           icon={Users}
-          color="amber"
+          color="sky"
         />
         <StatCard
           title="Problems Solved"
@@ -175,14 +175,16 @@ export default function AdminDashboard() {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Users className="w-5 h-5 text-amber-400" />
-            <h2 className="text-lg font-bold text-white tracking-tight">
+            <div className="p-1 rounded bg-sky-50 text-sky-600 border border-sky-200">
+              <Users className="w-4 h-4" />
+            </div>
+            <h2 className="text-lg font-extrabold text-slate-900 tracking-tight">
               Enrolled Students
             </h2>
           </div>
           <Link
             to="/admin/students"
-            className="text-xs font-semibold text-amber-400 hover:text-amber-300 flex items-center gap-1 transition-colors"
+            className="text-xs font-bold text-sky-600 hover:text-sky-800 flex items-center gap-1 transition-colors"
           >
             <span>Manage All Students</span>
             <ArrowRight className="w-3.5 h-3.5" />

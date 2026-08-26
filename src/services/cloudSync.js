@@ -314,6 +314,15 @@ export function subscribeToSettings(onUpdate, onError) {
 export function subscribeToActivities(onUpdate, onError) {
   let isSubscribed = true;
 
+  // Instant fetch on subscription mount
+  fetchFromRest('activity').then(freshActs => {
+    if (freshActs && isSubscribed) {
+      const acts = Object.keys(freshActs).map(k => ({ id: k, ...freshActs[k] }));
+      acts.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+      onUpdate(acts.slice(0, 30));
+    }
+  }).catch(() => {});
+
   const pollInterval = setInterval(async () => {
     if (!isSubscribed) return;
     try {
@@ -324,12 +333,25 @@ export function subscribeToActivities(onUpdate, onError) {
         onUpdate(acts.slice(0, 30));
       }
     } catch (e) {}
-  }, 5000);
+  }, 4000);
 
   return () => {
     isSubscribed = false;
     clearInterval(pollInterval);
   };
+}
+
+/**
+ * Push activity item to Cloud
+ */
+export async function syncActivityToCloud(activityItem) {
+  const cleanAct = sanitizeForCloud(activityItem);
+  await putToRest(`activity/${activityItem.id}`, cleanAct);
+  if (rtdb) {
+    try {
+      await set(ref(rtdb, `activity/${activityItem.id}`), cleanAct);
+    } catch (e) {}
+  }
 }
 
 /**

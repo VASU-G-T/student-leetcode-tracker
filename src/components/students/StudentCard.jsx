@@ -30,20 +30,20 @@ export default function StudentCard({
             <img
               src={student.profileImage || `https://api.dicebear.com/7.x/bottts/svg?seed=${student.githubUsername || student.name}`}
               alt={student.name}
-              className="w-12 h-12 rounded-xl object-cover border border-slate-700 shadow-md"
+              className="w-12 h-12 rounded-2xl object-cover border border-sky-200 shadow-sm bg-sky-50 shrink-0"
             />
             <div>
               <Link
                 to={`/student/${student.registerNumber || student.id}`}
-                className="font-bold text-white group-hover:text-amber-400 transition-colors text-base line-clamp-1"
+                className="font-bold text-slate-900 group-hover:text-sky-600 transition-colors text-base line-clamp-1"
               >
                 {student.name}
               </Link>
-              <div className="flex items-center gap-2 text-xs text-slate-400 mt-0.5">
-                <span className="font-mono bg-slate-800 px-1.5 py-0.5 rounded text-amber-400/90 border border-slate-700">
+              <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5">
+                <span className="font-mono bg-sky-50 px-2 py-0.5 rounded-full text-sky-700 font-bold border border-sky-200 text-[11px]">
                   {student.registerNumber}
                 </span>
-                <span>{student.department}</span>
+                <span className="font-medium text-slate-600">{student.department} • {student.section}</span>
               </div>
             </div>
           </div>
@@ -52,27 +52,27 @@ export default function StudentCard({
             <button
               onClick={() => onSync && onSync(student.id)}
               disabled={isSyncing}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-amber-400 hover:bg-slate-800 border border-slate-800 transition-colors"
+              className="p-2 rounded-xl text-slate-500 hover:text-sky-600 hover:bg-sky-50 border border-slate-200 hover:border-sky-300 transition-colors"
               title="Sync repository"
             >
-              <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin text-amber-400' : ''}`} />
+              <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin text-sky-600' : ''}`} />
             </button>
           )}
         </div>
 
         {/* Solved Stats Row */}
-        <div className="grid grid-cols-3 gap-2 mt-4 mb-2 pt-3 border-t border-slate-800/80 text-center">
-          <div className="bg-slate-950/40 p-2 rounded-lg border border-emerald-500/20">
-            <span className="text-[10px] text-slate-400 block font-medium uppercase">Easy</span>
-            <span className="text-sm font-bold text-emerald-400 font-mono">{student.easySolved || 0}</span>
+        <div className="grid grid-cols-3 gap-2 mt-4 mb-2 pt-3 border-t border-sky-100 text-center">
+          <div className="bg-emerald-50/60 p-2 rounded-xl border border-emerald-200/80">
+            <span className="text-[10px] text-emerald-700 block font-bold uppercase tracking-wider">Easy</span>
+            <span className="text-sm font-extrabold text-emerald-700 font-mono">{student.easySolved || 0}</span>
           </div>
-          <div className="bg-slate-950/40 p-2 rounded-lg border border-amber-500/20">
-            <span className="text-[10px] text-slate-400 block font-medium uppercase">Med</span>
-            <span className="text-sm font-bold text-amber-400 font-mono">{student.mediumSolved || 0}</span>
+          <div className="bg-sky-50/60 p-2 rounded-xl border border-sky-200/80">
+            <span className="text-[10px] text-sky-700 block font-bold uppercase tracking-wider">Med</span>
+            <span className="text-sm font-extrabold text-sky-700 font-mono">{student.mediumSolved || 0}</span>
           </div>
-          <div className="bg-slate-950/40 p-2 rounded-lg border border-rose-500/20">
-            <span className="text-[10px] text-slate-400 block font-medium uppercase">Hard</span>
-            <span className="text-sm font-bold text-rose-400 font-mono">{student.hardSolved || 0}</span>
+          <div className="bg-rose-50/60 p-2 rounded-xl border border-rose-200/80">
+            <span className="text-[10px] text-rose-700 block font-bold uppercase tracking-wider">Hard</span>
+            <span className="text-sm font-extrabold text-rose-700 font-mono">{student.hardSolved || 0}</span>
           </div>
         </div>
 
@@ -81,21 +81,21 @@ export default function StudentCard({
           const metrics = getStudentActivityMetrics(student);
           return (
             <div className="grid grid-cols-4 gap-1.5 mb-3 text-center text-[10px] font-mono">
-              <div className="bg-emerald-500/10 border border-emerald-500/20 py-1 px-1 rounded-md">
-                <span className="text-slate-400 block text-[9px]">TODAY</span>
-                <span className="text-emerald-400 font-bold">{metrics.today > 0 ? `+${metrics.today}` : '0'}</span>
+              <div className="bg-emerald-50 border border-emerald-200 py-1 px-1 rounded-lg">
+                <span className="text-slate-500 block text-[9px] font-bold">TODAY</span>
+                <span className="text-emerald-700 font-extrabold">{metrics.today > 0 ? `+${metrics.today}` : '0'}</span>
               </div>
-              <div className="bg-cyan-500/10 border border-cyan-500/20 py-1 px-1 rounded-md">
-                <span className="text-slate-400 block text-[9px]">1 WEEK</span>
-                <span className="text-cyan-400 font-bold">{metrics.week}</span>
+              <div className="bg-sky-50 border border-sky-200 py-1 px-1 rounded-lg">
+                <span className="text-slate-500 block text-[9px] font-bold">1 WEEK</span>
+                <span className="text-sky-700 font-extrabold">{metrics.week}</span>
               </div>
-              <div className="bg-amber-500/10 border border-amber-500/20 py-1 px-1 rounded-md">
-                <span className="text-slate-400 block text-[9px]">1 MONTH</span>
-                <span className="text-amber-400 font-bold">{metrics.month}</span>
+              <div className="bg-amber-50 border border-amber-200 py-1 px-1 rounded-lg">
+                <span className="text-slate-500 block text-[9px] font-bold">1 MONTH</span>
+                <span className="text-amber-700 font-extrabold">{metrics.month}</span>
               </div>
-              <div className="bg-orange-500/10 border border-orange-500/20 py-1 px-1 rounded-md">
-                <span className="text-slate-400 block text-[9px]">STREAK</span>
-                <span className="text-orange-400 font-bold">🔥 {metrics.streak}d</span>
+              <div className="bg-orange-50 border border-orange-200 py-1 px-1 rounded-lg">
+                <span className="text-slate-500 block text-[9px] font-bold">STREAK</span>
+                <span className="text-orange-700 font-extrabold">🔥 {metrics.streak}d</span>
               </div>
             </div>
           );
@@ -112,15 +112,15 @@ export default function StudentCard({
       </div>
 
       {/* Footer / Actions */}
-      <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
-        <span className="text-slate-500 text-[11px]">
+      <div className="pt-3 border-t border-sky-100 flex items-center justify-between text-xs">
+        <span className="text-slate-500 text-[11px] font-medium">
           Synced {formatRelativeTime(student.lastSynced)}
         </span>
 
         <div className="flex items-center gap-1.5">
           <Link
             to={`/student/${student.registerNumber || student.id}`}
-            className="p-1.5 text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors"
+            className="p-1.5 text-sky-700 hover:text-white bg-sky-50 hover:bg-sky-600 rounded-lg border border-sky-200 transition-colors shadow-sm"
             title="View student profile"
           >
             <Eye className="w-3.5 h-3.5" />
@@ -129,7 +129,7 @@ export default function StudentCard({
           {isAdmin && onEdit && (
             <button
               onClick={() => onEdit(student)}
-              className="p-1.5 text-amber-400/90 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 rounded-lg border border-amber-500/20 transition-colors"
+              className="p-1.5 text-amber-700 hover:text-white bg-amber-50 hover:bg-amber-500 rounded-lg border border-amber-200 transition-colors shadow-sm"
               title="Edit student"
             >
               <Edit className="w-3.5 h-3.5" />
@@ -139,7 +139,7 @@ export default function StudentCard({
           {isAdmin && onDelete && (
             <button
               onClick={() => onDelete(student)}
-              className="p-1.5 text-rose-400/90 hover:text-rose-300 bg-rose-500/10 hover:bg-rose-500/20 rounded-lg border border-rose-500/20 transition-colors"
+              className="p-1.5 text-rose-700 hover:text-white bg-rose-50 hover:bg-rose-500 rounded-lg border border-rose-200 transition-colors shadow-sm"
               title="Delete student"
             >
               <Trash2 className="w-3.5 h-3.5" />

@@ -61,10 +61,10 @@ export default function AdminEditStudent() {
 
   if (!student) {
     return (
-      <div className="glass-card p-12 text-center max-w-md mx-auto my-12">
-        <AlertCircle className="w-12 h-12 text-slate-500 mx-auto mb-3" />
-        <h2 className="text-lg font-bold text-white">Student Not Found</h2>
-        <p className="text-xs text-slate-400 mt-1 mb-4">The student record could not be found.</p>
+      <div className="glass-card p-12 text-center max-w-md mx-auto my-12 bg-white border-sky-100 shadow-sm">
+        <AlertCircle className="w-12 h-12 text-slate-400 mx-auto mb-3" />
+        <h2 className="text-lg font-bold text-slate-900">Student Not Found</h2>
+        <p className="text-xs text-slate-500 mt-1 mb-4 font-medium">The student record could not be found.</p>
         <Link to="/admin/students" className="btn-primary text-xs">Back to Students</Link>
       </div>
     );
@@ -91,7 +91,7 @@ export default function AdminEditStudent() {
         githubUsername: githubUsername.trim(),
         githubRepoUrl: githubRepoUrl.trim(),
         leetcodeUsername: leetcodeUsername.trim(),
-        goal: parseInt(goal, 10) || 200,
+        goal: parseInt(goal, 10) || 4033,
         profileImage: profileImage.trim()
       });
 
@@ -113,40 +113,40 @@ export default function AdminEditStudent() {
       <div className="flex items-center justify-between">
         <Link
           to="/admin/students"
-          className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-white transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-sky-600 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Students</span>
         </Link>
       </div>
 
-      <div className="glass-card p-6 sm:p-8 border-slate-800 shadow-2xl relative">
-        <div className="flex items-center gap-3 pb-6 border-b border-slate-800">
-          <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center border border-amber-500/20">
+      <div className="glass-card p-6 sm:p-8 border-sky-100 bg-white shadow-xl relative">
+        <div className="flex items-center gap-3 pb-6 border-b border-sky-100">
+          <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center border border-sky-200 shadow-sm">
             <Edit className="w-5 h-5" />
           </div>
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+            <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
               Edit Student: {student.name}
             </h1>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-500 font-medium">
               Update student information, academic details, and LeetSync repository settings.
             </p>
           </div>
         </div>
 
         {errorMessage && (
-          <div className="mt-4 p-3.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+          <div className="mt-4 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2 font-medium">
+            <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
             <span>{errorMessage}</span>
           </div>
         )}
 
-        {/* Repository Changed Notice (Requirement #29) */}
+        {/* Repository Changed Notice */}
         {isRepoChanged && (
-          <div className="mt-4 p-3.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center gap-2.5">
-            <Info className="w-4 h-4 shrink-0 text-amber-400" />
-            <span className="font-semibold">
+          <div className="mt-4 p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs flex items-center gap-2.5 shadow-sm">
+            <Info className="w-4 h-4 shrink-0 text-amber-600" />
+            <span className="font-bold">
               Repository changed. Run Sync to update progress.
             </span>
           </div>
@@ -155,8 +155,8 @@ export default function AdminEditStudent() {
         <form onSubmit={handleSubmit} className="space-y-6 mt-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">
-                Full Name <span className="text-amber-400">*</span>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase">
+                Full Name <span className="text-sky-600">*</span>
               </label>
               <input
                 type="text"
@@ -168,8 +168,8 @@ export default function AdminEditStudent() {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">
-                Register Number <span className="text-amber-400">*</span>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase">
+                Register Number <span className="text-sky-600">*</span>
               </label>
               <input
                 type="text"
@@ -181,13 +181,13 @@ export default function AdminEditStudent() {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">
+              <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase">
                 Department
               </label>
               <select
                 value={department}
                 onChange={(e) => setDepartment(e.target.value)}
-                className="input-field"
+                className="input-field font-medium cursor-pointer"
               >
                 {(settings.departments || ['ECE', 'CSE', 'IT', 'AI&DS', 'MECH', 'EEE']).map(d => (
                   <option key={d} value={d}>{d}</option>
@@ -197,13 +197,13 @@ export default function AdminEditStudent() {
 
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase">
                   Year
                 </label>
                 <select
                   value={year}
                   onChange={(e) => setYear(e.target.value)}
-                  className="input-field"
+                  className="input-field font-medium cursor-pointer"
                 >
                   {(settings.years || ['1st Year', '2nd Year', '3rd Year', '4th Year']).map(y => (
                     <option key={y} value={y}>{y}</option>
@@ -211,13 +211,13 @@ export default function AdminEditStudent() {
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase">
                   Section
                 </label>
                 <select
                   value={section}
                   onChange={(e) => setSection(e.target.value)}
-                  className="input-field"
+                  className="input-field font-medium cursor-pointer"
                 >
                   {(settings.sections || ['Sec A', 'Sec B', 'Sec C', 'Sec D', 'Sec E', 'Sec F']).map(s => (
                     <option key={s} value={s}>{s}</option>
@@ -227,7 +227,7 @@ export default function AdminEditStudent() {
             </div>
 
             <div className="sm:col-span-2">
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">
+              <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase">
                 College Email
               </label>
               <input
@@ -239,8 +239,8 @@ export default function AdminEditStudent() {
             </div>
 
             <div className="sm:col-span-2">
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">
-                GitHub Repository URL <span className="text-amber-400">*</span>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase">
+                GitHub Repository URL <span className="text-sky-600">*</span>
               </label>
               <input
                 type="url"
@@ -252,7 +252,7 @@ export default function AdminEditStudent() {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">
+              <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase">
                 GitHub Username
               </label>
               <input
@@ -264,7 +264,7 @@ export default function AdminEditStudent() {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">
+              <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase">
                 LeetCode Username
               </label>
               <input
@@ -276,7 +276,7 @@ export default function AdminEditStudent() {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">
+              <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase">
                 Target Problem Goal
               </label>
               <input
@@ -288,7 +288,7 @@ export default function AdminEditStudent() {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">
+              <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase">
                 Profile Photo URL
               </label>
               <input
@@ -300,14 +300,14 @@ export default function AdminEditStudent() {
             </div>
           </div>
 
-          <div className="pt-6 border-t border-slate-800 flex items-center justify-end gap-3">
+          <div className="pt-6 border-t border-sky-100 flex items-center justify-end gap-3">
             <Link to="/admin/students" className="btn-secondary">
               Cancel
             </Link>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="btn-primary flex items-center gap-2"
+              className="btn-primary flex items-center gap-2 shadow-md shadow-sky-500/25"
             >
               {isSubmitting ? (
                 <>

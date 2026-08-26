@@ -7,14 +7,14 @@ export default function FilterDropdown({ label, value, onChange, options = [], a
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="input-field py-2 text-xs font-medium cursor-pointer bg-slate-900/90 text-slate-200 border-slate-800"
+        className="input-field py-2 text-xs font-semibold cursor-pointer bg-white text-slate-700 border-slate-200 hover:border-sky-300 focus:border-sky-500 focus:ring-sky-500/25 shadow-sm"
       >
         <option value="">{label}: {allLabel}</option>
         {options.map((opt) => {
           const val = typeof opt === 'object' ? opt.value : opt;
           const lbl = typeof opt === 'object' ? opt.label : opt;
           return (
-            <option key={val} value={val} className="bg-slate-900 text-slate-200">
+            <option key={val} value={val} className="bg-white text-slate-800">
               {lbl}
             </option>
           );

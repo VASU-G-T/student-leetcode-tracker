@@ -12,12 +12,12 @@ export default function SearchBar({ value, onChange, placeholder = 'Search stude
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="input-field pl-10 pr-9 py-2.5 w-full bg-slate-900/90"
+        className="input-field pl-10 pr-9 py-2.5 w-full bg-white text-slate-800 placeholder-slate-400 border-slate-200 focus:border-sky-500 focus:ring-sky-500/25"
       />
       {value && (
         <button
           onClick={() => onChange('')}
-          className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-200"
+          className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
         >
           <X className="w-4 h-4" />
         </button>

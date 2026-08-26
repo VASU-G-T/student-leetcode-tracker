@@ -1,56 +1,61 @@
 import React from 'react';
 
-export default function StatCard({ title, value, subtitle, icon: Icon, color = 'amber', trend }) {
+export default function StatCard({ title, value, subtitle, icon: Icon, color = 'sky', trend }) {
   const colorMap = {
+    sky: {
+      border: 'hover:border-sky-300',
+      iconBg: 'bg-sky-50 text-sky-600 border-sky-200',
+      badge: 'text-sky-600'
+    },
     amber: {
-      border: 'hover:border-amber-500/40',
-      iconBg: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-      badge: 'text-amber-400'
+      border: 'hover:border-amber-300',
+      iconBg: 'bg-amber-50 text-amber-600 border-amber-200',
+      badge: 'text-amber-600'
     },
     emerald: {
-      border: 'hover:border-emerald-500/40',
-      iconBg: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-      badge: 'text-emerald-400'
+      border: 'hover:border-emerald-300',
+      iconBg: 'bg-emerald-50 text-emerald-600 border-emerald-200',
+      badge: 'text-emerald-600'
     },
     blue: {
-      border: 'hover:border-blue-500/40',
-      iconBg: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-      badge: 'text-blue-400'
+      border: 'hover:border-blue-300',
+      iconBg: 'bg-blue-50 text-blue-600 border-blue-200',
+      badge: 'text-blue-600'
     },
     rose: {
-      border: 'hover:border-rose-500/40',
-      iconBg: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
-      badge: 'text-rose-400'
+      border: 'hover:border-rose-300',
+      iconBg: 'bg-rose-50 text-rose-600 border-rose-200',
+      badge: 'text-rose-600'
     },
     purple: {
-      border: 'hover:border-purple-500/40',
-      iconBg: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
-      badge: 'text-purple-400'
+      border: 'hover:border-purple-300',
+      iconBg: 'bg-purple-50 text-purple-600 border-purple-200',
+      badge: 'text-purple-600'
     }
   };
 
-  const scheme = colorMap[color] || colorMap.amber;
+  const scheme = colorMap[color] || colorMap.sky;
 
   return (
-    <div className={`glass-card p-5 transition-all duration-200 ${scheme.border} group`}>
+    <div className={`glass-card-hover p-5 ${scheme.border} group`}>
       <div className="flex items-center justify-between mb-2">
-        <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">{title}</span>
+        <span className="text-xs font-bold uppercase tracking-wider text-slate-500">{title}</span>
         {Icon && (
-          <div className={`p-2.5 rounded-lg border ${scheme.iconBg} transition-transform duration-200 group-hover:scale-105`}>
+          <div className={`p-2.5 rounded-xl border ${scheme.iconBg} transition-transform duration-200 group-hover:scale-105 shadow-sm`}>
             <Icon className="w-5 h-5" />
           </div>
         )}
       </div>
       <div className="flex items-baseline gap-2">
-        <span className="text-2xl sm:text-3xl font-bold tracking-tight text-white">{value}</span>
+        <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">{value}</span>
         {trend && (
-          <span className="text-xs font-medium text-emerald-400">
+          <span className="text-xs font-bold text-emerald-600">
             {trend}
           </span>
         )}
       </div>
       {subtitle && (
-        <p className="mt-1 text-xs text-slate-400">{subtitle}</p>
+        <p className="mt-1 text-xs text-slate-500 font-medium">{subtitle}</p>
       )}
     </div>
   );

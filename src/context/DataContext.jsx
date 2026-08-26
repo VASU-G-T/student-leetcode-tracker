@@ -20,6 +20,7 @@ import {
   syncStudentToCloud,
   deleteStudentFromCloud,
   syncProjectsToCloud,
+  syncActivityToCloud,
   fetchAllStudentsFromCloud,
   fetchAllProjectsFromCloud
 } from '../services/cloudSync';
@@ -108,7 +109,11 @@ export function DataProvider({ children }) {
           parsedProjects[CREATOR_PROFILE.id] = CREATOR_PROJECTS;
         }
         setProjectsByStudent(parsedProjects);
-        setActivities(localActivity ? JSON.parse(localActivity) : []);
+        let parsedActivities = localActivity ? JSON.parse(localActivity) : [];
+        if (!parsedActivities || parsedActivities.length === 0) {
+          parsedActivities = INITIAL_ACTIVITY;
+        }
+        setActivities(parsedActivities);
         setSettings(localSettings ? JSON.parse(localSettings) : INITIAL_SETTINGS);
         setLastGlobalSync(localLastSync || null);
 
@@ -511,6 +516,25 @@ export function DataProvider({ children }) {
         // Permanent Real-time Cloud Save
         await syncStudentToCloud(id, syncResult.student);
 
+        // Generate activity logs for latest solved problems
+        if (syncResult.problems && syncResult.problems.length > 0) {
+          const recentProblems = syncResult.problems.slice(-3);
+          for (const p of recentProblems) {
+            const act = {
+              id: `act_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+              studentId: student.id,
+              studentName: student.name,
+              type: 'solved',
+              problemNumber: p.problemNumber,
+              problemTitle: p.title,
+              difficulty: p.difficulty,
+              language: p.language,
+              timestamp: new Date().toISOString()
+            };
+            logActivity(act);
+          }
+        }
+
         showToast(`Synced ${syncResult.stats.totalSolved} problems for ${student.name}`, 'success');
       } else {
         showToast(syncResult.error || `Sync failed for ${student.name}`, 'error');
@@ -591,12 +615,18 @@ export function DataProvider({ children }) {
    */
   const logActivity = async (activityItem) => {
     const act = {
-      id: activityItem.id || `act_${Date.now()}`,
+      id: activityItem.id || `act_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
       ...activityItem,
       timestamp: activityItem.timestamp || new Date().toISOString()
     };
 
-    setActivities(prev => [act, ...prev.slice(0, 29)]);
+    setActivities(prev => {
+      const filtered = prev.filter(a => a.id !== act.id);
+      return [act, ...filtered.slice(0, 29)];
+    });
+
+    // Push to Cloud RTDB + Firestore
+    syncActivityToCloud(act).catch(() => {});
 
     if (isFirebaseConfigured && db) {
       try {

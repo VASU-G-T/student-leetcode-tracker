@@ -73,42 +73,42 @@ export default function ProjectModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in">
-      <div className="glass-card max-w-lg w-full p-6 sm:p-7 border-slate-800 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-fade-in">
+      <div className="glass-card max-w-lg w-full p-6 sm:p-7 border-sky-100 shadow-2xl relative max-h-[90vh] overflow-y-auto bg-white">
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+          className="absolute top-5 right-5 p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-sky-50 transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Modal Header */}
-        <div className="flex items-center gap-3 pb-4 border-b border-slate-800">
-          <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center border border-amber-500/20">
+        <div className="flex items-center gap-3 pb-4 border-b border-sky-100">
+          <div className="w-10 h-10 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center border border-sky-200 shadow-sm">
             <Layers className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-white tracking-tight">
+            <h2 className="text-lg font-extrabold text-slate-900 tracking-tight">
               {project ? 'Edit Project' : 'Add Project to Showcase'}
             </h2>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-500 font-medium">
               Highlight your apps, hardware builds, and GitHub repositories.
             </p>
           </div>
         </div>
 
         {error && (
-          <div className="mt-4 p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+          <div className="mt-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2 font-medium">
+            <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
             <span>{error}</span>
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4 mt-5">
           <div>
-            <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">
-              Project Title <span className="text-amber-400">*</span>
+            <label className="block text-xs font-bold uppercase text-slate-700 mb-1.5">
+              Project Title <span className="text-sky-600">*</span>
             </label>
             <input
               type="text"
@@ -122,13 +122,13 @@ export default function ProjectModal({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">
+              <label className="block text-xs font-bold uppercase text-slate-700 mb-1.5">
                 Category
               </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="input-field"
+                className="input-field cursor-pointer font-medium"
               >
                 <option value="Web Application">Web Application</option>
                 <option value="Mobile App">Mobile App</option>
@@ -139,7 +139,7 @@ export default function ProjectModal({
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">
+              <label className="block text-xs font-bold uppercase text-slate-700 mb-1.5">
                 Tech Stack (Comma-separated)
               </label>
               <input
@@ -153,8 +153,8 @@ export default function ProjectModal({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">
-              Description <span className="text-amber-400">*</span>
+            <label className="block text-xs font-bold uppercase text-slate-700 mb-1.5">
+              Description <span className="text-sky-600">*</span>
             </label>
             <textarea
               rows={3}
@@ -168,11 +168,11 @@ export default function ProjectModal({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">
+              <label className="block text-xs font-bold uppercase text-slate-700 mb-1.5">
                 GitHub Repository URL
               </label>
               <div className="relative">
-                <GithubIcon className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
+                <GithubIcon className="w-4 h-4 text-slate-400 absolute left-3 top-3.5" />
                 <input
                   type="url"
                   value={githubUrl}
@@ -184,11 +184,11 @@ export default function ProjectModal({
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">
+              <label className="block text-xs font-bold uppercase text-slate-700 mb-1.5">
                 Live Demo / Website URL
               </label>
               <div className="relative">
-                <Globe className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
+                <Globe className="w-4 h-4 text-slate-400 absolute left-3 top-3.5" />
                 <input
                   type="url"
                   value={liveUrl}
@@ -201,11 +201,11 @@ export default function ProjectModal({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">
+            <label className="block text-xs font-bold uppercase text-slate-700 mb-1.5">
               Project Preview Image / Banner URL (Optional)
             </label>
             <div className="relative">
-              <ImageIcon className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
+              <ImageIcon className="w-4 h-4 text-slate-400 absolute left-3 top-3.5" />
               <input
                 type="url"
                 value={imageUrl}
@@ -216,7 +216,7 @@ export default function ProjectModal({
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+          <div className="flex items-center justify-end gap-3 pt-3 border-t border-sky-100">
             <button
               type="button"
               onClick={onClose}

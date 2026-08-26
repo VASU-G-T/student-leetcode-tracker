@@ -169,26 +169,26 @@ export default function Register() {
   return (
     <div className="max-w-3xl mx-auto space-y-6 animate-fade-in pb-16">
       {/* Top Banner */}
-      <div className="glass-card p-6 sm:p-8 border-slate-800 shadow-2xl relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="glass-card p-6 sm:p-8 border-sky-100 shadow-2xl relative overflow-hidden bg-white">
+        <div className="absolute top-0 right-0 w-80 h-80 bg-sky-400/10 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="flex items-center gap-3 pb-6 border-b border-slate-800">
-          <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center border border-amber-500/20 shadow-lg shadow-amber-500/10">
+        <div className="flex items-center gap-3 pb-6 border-b border-sky-100">
+          <div className="w-12 h-12 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center border border-sky-200 shadow-md shadow-sky-500/10">
             <UserPlus className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
               Create Student Profile
             </h1>
-            <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
+            <p className="text-xs sm:text-sm text-slate-500 mt-0.5 font-medium">
               Register your ECE coding profile, sync LeetCode progress via GitHub, and showcase your projects.
             </p>
           </div>
         </div>
 
         {submitError && (
-          <div className="mt-4 p-3.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+          <div className="mt-4 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2 font-medium">
+            <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
             <span>{submitError}</span>
           </div>
         )}
@@ -196,15 +196,15 @@ export default function Register() {
         <form onSubmit={handleSubmit} className="space-y-6 mt-6">
           {/* Section 1: Account Credentials */}
           <div className="space-y-4">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-2">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-sky-700 flex items-center gap-2">
               <Lock className="w-3.5 h-3.5" />
               <span>1. Account Credentials (For Student Login)</span>
             </h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">
-                  Choose Username <span className="text-amber-400">*</span>
+                <label className="block text-xs font-bold uppercase text-slate-700 mb-1.5">
+                  Choose Username <span className="text-sky-600">*</span>
                 </label>
                 <input
                   type="text"
@@ -217,8 +217,8 @@ export default function Register() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">
-                  Password <span className="text-amber-400">*</span>
+                <label className="block text-xs font-bold uppercase text-slate-700 mb-1.5">
+                  Password <span className="text-sky-600">*</span>
                 </label>
                 <input
                   type="password"
@@ -231,8 +231,8 @@ export default function Register() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">
-                  Confirm Password <span className="text-amber-400">*</span>
+                <label className="block text-xs font-bold uppercase text-slate-700 mb-1.5">
+                  Confirm Password <span className="text-sky-600">*</span>
                 </label>
                 <input
                   type="password"
@@ -247,16 +247,16 @@ export default function Register() {
           </div>
 
           {/* Section 2: Student Academic Details */}
-          <div className="space-y-4 pt-4 border-t border-slate-800/80">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-2">
+          <div className="space-y-4 pt-4 border-t border-sky-100">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-sky-700 flex items-center gap-2">
               <User className="w-3.5 h-3.5" />
               <span>2. Student Academic Details</span>
             </h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">
-                  Full Name <span className="text-amber-400">*</span>
+                <label className="block text-xs font-bold uppercase text-slate-700 mb-1.5">
+                  Full Name <span className="text-sky-600">*</span>
                 </label>
                 <input
                   type="text"
@@ -269,40 +269,40 @@ export default function Register() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">
-                  Register Number <span className="text-amber-400">*</span>
+                <label className="block text-xs font-bold uppercase text-slate-700 mb-1.5">
+                  Register Number <span className="text-sky-600">*</span>
                 </label>
                 <input
                   type="text"
                   value={registerNumber}
                   onChange={(e) => setRegisterNumber(e.target.value.toUpperCase())}
-                  placeholder="e.g. ECE001"
+                  placeholder="e.g. 922525106360"
                   required
                   className="input-field font-mono uppercase"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">
+                <label className="block text-xs font-bold uppercase text-slate-700 mb-1.5">
                   Department
                 </label>
                 <input
                   type="text"
                   value={department}
                   disabled
-                  className="input-field opacity-80 cursor-not-allowed text-amber-400 font-semibold"
+                  className="input-field opacity-80 cursor-not-allowed text-sky-700 font-bold bg-sky-50/50"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">
+                  <label className="block text-xs font-bold uppercase text-slate-700 mb-1.5">
                     Year
                   </label>
                   <select
                     value={year}
                     onChange={(e) => setYear(e.target.value)}
-                    className="input-field"
+                    className="input-field cursor-pointer"
                   >
                     {(settings.years || ['1st Year', '2nd Year', '3rd Year', '4th Year']).map(y => (
                       <option key={y} value={y}>{y}</option>
@@ -311,13 +311,13 @@ export default function Register() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">
+                  <label className="block text-xs font-bold uppercase text-slate-700 mb-1.5">
                     Section
                   </label>
                   <select
                     value={section}
                     onChange={(e) => setSection(e.target.value)}
-                    className="input-field"
+                    className="input-field cursor-pointer"
                   >
                     {(settings.sections || defaultSections).map(s => (
                       <option key={s} value={s}>{s}</option>
@@ -327,7 +327,7 @@ export default function Register() {
               </div>
 
               <div className="sm:col-span-2">
-                <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">
+                <label className="block text-xs font-bold uppercase text-slate-700 mb-1.5">
                   College Email Address
                 </label>
                 <input
@@ -342,19 +342,19 @@ export default function Register() {
           </div>
 
           {/* Section 3: LeetCode & GitHub Sync Settings */}
-          <div className="space-y-4 pt-4 border-t border-slate-800/80">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-2">
+          <div className="space-y-4 pt-4 border-t border-sky-100">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-sky-700 flex items-center gap-2">
               <FolderGit2 className="w-3.5 h-3.5" />
               <span>3. GitHub & LeetSync Configuration</span>
             </h2>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">
-                  GitHub Repository URL (LeetSync) <span className="text-amber-400">*</span>
+                <label className="block text-xs font-bold uppercase text-slate-700 mb-1.5">
+                  GitHub Repository URL (LeetSync) <span className="text-sky-600">*</span>
                 </label>
                 <div className="relative">
-                  <GithubIcon className="w-4 h-4 text-slate-500 absolute left-3.5 top-3 pointer-events-none" />
+                  <GithubIcon className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
                   <input
                     type="url"
                     value={githubRepoUrl}
@@ -362,28 +362,28 @@ export default function Register() {
                     placeholder="https://github.com/your-username/leetcode"
                     required
                     className={`input-field pl-10 ${
-                      validationStatus.isValid === true ? 'border-emerald-500/60 ring-1 ring-emerald-500/30' :
-                      validationStatus.isValid === false ? 'border-rose-500/60 ring-1 ring-rose-500/30' : ''
+                      validationStatus.isValid === true ? 'border-emerald-500 ring-1 ring-emerald-500/30' :
+                      validationStatus.isValid === false ? 'border-rose-500 ring-1 ring-rose-500/30' : ''
                     }`}
                   />
                 </div>
 
                 {validationStatus.isValidating && (
-                  <p className="text-xs text-amber-400 mt-1.5 flex items-center gap-1.5 font-mono">
-                    <span className="w-2.5 h-2.5 rounded-full border-2 border-amber-400 border-t-transparent animate-spin" />
+                  <p className="text-xs text-sky-600 mt-1.5 flex items-center gap-1.5 font-mono font-medium">
+                    <span className="w-2.5 h-2.5 rounded-full border-2 border-sky-600 border-t-transparent animate-spin" />
                     <span>Validating repository on GitHub...</span>
                   </p>
                 )}
 
                 {validationStatus.isValid === true && (
-                  <p className="text-xs text-emerald-400 mt-1.5 flex items-center gap-1.5 font-mono">
+                  <p className="text-xs text-emerald-600 mt-1.5 flex items-center gap-1.5 font-mono font-semibold">
                     <CheckCircle2 className="w-3.5 h-3.5" />
                     <span>✓ Repository verified: {validationStatus.owner}/{validationStatus.repo}</span>
                   </p>
                 )}
 
                 {validationStatus.isValid === false && (
-                  <p className="text-xs text-rose-400 mt-1.5 flex items-center gap-1.5 font-mono">
+                  <p className="text-xs text-rose-600 mt-1.5 flex items-center gap-1.5 font-mono font-semibold">
                     <AlertCircle className="w-3.5 h-3.5" />
                     <span>{validationStatus.message}</span>
                   </p>
@@ -392,7 +392,7 @@ export default function Register() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">
+                  <label className="block text-xs font-bold uppercase text-slate-700 mb-1.5">
                     GitHub Username
                   </label>
                   <input
@@ -405,11 +405,11 @@ export default function Register() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">
+                  <label className="block text-xs font-bold uppercase text-slate-700 mb-1.5">
                     LeetCode Username
                   </label>
                   <div className="relative">
-                    <LeetCodeIcon className="w-4 h-4 text-slate-500 absolute left-3.5 top-3 pointer-events-none" />
+                    <LeetCodeIcon className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
                     <input
                       type="text"
                       value={leetcodeUsername}
@@ -424,8 +424,8 @@ export default function Register() {
           </div>
 
           {/* Section 4: Profile Photo & Bio */}
-          <div className="space-y-4 pt-4 border-t border-slate-800/80">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-2">
+          <div className="space-y-4 pt-4 border-t border-sky-100">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-sky-700 flex items-center gap-2">
               <ImageIcon className="w-3.5 h-3.5" />
               <span>4. Profile Customization & Photo</span>
             </h2>
@@ -435,12 +435,12 @@ export default function Register() {
                 <img
                   src={profileImage || `https://api.dicebear.com/7.x/bottts/svg?seed=${username || 'user'}`}
                   alt="Profile preview"
-                  className="w-20 h-20 rounded-2xl object-cover border-2 border-amber-500/40 bg-slate-950 shadow-md"
+                  className="w-20 h-20 rounded-2xl object-cover border-2 border-sky-300 bg-sky-50 shadow-md"
                 />
               </div>
 
               <div className="flex-1 w-full space-y-2">
-                <label className="block text-xs font-semibold uppercase text-slate-400">
+                <label className="block text-xs font-bold uppercase text-slate-700">
                   Upload Profile Photo (or provide Image URL)
                 </label>
                 <div className="flex flex-col sm:flex-row gap-2">
@@ -451,8 +451,8 @@ export default function Register() {
                     placeholder="Paste image URL..."
                     className="input-field flex-1 text-xs"
                   />
-                  <label className="btn-secondary text-xs cursor-pointer flex items-center justify-center gap-2 shrink-0">
-                    <Upload className="w-3.5 h-3.5" />
+                  <label className="btn-secondary text-xs cursor-pointer flex items-center justify-center gap-2 shrink-0 font-semibold text-slate-700">
+                    <Upload className="w-3.5 h-3.5 text-sky-600" />
                     <span>Upload File</span>
                     <input
                       type="file"
@@ -466,24 +466,24 @@ export default function Register() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">
+              <label className="block text-xs font-bold uppercase text-slate-700 mb-1.5">
                 Bio / Headline
               </label>
               <input
                 type="text"
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
-                placeholder="e.g. ECE 3rd Year • Embedded Systems & DSA Enthusiast"
+                placeholder="e.g. ECE 2nd Year • Embedded Systems & DSA Enthusiast"
                 className="input-field text-xs"
               />
             </div>
           </div>
 
           {/* Submit Action */}
-          <div className="pt-4 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-xs text-slate-400">
+          <div className="pt-4 border-t border-sky-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-xs text-slate-500 font-medium">
               Already have an account?{' '}
-              <Link to="/login" className="text-amber-400 hover:underline font-semibold">
+              <Link to="/login" className="text-sky-600 hover:text-sky-800 hover:underline font-bold">
                 Sign In here
               </Link>
             </p>
@@ -491,7 +491,7 @@ export default function Register() {
             <button
               type="submit"
               disabled={isSubmitting || validationStatus.isValidating}
-              className="btn-primary w-full sm:w-auto px-6 py-2.5 flex items-center justify-center gap-2 text-sm font-semibold"
+              className="btn-primary w-full sm:w-auto px-6 py-2.5 flex items-center justify-center gap-2 text-sm font-semibold shadow-md shadow-sky-500/25"
             >
               {isSubmitting ? (
                 <span>Registering & Syncing...</span>

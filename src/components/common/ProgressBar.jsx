@@ -1,7 +1,7 @@
 import React from 'react';
 import { calculatePercentage } from '../../utils/helpers';
 
-export default function ProgressBar({ current = 0, target = 200, showLabel = true, size = 'md' }) {
+export default function ProgressBar({ current = 0, target = 4033, showLabel = true, size = 'md' }) {
   const percentage = calculatePercentage(current, target);
 
   const heights = {
@@ -14,15 +14,15 @@ export default function ProgressBar({ current = 0, target = 200, showLabel = tru
     <div className="w-full">
       {showLabel && (
         <div className="flex justify-between items-center mb-1.5 text-xs">
-          <span className="font-medium text-slate-300">
-            <span className="text-white font-semibold">{current}</span> / {target} Solved
+          <span className="font-medium text-slate-600">
+            <span className="text-slate-900 font-bold">{current}</span> / {target} Solved
           </span>
-          <span className="font-semibold text-amber-400">{percentage}%</span>
+          <span className="font-bold text-sky-600">{percentage}%</span>
         </div>
       )}
-      <div className={`w-full bg-slate-800 rounded-full overflow-hidden ${heights[size] || heights.md} border border-slate-700/50 p-[1px]`}>
+      <div className={`w-full bg-sky-100/80 rounded-full overflow-hidden ${heights[size] || heights.md} border border-sky-200/80 p-[1px]`}>
         <div 
-          className="bg-gradient-to-r from-amber-500 via-orange-500 to-emerald-500 h-full rounded-full transition-all duration-500 ease-out"
+          className="bg-gradient-to-r from-sky-400 via-sky-500 to-emerald-500 h-full rounded-full transition-all duration-500 ease-out shadow-sm"
           style={{ width: `${Math.min(100, percentage)}%` }}
         />
       </div>

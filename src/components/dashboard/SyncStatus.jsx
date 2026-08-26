@@ -10,21 +10,21 @@ export default function SyncStatus({ student, onSync, isSyncing }) {
   return (
     <div className="flex items-center gap-2">
       {isSyncing ? (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-medium animate-pulse">
-          <RefreshCw className="w-3 h-3 animate-spin" />
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-sky-100 text-sky-700 border border-sky-200 text-xs font-semibold animate-pulse shadow-sm">
+          <RefreshCw className="w-3 h-3 animate-spin text-sky-600" />
           <span>Syncing...</span>
         </span>
       ) : isFailed ? (
         <span 
-          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-rose-500/10 text-rose-400 border border-rose-500/20 text-xs font-medium"
+          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-rose-50 text-rose-600 border border-rose-200 text-xs font-semibold shadow-sm"
           title={student.syncError || 'Sync failed'}
         >
           <AlertCircle className="w-3 h-3" />
           <span>Sync failed</span>
         </span>
       ) : (
-        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-medium">
-          <CheckCircle className="w-3 h-3" />
+        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold shadow-sm">
+          <CheckCircle className="w-3 h-3 text-emerald-600" />
           <span>{formatRelativeTime(student.lastSynced)}</span>
         </span>
       )}

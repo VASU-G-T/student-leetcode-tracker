@@ -129,31 +129,31 @@ export default function AdminAddStudent() {
       <div className="flex items-center justify-between">
         <Link
           to="/admin/students"
-          className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-white transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-sky-600 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Students</span>
         </Link>
       </div>
 
-      <div className="glass-card p-6 sm:p-8 border-slate-800 shadow-2xl relative">
-        <div className="flex items-center gap-3 pb-6 border-b border-slate-800">
-          <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center border border-amber-500/20">
+      <div className="glass-card p-6 sm:p-8 border-sky-100 bg-white shadow-xl relative">
+        <div className="flex items-center gap-3 pb-6 border-b border-sky-100">
+          <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center border border-sky-200 shadow-sm">
             <UserPlus className="w-5 h-5" />
           </div>
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+            <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
               Add New Student
             </h1>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-500 font-medium">
               Register a student and link their LeetSync GitHub repository for automated tracking.
             </p>
           </div>
         </div>
 
         {submitError && (
-          <div className="mt-4 p-3.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+          <div className="mt-4 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2 font-medium">
+            <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
             <span>{submitError}</span>
           </div>
         )}
@@ -161,13 +161,13 @@ export default function AdminAddStudent() {
         <form onSubmit={handleSubmit} className="space-y-6 mt-6">
           {/* Section 1: Academic Information */}
           <div>
-            <h2 className="text-xs font-bold uppercase tracking-wider text-amber-400 mb-3">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-sky-700 mb-3">
               1. Student Academic Details
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1.5">
-                  Full Name <span className="text-amber-400">*</span>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase">
+                  Full Name <span className="text-sky-600">*</span>
                 </label>
                 <input
                   type="text"
@@ -180,27 +180,27 @@ export default function AdminAddStudent() {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1.5">
-                  Register Number <span className="text-amber-400">*</span>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase">
+                  Register Number <span className="text-sky-600">*</span>
                 </label>
                 <input
                   type="text"
                   value={registerNumber}
                   onChange={(e) => setRegisterNumber(e.target.value)}
-                  placeholder="e.g. ECE001"
+                  placeholder="e.g. 922525106360"
                   required
                   className="input-field uppercase font-mono"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase">
                   Department
                 </label>
                 <select
                   value={department}
                   onChange={(e) => setDepartment(e.target.value)}
-                  className="input-field"
+                  className="input-field font-medium cursor-pointer"
                 >
                   {(settings.departments || ['ECE', 'CSE', 'IT', 'AI&DS', 'MECH', 'EEE']).map(d => (
                     <option key={d} value={d}>{d}</option>
@@ -210,13 +210,13 @@ export default function AdminAddStudent() {
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase">
                     Year
                   </label>
                   <select
                     value={year}
                     onChange={(e) => setYear(e.target.value)}
-                    className="input-field"
+                    className="input-field font-medium cursor-pointer"
                   >
                     {(settings.years || ['1st Year', '2nd Year', '3rd Year', '4th Year']).map(y => (
                       <option key={y} value={y}>{y}</option>
@@ -224,13 +224,13 @@ export default function AdminAddStudent() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase">
                     Section
                   </label>
                   <select
                     value={section}
                     onChange={(e) => setSection(e.target.value)}
-                    className="input-field"
+                    className="input-field font-medium cursor-pointer"
                   >
                     {(settings.sections || ['Sec A', 'Sec B', 'Sec C', 'Sec D', 'Sec E', 'Sec F']).map(s => (
                       <option key={s} value={s}>{s}</option>
@@ -240,7 +240,7 @@ export default function AdminAddStudent() {
               </div>
 
               <div className="sm:col-span-2">
-                <label className="block text-xs font-medium text-slate-300 mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase">
                   College Email
                 </label>
                 <input
@@ -255,16 +255,16 @@ export default function AdminAddStudent() {
           </div>
 
           {/* Section 2: GitHub Repository & LeetSync Link */}
-          <div className="pt-4 border-t border-slate-800">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-amber-400 mb-3 flex items-center gap-1.5">
+          <div className="pt-4 border-t border-sky-100">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-sky-700 mb-3 flex items-center gap-1.5">
               <GithubIcon className="w-3.5 h-3.5" />
               <span>2. GitHub Repository & LeetSync Integration</span>
             </h2>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1.5">
-                  GitHub Repository URL <span className="text-amber-400">*</span>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase">
+                  GitHub Repository URL <span className="text-sky-600">*</span>
                 </label>
                 <input
                   type="url"
@@ -275,22 +275,22 @@ export default function AdminAddStudent() {
                   className="input-field font-mono"
                 />
 
-                {/* Validation Status Feedback Pill (Requirement #8) */}
+                {/* Validation Status Feedback Pill */}
                 {githubRepoUrl.trim() && (
                   <div className="mt-2 text-xs flex items-center gap-2">
                     {validationStatus.isValidating ? (
-                      <span className="text-slate-400 flex items-center gap-1.5">
-                        <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-400" />
+                      <span className="text-slate-500 flex items-center gap-1.5 font-medium">
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-sky-600" />
                         <span>Validating repository on GitHub...</span>
                       </span>
                     ) : validationStatus.isValid ? (
-                      <span className="text-emerald-400 font-medium flex items-center gap-1.5 bg-emerald-500/10 px-2.5 py-1 rounded-md border border-emerald-500/20">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                      <span className="text-emerald-700 font-bold flex items-center gap-1.5 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                         <span>{validationStatus.message} (Owner: {validationStatus.owner}, Repo: {validationStatus.repo})</span>
                       </span>
                     ) : validationStatus.isValid === false ? (
-                      <span className="text-rose-400 font-medium flex items-center gap-1.5 bg-rose-500/10 px-2.5 py-1 rounded-md border border-rose-500/20">
-                        <AlertCircle className="w-4 h-4 text-rose-400" />
+                      <span className="text-rose-700 font-bold flex items-center gap-1.5 bg-rose-50 px-2.5 py-1 rounded-full border border-rose-200">
+                        <AlertCircle className="w-4 h-4 text-rose-500" />
                         <span>{validationStatus.message}</span>
                       </span>
                     ) : null}
@@ -300,7 +300,7 @@ export default function AdminAddStudent() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase">
                     GitHub Username
                   </label>
                   <input
@@ -313,8 +313,8 @@ export default function AdminAddStudent() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1.5">
-                    LeetCode Username <span className="text-slate-500">(Optional)</span>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase">
+                    LeetCode Username <span className="text-slate-400 font-normal">(Optional)</span>
                   </label>
                   <input
                     type="text"
@@ -328,7 +328,7 @@ export default function AdminAddStudent() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase">
                     Target Problem Goal
                   </label>
                   <input
@@ -341,8 +341,8 @@ export default function AdminAddStudent() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1.5">
-                    Custom Profile Photo URL <span className="text-slate-500">(Optional)</span>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase">
+                    Custom Profile Photo URL <span className="text-slate-400 font-normal">(Optional)</span>
                   </label>
                   <input
                     type="url"
@@ -357,7 +357,7 @@ export default function AdminAddStudent() {
           </div>
 
           {/* Form Actions */}
-          <div className="pt-6 border-t border-slate-800 flex items-center justify-end gap-3">
+          <div className="pt-6 border-t border-sky-100 flex items-center justify-end gap-3">
             <Link
               to="/admin/students"
               className="btn-secondary"
@@ -368,7 +368,7 @@ export default function AdminAddStudent() {
             <button
               type="submit"
               disabled={isSubmitting || validationStatus.isValid === false}
-              className="btn-primary flex items-center gap-2"
+              className="btn-primary flex items-center gap-2 shadow-md shadow-sky-500/25"
             >
               {isSubmitting ? (
                 <>

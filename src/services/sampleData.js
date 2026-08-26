@@ -60,7 +60,63 @@ export const INITIAL_STUDENTS = [CREATOR_PROFILE];
 
 export const INITIAL_SAMPLE_PROBLEMS = {};
 
-export const INITIAL_ACTIVITY = [];
+export const INITIAL_ACTIVITY = [
+  {
+    id: 'act_init_1',
+    studentId: 'vasu_gt_creator',
+    studentName: 'G T VASUDEVAN',
+    type: 'solved',
+    problemNumber: 1,
+    problemTitle: 'Two Sum',
+    difficulty: 'Easy',
+    language: 'Java',
+    timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'act_init_2',
+    studentId: 'student_1787731483951_yrz9g',
+    studentName: 'SIVARANJAN M P',
+    type: 'solved',
+    problemNumber: 1929,
+    problemTitle: 'Concatenation of Array',
+    difficulty: 'Easy',
+    language: 'Python',
+    timestamp: new Date(Date.now() - 45 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'act_init_3',
+    studentId: 'vasu_gt_creator',
+    studentName: 'G T VASUDEVAN',
+    type: 'solved',
+    problemNumber: 15,
+    problemTitle: '3Sum',
+    difficulty: 'Medium',
+    language: 'C++',
+    timestamp: new Date(Date.now() - 2 * 3600 * 1000).toISOString()
+  },
+  {
+    id: 'act_init_4',
+    studentId: 'student_1787731483951_yrz9g',
+    studentName: 'SIVARANJAN M P',
+    type: 'solved',
+    problemNumber: 206,
+    problemTitle: 'Reverse Linked List',
+    difficulty: 'Easy',
+    language: 'Java',
+    timestamp: new Date(Date.now() - 5 * 3600 * 1000).toISOString()
+  },
+  {
+    id: 'act_init_5',
+    studentId: 'vasu_gt_creator',
+    studentName: 'G T VASUDEVAN',
+    type: 'solved',
+    problemNumber: 42,
+    problemTitle: 'Trapping Rain Water',
+    difficulty: 'Hard',
+    language: 'Python',
+    timestamp: new Date(Date.now() - 12 * 3600 * 1000).toISOString()
+  }
+];
 
 export const INITIAL_SETTINGS = {
   appName: 'ECE LeetTrack',

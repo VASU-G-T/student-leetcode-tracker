@@ -87,27 +87,29 @@ export default function StudentDirectory() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
-            <Users className="w-7 h-7 text-amber-400" />
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2.5">
+            <div className="p-2 rounded-xl bg-sky-50 text-sky-600 border border-sky-200 shadow-sm">
+              <Users className="w-6 h-6" />
+            </div>
             <span>ECE Student Directory</span>
           </h1>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">
+          <p className="text-xs sm:text-sm text-slate-500 mt-1 font-medium">
             Browse and inspect up to 400+ ECE student profiles across Sec A, Sec B, Sec C, Sec D, Sec E, Sec F ({students.length} Registered)
           </p>
         </div>
 
         {/* View Mode Toggle */}
-        <div className="flex items-center gap-1.5 p-1 bg-slate-900 border border-slate-800 rounded-lg">
+        <div className="flex items-center gap-1.5 p-1 bg-white border border-slate-200 rounded-xl shadow-sm">
           <button
             onClick={() => setViewMode('grid')}
-            className={`p-1.5 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-amber-500 text-slate-950 shadow-sm' : 'text-slate-400 hover:text-white'}`}
+            className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-sky-500 text-white shadow-sm shadow-sky-500/25' : 'text-slate-500 hover:text-slate-800'}`}
             title="Grid View"
           >
             <LayoutGrid className="w-4 h-4" />
           </button>
           <button
             onClick={() => setViewMode('table')}
-            className={`p-1.5 rounded-md transition-colors ${viewMode === 'table' ? 'bg-amber-500 text-slate-950 shadow-sm' : 'text-slate-400 hover:text-white'}`}
+            className={`p-2 rounded-lg transition-all ${viewMode === 'table' ? 'bg-sky-500 text-white shadow-sm shadow-sky-500/25' : 'text-slate-500 hover:text-slate-800'}`}
             title="Table View"
           >
             <List className="w-4 h-4" />
@@ -116,13 +118,13 @@ export default function StudentDirectory() {
       </div>
 
       {/* Filter and Search Toolbar */}
-      <div className="glass-card p-4 space-y-3">
+      <div className="glass-card p-4 space-y-3 bg-white border-sky-100 shadow-sm">
         <div className="flex flex-col md:flex-row gap-3">
           <div className="flex-1">
             <SearchBar
               value={searchTerm}
               onChange={setSearchTerm}
-              placeholder="Search by student name, register number (e.g. 9276...), or GitHub username..."
+              placeholder="Search by student name, register number (e.g. 9225...), or GitHub username..."
             />
           </div>
 
@@ -164,11 +166,11 @@ export default function StudentDirectory() {
         </div>
 
         {/* Quick Section Filter Pills */}
-        <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-slate-800/60">
-          <span className="text-[11px] text-slate-400 mr-1 font-medium">Quick Section:</span>
+        <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-slate-100">
+          <span className="text-[11px] text-slate-500 mr-1 font-bold">Quick Section:</span>
           <button
             onClick={() => { setSection(''); setSearchParams({}); }}
-            className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${!section ? 'bg-amber-500 text-slate-950 font-bold' : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'}`}
+            className={`px-3 py-1 rounded-full text-xs font-bold transition-all shadow-sm ${!section ? 'bg-sky-500 text-white shadow-sky-500/25' : 'bg-white text-slate-600 hover:text-sky-700 hover:bg-sky-50 border border-slate-200'}`}
           >
             All Sections
           </button>
@@ -176,7 +178,7 @@ export default function StudentDirectory() {
             <button
               key={s}
               onClick={() => { setSection(s); setSearchParams({ section: s }); }}
-              className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${section === s ? 'bg-amber-500 text-slate-950 font-bold' : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'}`}
+              className={`px-3 py-1 rounded-full text-xs font-bold transition-all shadow-sm ${section === s ? 'bg-sky-500 text-white shadow-sky-500/25' : 'bg-white text-slate-600 hover:text-sky-700 hover:bg-sky-50 border border-slate-200'}`}
             >
               {s}
             </button>
@@ -185,12 +187,12 @@ export default function StudentDirectory() {
 
         {/* Active Filter Chips indicator */}
         {(searchTerm || year || section) && (
-          <div className="flex items-center gap-2 pt-2 border-t border-slate-800/60 text-xs text-slate-400">
+          <div className="flex items-center gap-2 pt-2 border-t border-slate-100 text-xs text-slate-500">
             <span>Filtering active:</span>
-            <span className="font-semibold text-amber-400">{filteredStudents.length} matching students</span>
+            <span className="font-bold text-sky-700">{filteredStudents.length} matching students</span>
             <button
               onClick={() => { setSearchTerm(''); setYear(''); setSection(''); setSearchParams({}); }}
-              className="text-slate-400 hover:text-white underline ml-2"
+              className="text-sky-600 hover:text-sky-800 underline ml-2 font-semibold"
             >
               Reset Filters
             </button>
@@ -200,10 +202,10 @@ export default function StudentDirectory() {
 
       {/* Student List View */}
       {filteredStudents.length === 0 ? (
-        <div className="glass-card p-12 text-center text-slate-400">
-          <Users className="w-12 h-12 mx-auto text-slate-600 mb-3" />
-          <h3 className="text-base font-semibold text-slate-300">No students found</h3>
-          <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+        <div className="glass-card p-12 text-center text-slate-400 bg-white border-sky-100 shadow-sm">
+          <Users className="w-12 h-12 mx-auto text-sky-300 mb-3" />
+          <h3 className="text-base font-bold text-slate-800">No students found</h3>
+          <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto font-medium">
             We couldn't find any students matching your search criteria. Try modifying or clearing your filters.
           </p>
         </div>
@@ -222,7 +224,7 @@ export default function StudentDirectory() {
           </div>
 
           {filteredStudents.length > 30 && (
-            <div className="glass-card overflow-hidden">
+            <div className="glass-card overflow-hidden shadow-sm">
               <Pagination
                 currentPage={currentPage}
                 totalItems={filteredStudents.length}
