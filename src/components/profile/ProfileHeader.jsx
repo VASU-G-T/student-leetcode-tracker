@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { GithubIcon, LeetCodeIcon } from '../common/Icons';
 import ProgressBar from '../common/ProgressBar';
-import { formatDateTime, formatRelativeTime } from '../../utils/helpers';
+import { formatDateTime, formatRelativeTime, getStudentActivityMetrics } from '../../utils/helpers';
 import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
 
@@ -183,9 +183,49 @@ export default function ProfileHeader({ student, isSyncing, onSync, onAddProject
         </div>
       </div>
 
+      {/* Submission Metrics Banner */}
+      {(() => {
+        const metrics = getStudentActivityMetrics(student);
+        return (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-slate-800/60">
+            <div className="bg-slate-950/60 p-3 rounded-xl border border-emerald-500/20 text-center">
+              <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider block">Today's Solved</span>
+              <span className="text-xl font-extrabold font-mono text-emerald-400">
+                {metrics.today > 0 ? `+${metrics.today}` : '0'}
+              </span>
+              <span className="text-[10px] text-emerald-500/80 block mt-0.5 font-medium">Last 24 Hours</span>
+            </div>
+
+            <div className="bg-slate-950/60 p-3 rounded-xl border border-cyan-500/20 text-center">
+              <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider block">Last 1 Week</span>
+              <span className="text-xl font-extrabold font-mono text-cyan-400">
+                {metrics.week}
+              </span>
+              <span className="text-[10px] text-cyan-500/80 block mt-0.5 font-medium">Past 7 Days</span>
+            </div>
+
+            <div className="bg-slate-950/60 p-3 rounded-xl border border-amber-500/20 text-center">
+              <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider block">Last 1 Month</span>
+              <span className="text-xl font-extrabold font-mono text-amber-400">
+                {metrics.month}
+              </span>
+              <span className="text-[10px] text-amber-500/80 block mt-0.5 font-medium">Past 30 Days</span>
+            </div>
+
+            <div className="bg-slate-950/60 p-3 rounded-xl border border-orange-500/20 text-center">
+              <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider block">Daily Streak</span>
+              <span className="text-xl font-extrabold font-mono text-orange-400 flex items-center justify-center gap-1">
+                🔥 {metrics.streak}d
+              </span>
+              <span className="text-[10px] text-orange-500/80 block mt-0.5 font-medium">Active Consistency</span>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Skills Badges */}
       {student.skills && student.skills.length > 0 && (
-        <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-slate-800/60 text-xs">
+        <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-800/60 text-xs">
           <span className="text-slate-400 text-xs font-medium">Skills:</span>
           {student.skills.map((skill, idx) => (
             <span

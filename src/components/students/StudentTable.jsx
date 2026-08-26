@@ -11,7 +11,7 @@ import { GithubIcon } from '../common/Icons';
 import SyncStatus from '../dashboard/SyncStatus';
 import ProgressBar from '../common/ProgressBar';
 import Pagination from '../common/Pagination';
-import { formatRelativeTime } from '../../utils/helpers';
+import { formatRelativeTime, getStudentActivityMetrics } from '../../utils/helpers';
 
 export default function StudentTable({ 
   students = [], 
@@ -45,9 +45,13 @@ export default function StudentTable({
               <th className="py-3 px-4">Reg No</th>
               <th className="py-3 px-4">Dept & Sec</th>
               <th className="py-3 px-4 text-center">Solved</th>
-              <th className="py-3 px-4 text-center text-emerald-400">Easy</th>
-              <th className="py-3 px-4 text-center text-amber-400">Med</th>
-              <th className="py-3 px-4 text-center text-rose-400">Hard</th>
+              <th className="py-3 px-4 text-center text-emerald-400">Today</th>
+              <th className="py-3 px-4 text-center text-cyan-400">1 Week</th>
+              <th className="py-3 px-4 text-center text-amber-400">1 Month</th>
+              <th className="py-3 px-4 text-center text-orange-400">Streak</th>
+              <th className="py-3 px-4 text-center hidden lg:table-cell text-emerald-400">Easy</th>
+              <th className="py-3 px-4 text-center hidden lg:table-cell text-amber-400">Med</th>
+              <th className="py-3 px-4 text-center hidden lg:table-cell text-rose-400">Hard</th>
               <th className="py-3 px-4 w-32">Sync Status</th>
               <th className="py-3 px-4 text-right">Actions</th>
             </tr>
@@ -56,6 +60,7 @@ export default function StudentTable({
             {paginatedStudents.map((student, idx) => {
               const globalIndex = (currentPage - 1) * pageSize + idx + 1;
               const isSyncing = syncingStudentId === student.id;
+              const metrics = getStudentActivityMetrics(student);
 
               return (
                 <tr 
@@ -108,18 +113,46 @@ export default function StudentTable({
                     {student.totalSolved || 0}
                   </td>
 
+                  {/* Today */}
+                  <td className="py-3 px-4 text-center font-mono">
+                    <span className={`inline-block px-2 py-0.5 rounded-md text-xs font-bold border ${metrics.today > 0 ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : 'bg-slate-800/40 text-slate-500 border-slate-800'}`}>
+                      {metrics.today > 0 ? `+${metrics.today}` : '0'}
+                    </span>
+                  </td>
+
+                  {/* 1 Week */}
+                  <td className="py-3 px-4 text-center font-mono">
+                    <span className="inline-block px-2 py-0.5 rounded-md text-xs font-semibold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                      {metrics.week}
+                    </span>
+                  </td>
+
+                  {/* 1 Month */}
+                  <td className="py-3 px-4 text-center font-mono">
+                    <span className="inline-block px-2 py-0.5 rounded-md text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                      {metrics.month}
+                    </span>
+                  </td>
+
+                  {/* Streak */}
+                  <td className="py-3 px-4 text-center font-mono">
+                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold border ${metrics.streak > 0 ? 'bg-orange-500/15 text-orange-400 border-orange-500/30' : 'bg-slate-800/40 text-slate-500 border-slate-800'}`}>
+                      {metrics.streak > 0 ? `🔥 ${metrics.streak}d` : '0d'}
+                    </span>
+                  </td>
+
                   {/* Easy */}
-                  <td className="py-3 px-4 text-center font-mono font-medium text-emerald-400">
+                  <td className="py-3 px-4 text-center hidden lg:table-cell font-mono font-medium text-emerald-400">
                     {student.easySolved || 0}
                   </td>
 
                   {/* Medium */}
-                  <td className="py-3 px-4 text-center font-mono font-medium text-amber-400">
+                  <td className="py-3 px-4 text-center hidden lg:table-cell font-mono font-medium text-amber-400">
                     {student.mediumSolved || 0}
                   </td>
 
                   {/* Hard */}
-                  <td className="py-3 px-4 text-center font-mono font-medium text-rose-400">
+                  <td className="py-3 px-4 text-center hidden lg:table-cell font-mono font-medium text-rose-400">
                     {student.hardSolved || 0}
                   </td>
 

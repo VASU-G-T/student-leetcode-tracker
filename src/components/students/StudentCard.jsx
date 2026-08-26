@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { GithubIcon } from '../common/Icons';
 import ProgressBar from '../common/ProgressBar';
-import { formatRelativeTime } from '../../utils/helpers';
+import { formatRelativeTime, getStudentActivityMetrics } from '../../utils/helpers';
 
 export default function StudentCard({ 
   student, 
@@ -61,7 +61,7 @@ export default function StudentCard({
         </div>
 
         {/* Solved Stats Row */}
-        <div className="grid grid-cols-3 gap-2 my-4 pt-3 border-t border-slate-800/80 text-center">
+        <div className="grid grid-cols-3 gap-2 mt-4 mb-2 pt-3 border-t border-slate-800/80 text-center">
           <div className="bg-slate-950/40 p-2 rounded-lg border border-emerald-500/20">
             <span className="text-[10px] text-slate-400 block font-medium uppercase">Easy</span>
             <span className="text-sm font-bold text-emerald-400 font-mono">{student.easySolved || 0}</span>
@@ -75,6 +75,31 @@ export default function StudentCard({
             <span className="text-sm font-bold text-rose-400 font-mono">{student.hardSolved || 0}</span>
           </div>
         </div>
+
+        {/* Submissions Velocity & Streak */}
+        {(() => {
+          const metrics = getStudentActivityMetrics(student);
+          return (
+            <div className="grid grid-cols-4 gap-1.5 mb-3 text-center text-[10px] font-mono">
+              <div className="bg-emerald-500/10 border border-emerald-500/20 py-1 px-1 rounded-md">
+                <span className="text-slate-400 block text-[9px]">TODAY</span>
+                <span className="text-emerald-400 font-bold">{metrics.today > 0 ? `+${metrics.today}` : '0'}</span>
+              </div>
+              <div className="bg-cyan-500/10 border border-cyan-500/20 py-1 px-1 rounded-md">
+                <span className="text-slate-400 block text-[9px]">1 WEEK</span>
+                <span className="text-cyan-400 font-bold">{metrics.week}</span>
+              </div>
+              <div className="bg-amber-500/10 border border-amber-500/20 py-1 px-1 rounded-md">
+                <span className="text-slate-400 block text-[9px]">1 MONTH</span>
+                <span className="text-amber-400 font-bold">{metrics.month}</span>
+              </div>
+              <div className="bg-orange-500/10 border border-orange-500/20 py-1 px-1 rounded-md">
+                <span className="text-slate-400 block text-[9px]">STREAK</span>
+                <span className="text-orange-400 font-bold">🔥 {metrics.streak}d</span>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Goal Progress */}
         <div className="mb-4">

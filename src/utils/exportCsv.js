@@ -26,24 +26,50 @@ export function exportToCsv(filename, headers, rows) {
   URL.revokeObjectURL(url);
 }
 
+import { getStudentActivityMetrics } from './helpers';
+
 /**
  * Export Leaderboard to CSV
  */
 export function exportLeaderboardCsv(students) {
-  const headers = ['Rank', 'Name', 'Register Number', 'Department', 'Year', 'Section', 'Total Solved', 'Easy', 'Medium', 'Hard', 'GitHub Repo'];
-  const rows = students.map((s, idx) => [
-    idx + 1,
-    s.name,
-    s.registerNumber,
-    s.department,
-    s.year,
-    s.section,
-    s.totalSolved || 0,
-    s.easySolved || 0,
-    s.mediumSolved || 0,
-    s.hardSolved || 0,
-    s.githubRepoUrl
-  ]);
+  const headers = [
+    'Rank', 
+    'Name', 
+    'Register Number', 
+    'Department', 
+    'Year', 
+    'Section', 
+    'Total Solved', 
+    'Today Solved', 
+    '1 Week Solved', 
+    '1 Month Solved', 
+    'Streak (Days)', 
+    'Easy', 
+    'Medium', 
+    'Hard', 
+    'GitHub Repo'
+  ];
+  
+  const rows = students.map((s, idx) => {
+    const metrics = getStudentActivityMetrics(s);
+    return [
+      idx + 1,
+      s.name,
+      s.registerNumber,
+      s.department,
+      s.year,
+      s.section,
+      s.totalSolved || 0,
+      metrics.today,
+      metrics.week,
+      metrics.month,
+      metrics.streak,
+      s.easySolved || 0,
+      s.mediumSolved || 0,
+      s.hardSolved || 0,
+      s.githubRepoUrl
+    ];
+  });
 
   exportToCsv(`LeetTrack_Leaderboard_${new Date().toISOString().split('T')[0]}`, headers, rows);
 }

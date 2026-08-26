@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Trophy, Medal, Crown, ExternalLink, Download, Sparkles } from 'lucide-react';
 import ProgressBar from '../common/ProgressBar';
 import Pagination from '../common/Pagination';
-import { sortLeaderboard } from '../../utils/helpers';
+import { sortLeaderboard, getStudentActivityMetrics } from '../../utils/helpers';
 import { exportLeaderboardCsv } from '../../utils/exportCsv';
 
 export default function LeaderboardTable({ students = [], showExport = true, limitCount = null }) {
@@ -90,15 +90,20 @@ export default function LeaderboardTable({ students = [], showExport = true, lim
               <th className="py-3 px-4">Student</th>
               <th className="py-3 px-4 hidden md:table-cell">Dept & Year</th>
               <th className="py-3 px-4 text-center">Total Solved</th>
-              <th className="py-3 px-4 text-center hidden sm:table-cell text-emerald-400">Easy</th>
-              <th className="py-3 px-4 text-center hidden sm:table-cell text-amber-400">Medium</th>
-              <th className="py-3 px-4 text-center hidden sm:table-cell text-rose-400">Hard</th>
-              <th className="py-3 px-4 w-44">Goal Progress</th>
+              <th className="py-3 px-4 text-center text-emerald-400">Today</th>
+              <th className="py-3 px-4 text-center text-cyan-400">1 Week</th>
+              <th className="py-3 px-4 text-center text-amber-400">1 Month</th>
+              <th className="py-3 px-4 text-center text-orange-400">Streak</th>
+              <th className="py-3 px-4 text-center hidden lg:table-cell text-emerald-400">Easy</th>
+              <th className="py-3 px-4 text-center hidden lg:table-cell text-amber-400">Med</th>
+              <th className="py-3 px-4 text-center hidden lg:table-cell text-rose-400">Hard</th>
+              <th className="py-3 px-4 w-40">Goal Progress</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-800/60 text-sm">
             {paginatedList.map((student, index) => {
               const rank = limitCount ? index + 1 : (currentPage - 1) * pageSize + index + 1;
+              const metrics = getStudentActivityMetrics(student);
 
               return (
                 <tr 
@@ -156,18 +161,46 @@ export default function LeaderboardTable({ students = [], showExport = true, lim
                     </span>
                   </td>
 
+                  {/* Today Submissions */}
+                  <td className="py-3.5 px-4 text-center font-mono">
+                    <span className={`inline-block px-2 py-0.5 rounded-md text-xs font-bold border ${metrics.today > 0 ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : 'bg-slate-800/40 text-slate-500 border-slate-800'}`}>
+                      {metrics.today > 0 ? `+${metrics.today}` : '0'}
+                    </span>
+                  </td>
+
+                  {/* 1 Week Submissions */}
+                  <td className="py-3.5 px-4 text-center font-mono">
+                    <span className="inline-block px-2 py-0.5 rounded-md text-xs font-semibold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                      {metrics.week}
+                    </span>
+                  </td>
+
+                  {/* 1 Month Submissions */}
+                  <td className="py-3.5 px-4 text-center font-mono">
+                    <span className="inline-block px-2 py-0.5 rounded-md text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                      {metrics.month}
+                    </span>
+                  </td>
+
+                  {/* Streak Count */}
+                  <td className="py-3.5 px-4 text-center font-mono">
+                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold border ${metrics.streak > 0 ? 'bg-orange-500/15 text-orange-400 border-orange-500/30' : 'bg-slate-800/40 text-slate-500 border-slate-800'}`}>
+                      {metrics.streak > 0 ? `🔥 ${metrics.streak}d` : '0d'}
+                    </span>
+                  </td>
+
                   {/* Easy */}
-                  <td className="py-3.5 px-4 text-center hidden sm:table-cell font-mono font-medium text-emerald-400">
+                  <td className="py-3.5 px-4 text-center hidden lg:table-cell font-mono font-medium text-emerald-400">
                     {student.easySolved || 0}
                   </td>
 
                   {/* Medium */}
-                  <td className="py-3.5 px-4 text-center hidden sm:table-cell font-mono font-medium text-amber-400">
+                  <td className="py-3.5 px-4 text-center hidden lg:table-cell font-mono font-medium text-amber-400">
                     {student.mediumSolved || 0}
                   </td>
 
                   {/* Hard */}
-                  <td className="py-3.5 px-4 text-center hidden sm:table-cell font-mono font-medium text-rose-400">
+                  <td className="py-3.5 px-4 text-center hidden lg:table-cell font-mono font-medium text-rose-400">
                     {student.hardSolved || 0}
                   </td>
 
