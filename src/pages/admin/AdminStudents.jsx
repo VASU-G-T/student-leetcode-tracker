@@ -23,7 +23,7 @@ export default function AdminStudents() {
   const { students, settings, syncingStudentId, syncStudent, deleteStudent } = useData();
   const navigate = useNavigate();
 
-  const defaultSections = ['Sec A', 'Sec B', 'Sec V', 'Sec D', 'Sec E', 'Sec F'];
+  const defaultSections = ['Sec A', 'Sec B', 'Sec C', 'Sec D', 'Sec E', 'Sec F'];
 
   const [searchTerm, setSearchTerm] = useState('');
   const [year, setYear] = useState('');
@@ -82,7 +82,7 @@ export default function AdminStudents() {
             <span>ECE Student Roster Management</span>
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Add, configure repositories, trigger syncs, and manage student tracking records across Sec A, Sec B, Sec V, Sec D, Sec E, Sec F.
+            Add, configure repositories, trigger syncs, and manage student tracking records across Sec A, Sec B, Sec C, Sec D, Sec E, Sec F.
           </p>
         </div>
 

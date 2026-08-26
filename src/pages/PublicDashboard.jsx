@@ -49,12 +49,12 @@ export default function PublicDashboard() {
     };
   }, [students]);
 
-  // Section-wise metrics for Sec A, Sec B, Sec V, Sec D, Sec E, Sec F
-  const sectionsList = ['Sec A', 'Sec B', 'Sec V', 'Sec D', 'Sec E', 'Sec F'];
+  // Section-wise metrics for Sec A, Sec B, Sec C, Sec D, Sec E, Sec F
+  const sectionsList = ['Sec A', 'Sec B', 'Sec C', 'Sec D', 'Sec E', 'Sec F'];
   
   const sectionMetrics = useMemo(() => {
     return sectionsList.map(sec => {
-      // match "Sec A" or "A", "Sec V" or "V", etc.
+      // match "Sec A" or "A", "Sec C" or "C", etc.
       const rawLetter = sec.replace('Sec ', '');
       const secStudents = students.filter(s => s.section === sec || s.section === rawLetter);
       const totalSolved = secStudents.reduce((sum, s) => sum + (s.totalSolved || 0), 0);
@@ -92,7 +92,7 @@ export default function PublicDashboard() {
               {greeting}
             </h1>
             <p className="text-slate-400 text-sm sm:text-base max-w-2xl leading-relaxed">
-              Tracking Electronics & Communication Engineering (ECE) students across <strong className="text-white">Sec A, Sec B, Sec V, Sec D, Sec E, Sec F</strong> automatically via GitHub repositories.
+              Tracking Electronics & Communication Engineering (ECE) students across <strong className="text-white">Sec A, Sec B, Sec C, Sec D, Sec E, Sec F</strong> automatically via GitHub repositories.
             </p>
           </div>
 

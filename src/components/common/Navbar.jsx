@@ -50,7 +50,7 @@ export default function Navbar({ onMobileMenuToggle }) {
                 </span>
               </span>
               <span className="text-[10px] text-slate-400 hidden sm:block font-medium">
-                Sec A • Sec B • Sec V • Sec D • Sec E • Sec F
+                Sec A • Sec B • Sec C • Sec D • Sec E • Sec F
               </span>
             </div>
           </Link>

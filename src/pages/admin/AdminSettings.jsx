@@ -206,7 +206,7 @@ export default function AdminSettings() {
           <span>ECE Student Roster Management</span>
         </h2>
         <p className="text-xs text-slate-400">
-          Currently tracking <strong className="text-white font-mono">{students.length}</strong> student profile(s) across ECE Sections (Sec A, Sec B, Sec V, Sec D, Sec E, Sec F).
+          Currently tracking <strong className="text-white font-mono">{students.length}</strong> student profile(s) across ECE Sections (Sec A, Sec B, Sec C, Sec D, Sec E, Sec F).
         </p>
 
         {students.length > 0 && (

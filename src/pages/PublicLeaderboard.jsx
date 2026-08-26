@@ -18,7 +18,7 @@ import { useData } from '../context/DataContext';
 export default function PublicLeaderboard() {
   const { students, settings } = useData();
 
-  const defaultSections = ['Sec A', 'Sec B', 'Sec V', 'Sec D', 'Sec E', 'Sec F'];
+  const defaultSections = ['Sec A', 'Sec B', 'Sec C', 'Sec D', 'Sec E', 'Sec F'];
 
   const [searchTerm, setSearchTerm] = useState('');
   const [year, setYear] = useState('');

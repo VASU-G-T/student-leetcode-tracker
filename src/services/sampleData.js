@@ -1,6 +1,6 @@
 /**
  * Default Configuration for ECE Department Student LeetCode Progress Tracker
- * Clean production-ready initial state with 0 demo data.
+ * Focused exclusively on ECE Department across Sections: Sec A, Sec B, Sec C, Sec D, Sec E, Sec F
  */
 
 export const INITIAL_STUDENTS = [];
@@ -18,5 +18,5 @@ export const INITIAL_SETTINGS = {
   leaderboardVisibility: 'public',
   departments: ['ECE'],
   years: ['1st Year', '2nd Year', '3rd Year', '4th Year'],
-  sections: ['Sec A', 'Sec B', 'Sec V', 'Sec D', 'Sec E', 'Sec F']
+  sections: ['Sec A', 'Sec B', 'Sec C', 'Sec D', 'Sec E', 'Sec F']
 };

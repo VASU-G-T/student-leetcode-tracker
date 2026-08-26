@@ -68,7 +68,7 @@ export default function StudentDirectory() {
       });
   }, [students, searchTerm, department, year, section, sortBy]);
 
-  const defaultSections = ['Sec A', 'Sec B', 'Sec V', 'Sec D', 'Sec E', 'Sec F'];
+  const defaultSections = ['Sec A', 'Sec B', 'Sec C', 'Sec D', 'Sec E', 'Sec F'];
 
   return (
     <div className="space-y-6 animate-fade-in pb-12">
@@ -80,7 +80,7 @@ export default function StudentDirectory() {
             <span>ECE Student Directory</span>
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Browse and inspect ECE student coding profiles across Sec A, Sec B, Sec V, Sec D, Sec E, Sec F ({students.length} Total)
+            Browse and inspect ECE student coding profiles across Sec A, Sec B, Sec C, Sec D, Sec E, Sec F ({students.length} Total)
           </p>
         </div>
 

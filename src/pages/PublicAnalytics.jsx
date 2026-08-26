@@ -25,7 +25,7 @@ import { useData } from '../context/DataContext';
 export default function PublicAnalytics() {
   const { students } = useData();
 
-  const sectionsList = ['Sec A', 'Sec B', 'Sec V', 'Sec D', 'Sec E', 'Sec F'];
+  const sectionsList = ['Sec A', 'Sec B', 'Sec C', 'Sec D', 'Sec E', 'Sec F'];
 
   // Section analytics calculation
   const sectionData = useMemo(() => {
@@ -122,7 +122,7 @@ export default function PublicAnalytics() {
           <span>Section-Wise LeetCode Analytics</span>
         </h1>
         <p className="text-xs sm:text-sm text-slate-400 mt-1">
-          Comparative benchmarks across <strong className="text-white">Sec A, Sec B, Sec V, Sec D, Sec E, Sec F</strong> in Electronics & Communication Engineering.
+          Comparative benchmarks across <strong className="text-white">Sec A, Sec B, Sec C, Sec D, Sec E, Sec F</strong> in Electronics & Communication Engineering.
         </p>
       </div>
 
@@ -152,7 +152,7 @@ export default function PublicAnalytics() {
         <StatCard
           title="Active Sections"
           value={6}
-          subtitle="Sec A, B, V, D, E, F"
+          subtitle="Sec A, B, C, D, E, F"
           icon={Layers}
           color="purple"
         />
