@@ -16,7 +16,10 @@ import {
   subscribeToStudents, 
   subscribeToProjects, 
   subscribeToSettings, 
-  subscribeToActivities 
+  subscribeToActivities,
+  syncStudentToCloud,
+  deleteStudentFromCloud,
+  syncProjectsToCloud
 } from '../services/cloudSync';
 import { 
   INITIAL_STUDENTS, 
@@ -207,14 +210,8 @@ export function DataProvider({ children }) {
       createdAt: new Date().toISOString()
     };
 
-    // Push to Firestore in real-time
-    if (isFirebaseConfigured && db) {
-      try {
-        await setDoc(doc(db, 'students', newId), newStudent);
-      } catch (e) {
-        console.warn('Firestore add student error:', e);
-      }
-    }
+    // Push to Cloud (Firestore + Realtime Database)
+    await syncStudentToCloud(newId, newStudent);
 
     setStudents(prev => [newStudent, ...prev]);
 
@@ -299,14 +296,8 @@ export function DataProvider({ children }) {
 
     const merged = { ...target, ...updatedData, updatedAt: new Date().toISOString() };
 
-    // Push to Firestore in real-time
-    if (isFirebaseConfigured && db) {
-      try {
-        await setDoc(doc(db, 'students', id), merged, { merge: true });
-      } catch (e) {
-        console.warn('Firestore update student error:', e);
-      }
-    }
+    // Push to Cloud
+    await syncStudentToCloud(id, merged);
 
     setStudents(prev => prev.map(s => s.id === id ? merged : s));
     showToast(`Updated student profile for ${merged.name}`, 'success');
@@ -328,11 +319,7 @@ export function DataProvider({ children }) {
     if (!target) return;
     const updated = { ...target, accessStatus };
 
-    if (isFirebaseConfigured && db) {
-      try {
-        await updateDoc(doc(db, 'students', id), { accessStatus });
-      } catch (e) {}
-    }
+    await syncStudentToCloud(id, updated);
 
     setStudents(prev => prev.map(s => s.id === id ? updated : s));
     showToast(`Access status updated for ${target.name}: ${accessStatus}`, 'info');
@@ -345,12 +332,7 @@ export function DataProvider({ children }) {
     const studentToDelete = students.find(s => s.id === id);
     if (!studentToDelete) return;
 
-    if (isFirebaseConfigured && db) {
-      try {
-        await deleteDoc(doc(db, 'students', id));
-        await deleteDoc(doc(db, 'projects', id));
-      } catch (e) {}
-    }
+    await deleteStudentFromCloud(id);
 
     const updatedStudents = students.filter(s => s.id !== id);
     setStudents(updatedStudents);
@@ -395,16 +377,8 @@ export function DataProvider({ children }) {
       [studentId]: updatedProjects
     }));
 
-    // Real-time Cloud Save
-    if (isFirebaseConfigured && db) {
-      try {
-        await setDoc(doc(db, 'projects', studentId), {
-          studentId,
-          projects: updatedProjects,
-          updatedAt: new Date().toISOString()
-        });
-      } catch (e) {}
-    }
+    // Real-time Dual Cloud Save
+    await syncProjectsToCloud(studentId, updatedProjects);
 
     showToast(`Project "${newProject.title}" added to showcase!`, 'success');
     return newProject;
@@ -432,15 +406,7 @@ export function DataProvider({ children }) {
       [studentId]: updated
     }));
 
-    if (isFirebaseConfigured && db) {
-      try {
-        await setDoc(doc(db, 'projects', studentId), {
-          studentId,
-          projects: updated,
-          updatedAt: new Date().toISOString()
-        });
-      } catch (e) {}
-    }
+    await syncProjectsToCloud(studentId, updated);
 
     showToast('Project details updated successfully!', 'success');
   };
@@ -457,15 +423,7 @@ export function DataProvider({ children }) {
       [studentId]: filtered
     }));
 
-    if (isFirebaseConfigured && db) {
-      try {
-        await setDoc(doc(db, 'projects', studentId), {
-          studentId,
-          projects: filtered,
-          updatedAt: new Date().toISOString()
-        });
-      } catch (e) {}
-    }
+    await syncProjectsToCloud(studentId, filtered);
 
     showToast('Project removed from showcase', 'info');
   };

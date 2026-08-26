@@ -1,6 +1,7 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import { getDatabase } from 'firebase/database';
 
 export const CUSTOM_FIREBASE_KEY = 'leettrack_custom_firebase_config_v2';
 
@@ -36,7 +37,8 @@ export function getActiveFirebaseConfig() {
       storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || '',
       messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
       appId: import.meta.env.VITE_FIREBASE_APP_ID || '',
-      measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || ''
+      measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || '',
+      databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL || DEFAULT_FIREBASE_CONFIG.databaseURL
     };
   }
 
@@ -64,16 +66,22 @@ export const isFirebaseConfigured = Boolean(
 let app = null;
 let auth = null;
 let db = null;
+let rtdb = null;
 
 if (isFirebaseConfigured) {
   try {
     app = !getApps().length ? initializeApp(config) : getApp();
     auth = getAuth(app);
-    db = getFirestore(app);
-    console.log('🟢 Firebase Cloud Firestore connected successfully for real-time multi-device sync');
+    try {
+      db = getFirestore(app);
+    } catch (e) {}
+    try {
+      rtdb = getDatabase(app);
+    } catch (e) {}
+    console.log('🟢 Firebase Cloud connected successfully for real-time multi-device sync');
   } catch (err) {
     console.warn('Firebase initialization error, running with local state fallback:', err);
   }
 }
 
-export { app, auth, db };
+export { app, auth, db, rtdb };
