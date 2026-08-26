@@ -7,17 +7,15 @@ import {
   Search, 
   SlidersHorizontal, 
   ArrowUpDown, 
-  UserPlus,
-  FileText,
-  FileSpreadsheet
+  UserPlus 
 } from 'lucide-react';
 import SearchBar from '../components/common/SearchBar';
 import FilterDropdown from '../components/common/FilterDropdown';
 import StudentCard from '../components/students/StudentCard';
 import StudentTable from '../components/students/StudentTable';
 import Pagination from '../components/common/Pagination';
+import ExportMenu from '../components/common/ExportMenu';
 import { useData } from '../context/DataContext';
-import { exportLeaderboardExcel, exportLeaderboardWordDoc } from '../utils/exportCsv';
 
 export default function StudentDirectory() {
   const { students, settings, syncingStudentId, syncStudent } = useData();
@@ -103,25 +101,12 @@ export default function StudentDirectory() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
-          {/* Sheet Table Export Button */}
-          <button
-            onClick={() => exportLeaderboardExcel(filteredStudents)}
-            className="btn-secondary flex items-center gap-1.5 font-bold text-purple-700 hover:text-purple-800 bg-purple-50 hover:bg-purple-100/80 shadow-sm border-purple-200 text-xs"
-            title="Download clean Google Sheets / Excel formatted table with separate columns and proper spacing"
-          >
-            <FileSpreadsheet className="w-3.5 h-3.5 text-purple-600" />
-            <span>Export Sheet Table (.xls)</span>
-          </button>
-
-          {/* Word Table Export Button */}
-          <button
-            onClick={() => exportLeaderboardWordDoc(filteredStudents)}
-            className="btn-secondary flex items-center gap-1.5 font-bold text-sky-700 hover:text-sky-800 bg-sky-50 hover:bg-sky-100/80 shadow-sm border-sky-200 text-xs"
-            title="Download formatted Microsoft Word Document table"
-          >
-            <FileText className="w-3.5 h-3.5 text-sky-600" />
-            <span>Word Doc (.doc)</span>
-          </button>
+          {/* Unified Export Menu */}
+          <ExportMenu
+            data={filteredStudents}
+            buttonText="Export Roster"
+            size="sm"
+          />
 
           {/* View Mode Toggle */}
           <div className="flex items-center gap-1.5 p-1 bg-white border border-slate-200 rounded-xl shadow-sm">

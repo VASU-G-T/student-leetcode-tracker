@@ -3,23 +3,17 @@ import {
   Trophy, 
   Crown, 
   Medal, 
-  Download, 
   SlidersHorizontal, 
   Sparkles, 
   Award, 
-  Layers,
-  FileText,
-  FileSpreadsheet
+  Layers 
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import LeaderboardTable from '../components/leaderboard/LeaderboardTable';
 import FilterDropdown from '../components/common/FilterDropdown';
 import SearchBar from '../components/common/SearchBar';
+import ExportMenu from '../components/common/ExportMenu';
 import { useData } from '../context/DataContext';
-import { 
-  exportLeaderboardExcel, 
-  exportLeaderboardWordDoc 
-} from '../utils/exportCsv';
 
 export default function PublicLeaderboard() {
   const { students, settings } = useData();
@@ -79,25 +73,12 @@ export default function PublicLeaderboard() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
-            {/* Sheet Table Export Button */}
-            <button
-              onClick={() => exportLeaderboardExcel(filteredStudents)}
-              className="btn-secondary flex items-center gap-2 font-bold text-purple-700 hover:text-purple-800 bg-purple-50 hover:bg-purple-100/80 shadow-sm border-purple-200"
-              title="Download clean Google Sheets / Excel formatted table with separate columns and proper spacing"
-            >
-              <FileSpreadsheet className="w-4 h-4 text-purple-600" />
-              <span>Export Sheet Table (.xls)</span>
-            </button>
-
-            {/* Word Document Table Export Button */}
-            <button
-              onClick={() => exportLeaderboardWordDoc(filteredStudents)}
-              className="btn-secondary flex items-center gap-2 font-bold text-sky-700 hover:text-sky-800 bg-sky-50 hover:bg-sky-100/80 shadow-sm border-sky-200"
-              title="Download formatted Microsoft Word Document table"
-            >
-              <FileText className="w-4 h-4 text-sky-600" />
-              <span>Word Doc (.doc)</span>
-            </button>
+            {/* Unified Export Menu Dropdown */}
+            <ExportMenu
+              data={filteredStudents}
+              buttonText="Export Report"
+              size="md"
+            />
 
             <button
               onClick={triggerCelebration}

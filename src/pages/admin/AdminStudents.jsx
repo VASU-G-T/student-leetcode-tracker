@@ -1,31 +1,25 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
   Users, 
   UserPlus, 
   Search, 
   RefreshCw, 
-  Download, 
   Trash2, 
   SlidersHorizontal,
   Edit,
   Eye,
   Layers,
   UploadCloud,
-  FileSpreadsheet,
-  FileText,
-  ChevronDown
+  FileSpreadsheet
 } from 'lucide-react';
 import SearchBar from '../../components/common/SearchBar';
 import FilterDropdown from '../../components/common/FilterDropdown';
 import StudentTable from '../../components/students/StudentTable';
 import ConfirmModal from '../../components/common/ConfirmModal';
 import BulkStudentModal from '../../components/admin/BulkStudentModal';
+import ExportMenu from '../../components/common/ExportMenu';
 import { useData } from '../../context/DataContext';
-import { 
-  exportLeaderboardExcel, 
-  exportLeaderboardWordDoc 
-} from '../../utils/exportCsv';
 
 export default function AdminStudents() {
   const { students, settings, syncingStudentId, syncStudent, deleteStudent } = useData();
@@ -39,18 +33,6 @@ export default function AdminStudents() {
   const [sortBy, setSortBy] = useState('totalSolved');
   const [studentToDelete, setStudentToDelete] = useState(null);
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
-  const [isExportOpen, setIsExportOpen] = useState(false);
-  const exportRef = useRef(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (exportRef.current && !exportRef.current.contains(event.target)) {
-        setIsExportOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   const filteredStudents = useMemo(() => {
     return students
@@ -119,49 +101,12 @@ export default function AdminStudents() {
             <span>Bulk Import</span>
           </button>
 
-          {/* Multi-Format Export Dropdown */}
-          <div className="relative" ref={exportRef}>
-            <button
-              onClick={() => setIsExportOpen(!isExportOpen)}
-              className="btn-secondary flex items-center gap-1.5 text-xs font-semibold text-purple-700 hover:text-purple-800 bg-purple-50 hover:bg-purple-100/80 border-purple-200 shadow-sm"
-            >
-              <FileSpreadsheet className="w-3.5 h-3.5 text-purple-600" />
-              <span>Export Sheet Table</span>
-              <ChevronDown className={`w-3 h-3 text-purple-400 transition-transform ${isExportOpen ? 'rotate-180' : ''}`} />
-            </button>
-
-            {isExportOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-white border border-sky-100 rounded-2xl shadow-xl z-50 p-1.5 animate-slide-up">
-                <button
-                  onClick={() => {
-                    exportLeaderboardExcel(filteredStudents);
-                    setIsExportOpen(false);
-                  }}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:text-purple-700 hover:bg-purple-50 rounded-xl transition-colors text-left"
-                >
-                  <FileSpreadsheet className="w-4 h-4 text-purple-600 shrink-0" />
-                  <div>
-                    <div className="font-bold">Sheet Table (.xls)</div>
-                    <div className="text-[10px] text-slate-400 font-normal">Google Sheets & Excel Table</div>
-                  </div>
-                </button>
-
-                <button
-                  onClick={() => {
-                    exportLeaderboardWordDoc(filteredStudents);
-                    setIsExportOpen(false);
-                  }}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:text-sky-700 hover:bg-sky-50 rounded-xl transition-colors text-left mt-0.5"
-                >
-                  <FileText className="w-4 h-4 text-sky-600 shrink-0" />
-                  <div>
-                    <div className="font-bold">Word Doc (.doc)</div>
-                    <div className="text-[10px] text-slate-400 font-normal">Formatted Word Table Document</div>
-                  </div>
-                </button>
-              </div>
-            )}
-          </div>
+          {/* Unified Export Menu Dropdown */}
+          <ExportMenu
+            data={filteredStudents}
+            buttonText="Export Roster"
+            size="sm"
+          />
 
           <Link
             to="/admin/students/add"

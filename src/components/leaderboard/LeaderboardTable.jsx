@@ -4,7 +4,7 @@ import { Trophy, Medal, Crown, ExternalLink, Download, Sparkles } from 'lucide-r
 import ProgressBar from '../common/ProgressBar';
 import Pagination from '../common/Pagination';
 import { sortLeaderboard, getStudentActivityMetrics } from '../../utils/helpers';
-import { exportLeaderboardCsv } from '../../utils/exportCsv';
+import ExportMenu from '../common/ExportMenu';
 
 export default function LeaderboardTable({ students = [], showExport = true, limitCount = null }) {
   const sorted = sortLeaderboard(students);
@@ -73,14 +73,11 @@ export default function LeaderboardTable({ students = [], showExport = true, lim
             </span>
           </div>
 
-          <button
-            onClick={() => exportLeaderboardCsv(sorted)}
-            className="btn-secondary !py-1.5 !px-3 text-xs flex items-center gap-1.5 font-semibold text-sky-700 hover:text-sky-800"
-            title="Download ranking data as CSV"
-          >
-            <Download className="w-3.5 h-3.5 text-sky-600" />
-            <span>Export CSV</span>
-          </button>
+          <ExportMenu
+            data={sorted}
+            buttonText="Export Report"
+            size="sm"
+          />
         </div>
       )}
 
