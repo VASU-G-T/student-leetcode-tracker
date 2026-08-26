@@ -16,7 +16,9 @@ import {
   INITIAL_STUDENTS, 
   INITIAL_SAMPLE_PROBLEMS, 
   INITIAL_ACTIVITY, 
-  INITIAL_SETTINGS 
+  INITIAL_SETTINGS,
+  CREATOR_PROFILE,
+  CREATOR_PROJECTS
 } from '../services/sampleData';
 import { syncStudentRepository, syncAllStudents } from '../services/syncService';
 
@@ -100,10 +102,18 @@ export function DataProvider({ children }) {
           const localSettings = localStorage.getItem(STORAGE_KEYS.SETTINGS);
           const localLastSync = localStorage.getItem(STORAGE_KEYS.LAST_SYNC);
 
-          const parsedStudents = localStudents ? JSON.parse(localStudents).filter(s => !s.isSample) : [];
+          let parsedStudents = localStudents ? JSON.parse(localStudents).filter(s => !s.isSample) : [];
+          if (!parsedStudents.some(s => s.id === CREATOR_PROFILE.id || s.username === CREATOR_PROFILE.username || s.registerNumber === CREATOR_PROFILE.registerNumber)) {
+            parsedStudents = [CREATOR_PROFILE, ...parsedStudents];
+          }
           setStudents(parsedStudents);
           setProblemsByStudent(localProblems ? JSON.parse(localProblems) : {});
-          setProjectsByStudent(localProjects ? JSON.parse(localProjects) : {});
+          
+          let parsedProjects = localProjects ? JSON.parse(localProjects) : {};
+          if (!parsedProjects[CREATOR_PROFILE.id]) {
+            parsedProjects[CREATOR_PROFILE.id] = CREATOR_PROJECTS;
+          }
+          setProjectsByStudent(parsedProjects);
           setActivities(localActivity ? JSON.parse(localActivity) : []);
           setSettings(localSettings ? JSON.parse(localSettings) : INITIAL_SETTINGS);
           setLastGlobalSync(localLastSync || null);

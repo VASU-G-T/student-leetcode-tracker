@@ -7,18 +7,23 @@ import {
   FolderGit2, 
   Trophy, 
   ArrowRight, 
-  Sparkles,
-  RefreshCw,
-  Layers,
-  UserPlus,
-  ShieldCheck
+  Sparkles, 
+  RefreshCw, 
+  Layers, 
+  UserPlus, 
+  ShieldCheck,
+  ExternalLink,
+  Award,
+  GraduationCap
 } from 'lucide-react';
+import { GithubIcon, LeetCodeIcon } from '../components/common/Icons';
 import StatCard from '../components/common/StatCard';
 import DifficultyChart from '../components/dashboard/DifficultyChart';
 import ActivityFeed from '../components/dashboard/ActivityFeed';
 import LeaderboardTable from '../components/leaderboard/LeaderboardTable';
 import { useData } from '../context/DataContext';
 import { formatRelativeTime } from '../utils/helpers';
+import { CREATOR_PROFILE } from '../services/sampleData';
 
 export default function PublicDashboard() {
   const { students, activities, lastGlobalSync, isSyncingAll } = useData();
@@ -80,9 +85,10 @@ export default function PublicDashboard() {
   return (
     <div className="space-y-8 animate-fade-in pb-12">
       {/* Hero Welcome Header */}
-      <div className="glass-card p-6 sm:p-8 relative overflow-hidden border-slate-800">
-        <div className="absolute -right-10 -bottom-10 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="glass-card p-6 sm:p-8 relative overflow-hidden border-slate-800 space-y-6">
+        <div className="absolute -right-10 -bottom-10 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
         
+        {/* Top Headline & Actions */}
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-semibold">
@@ -106,12 +112,83 @@ export default function PublicDashboard() {
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
-              to="/admin/students/add"
-              className="btn-secondary flex items-center gap-2"
+              to="/register"
+              className="btn-secondary flex items-center gap-2 text-amber-400 border-amber-500/30"
             >
-              <UserPlus className="w-4 h-4 text-amber-400" />
-              <span>Add Student (Admin)</span>
+              <UserPlus className="w-4 h-4" />
+              <span>Register Student Profile</span>
             </Link>
+          </div>
+        </div>
+
+        {/* Dedicated App Creator & Lead Developer Profile Spotlight */}
+        <div className="relative z-10 p-5 rounded-2xl bg-slate-950/80 border border-amber-500/30 shadow-xl flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5">
+          <div className="flex items-center sm:items-start gap-4">
+            <div className="relative group shrink-0">
+              <img
+                src={CREATOR_PROFILE.profileImage}
+                alt={CREATOR_PROFILE.name}
+                className="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl object-cover border-2 border-amber-400 shadow-lg shadow-amber-500/20 bg-slate-900"
+              />
+              <span className="absolute -bottom-1 -right-1 flex h-3.5 w-3.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500"></span>
+              </span>
+            </div>
+
+            <div className="space-y-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-base sm:text-lg font-bold text-white tracking-tight">
+                  {CREATOR_PROFILE.name}
+                </span>
+                <span className="px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-[11px] font-semibold text-amber-400 flex items-center gap-1">
+                  <Sparkles className="w-3 h-3" />
+                  <span>App Creator & Lead Developer</span>
+                </span>
+                <span className="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-[10px] font-mono text-slate-300">
+                  {CREATOR_PROFILE.department} • {CREATOR_PROFILE.section}
+                </span>
+              </div>
+
+              <p className="text-xs text-slate-300 max-w-xl line-clamp-1">
+                {CREATOR_PROFILE.bio}
+              </p>
+
+              {/* Creator Skills */}
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                {['React', 'Node.js', 'Vite', 'IoT / Embedded', 'LeetCode DSA', 'Firebase'].map((s, idx) => (
+                  <span
+                    key={idx}
+                    className="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-[10px] font-mono text-amber-300/90"
+                  >
+                    {s}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Profile & Projects Action */}
+          <div className="flex items-center gap-2.5 w-full lg:w-auto shrink-0">
+            <Link
+              to={`/student/${CREATOR_PROFILE.registerNumber || CREATOR_PROFILE.id}`}
+              className="btn-primary flex-1 lg:flex-initial !py-2 !px-4 text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-amber-500/20"
+            >
+              <span>View Creator Profile & Projects</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+
+            <a
+              href="https://github.com/VASU-G-T"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-secondary !py-2 !px-3 text-xs flex items-center justify-center gap-1.5 bg-slate-900"
+              title="GitHub Profile"
+            >
+              <GithubIcon className="w-3.5 h-3.5 text-slate-300" />
+              <span className="hidden sm:inline">GitHub</span>
+              <ExternalLink className="w-3 h-3 text-slate-500" />
+            </a>
           </div>
         </div>
       </div>
@@ -178,76 +255,52 @@ export default function PublicDashboard() {
               <p className="text-[11px] text-slate-400 mt-0.5">
                 {sec.count} {sec.count === 1 ? 'student' : 'students'}
               </p>
-              <p className="text-[10px] text-emerald-400 font-mono mt-0.5">
-                ~{sec.avg} avg
-              </p>
             </Link>
           ))}
         </div>
       </div>
 
-      {/* When no students exist yet: Show helpful start guide */}
-      {students.length === 0 && (
-        <div className="glass-card p-6 border-amber-500/20 bg-amber-500/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-amber-400" />
-              <span>Ready to add your first ECE student!</span>
-            </h3>
-            <p className="text-xs text-slate-300 max-w-xl">
-              Log into the Admin Console to register students with their GitHub repositories (where LeetSync pushes solutions). Progress will be calculated and displayed here automatically!
-            </p>
-          </div>
-          <Link
-            to="/admin/students/add"
-            className="btn-primary shrink-0 flex items-center gap-2 text-xs"
-          >
-            <UserPlus className="w-4 h-4" />
-            <span>+ Add Student Now</span>
-          </Link>
-        </div>
-      )}
-
-      {/* Main Charts & Activity Section */}
+      {/* Main Grid: Difficulty Chart & Activity Feed */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Difficulty Distribution */}
         <div className="lg:col-span-1">
           <DifficultyChart
             easy={stats.easyTotal}
             medium={stats.mediumTotal}
             hard={stats.hardTotal}
-            title="ECE Problem Breakdown"
+            title="Department Problem Complexity"
           />
         </div>
 
-        {/* Live Activity Feed */}
         <div className="lg:col-span-2">
           <ActivityFeed activities={activities} />
         </div>
       </div>
 
-      {/* Top Leaderboard Preview */}
+      {/* Department Leaderboard Preview */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Trophy className="w-5 h-5 text-amber-400" />
-            <h2 className="text-lg font-bold text-white tracking-tight">
-              ECE Top Solvers Leaderboard
+          <div>
+            <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
+              <Trophy className="w-5 h-5 text-amber-400" />
+              <span>ECE Department Leaderboard</span>
             </h2>
+            <p className="text-xs text-slate-400">
+              Top performers ranked by total accepted LeetCode solutions.
+            </p>
           </div>
+
           <Link
             to="/leaderboard"
-            className="text-xs font-semibold text-amber-400 hover:text-amber-300 flex items-center gap-1 transition-colors"
+            className="btn-secondary text-xs flex items-center gap-1.5 text-slate-300 hover:text-white"
           >
-            <span>View Full Leaderboard</span>
+            <span>Full Leaderboard</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
 
-        <LeaderboardTable 
-          students={students} 
-          showExport={false} 
-          limitCount={5} 
+        <LeaderboardTable
+          students={students}
+          limitCount={10}
         />
       </div>
     </div>
