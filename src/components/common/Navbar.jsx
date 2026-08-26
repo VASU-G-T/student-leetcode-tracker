@@ -44,13 +44,13 @@ export default function Navbar({ onMobileMenuToggle }) {
             </div>
             <div className="flex flex-col">
               <span className="font-bold text-lg tracking-tight text-white flex items-center gap-1.5">
-                LeetTrack
+                ECE LeetTrack
                 <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 font-mono border border-amber-500/20">
-                  v1.0
+                  ECE Dept
                 </span>
               </span>
               <span className="text-[10px] text-slate-400 hidden sm:block font-medium">
-                Track. Solve. Improve.
+                Sec A • Sec B • Sec V • Sec D • Sec E • Sec F
               </span>
             </div>
           </Link>

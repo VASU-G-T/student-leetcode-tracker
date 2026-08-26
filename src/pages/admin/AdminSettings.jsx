@@ -199,37 +199,32 @@ export default function AdminSettings() {
         </div>
       </div>
 
-      {/* Sample Data Management (Requirement #40) */}
+      {/* Roster Data Management */}
       <div className="glass-card p-6 border-slate-800 space-y-4">
         <h2 className="text-sm font-bold uppercase tracking-wider text-white flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-amber-400" />
-          <span>Development & Sample Data</span>
+          <Database className="w-4 h-4 text-amber-400" />
+          <span>ECE Student Roster Management</span>
         </h2>
         <p className="text-xs text-slate-400">
-          Sample students (G T Vasudevan, Karthick, Nivetha, Arun, Praveen) are loaded for development and demonstration.
+          Currently tracking <strong className="text-white font-mono">{students.length}</strong> student profile(s) across ECE Sections (Sec A, Sec B, Sec V, Sec D, Sec E, Sec F).
         </p>
 
-        <div className="flex flex-wrap items-center gap-3 pt-2">
-          <button
-            type="button"
-            onClick={resetToSampleData}
-            className="btn-secondary flex items-center gap-2 text-xs"
-          >
-            <RefreshCw className="w-3.5 h-3.5" />
-            <span>Reset / Reload Sample Students</span>
-          </button>
-
-          {sampleCount > 0 && (
+        {students.length > 0 && (
+          <div className="pt-2">
             <button
               type="button"
-              onClick={clearSampleData}
+              onClick={() => {
+                if (window.confirm("Are you sure you want to clear all student profiles from this tracker?")) {
+                  clearSampleData();
+                }
+              }}
               className="btn-danger flex items-center gap-2 text-xs"
             >
               <Trash2 className="w-3.5 h-3.5" />
-              <span>Clear Sample Students ({sampleCount})</span>
+              <span>Clear All Student Profiles</span>
             </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -24,7 +24,7 @@ export default function AdminAddStudent() {
   const [registerNumber, setRegisterNumber] = useState('');
   const [department, setDepartment] = useState(settings.defaultDepartment || 'ECE');
   const [year, setYear] = useState('2nd Year');
-  const [section, setSection] = useState('A');
+  const [section, setSection] = useState('Sec A');
   const [email, setEmail] = useState('');
   const [githubUsername, setGithubUsername] = useState('');
   const [githubRepoUrl, setGithubRepoUrl] = useState('');
@@ -128,7 +128,7 @@ export default function AdminAddStudent() {
     setRegisterNumber('ECE001');
     setDepartment('ECE');
     setYear('2nd Year');
-    setSection('A');
+    setSection('Sec A');
     setEmail('vasudevan@college.edu');
     setGithubUsername('Vasudevan123');
     setGithubRepoUrl('https://github.com/Vasudevan123/leetcode');
@@ -254,7 +254,7 @@ export default function AdminAddStudent() {
                     onChange={(e) => setSection(e.target.value)}
                     className="input-field"
                   >
-                    {(settings.sections || ['A', 'B', 'C', 'D']).map(s => (
+                    {(settings.sections || ['Sec A', 'Sec B', 'Sec V', 'Sec D', 'Sec E', 'Sec F']).map(s => (
                       <option key={s} value={s}>{s}</option>
                     ))}
                   </select>

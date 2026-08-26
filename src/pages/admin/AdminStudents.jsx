@@ -9,7 +9,8 @@ import {
   Trash2, 
   SlidersHorizontal,
   Edit,
-  Eye
+  Eye,
+  Layers
 } from 'lucide-react';
 import SearchBar from '../../components/common/SearchBar';
 import FilterDropdown from '../../components/common/FilterDropdown';
@@ -22,8 +23,9 @@ export default function AdminStudents() {
   const { students, settings, syncingStudentId, syncStudent, deleteStudent } = useData();
   const navigate = useNavigate();
 
+  const defaultSections = ['Sec A', 'Sec B', 'Sec V', 'Sec D', 'Sec E', 'Sec F'];
+
   const [searchTerm, setSearchTerm] = useState('');
-  const [department, setDepartment] = useState('');
   const [year, setYear] = useState('');
   const [section, setSection] = useState('');
   const [sortBy, setSortBy] = useState('totalSolved');
@@ -38,11 +40,13 @@ export default function AdminStudents() {
           s.registerNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
           (s.githubUsername && s.githubUsername.toLowerCase().includes(searchTerm.toLowerCase()));
 
-        const matchesDept = !department || s.department === department;
         const matchesYear = !year || s.year === year;
-        const matchesSec = !section || s.section === section;
+        const matchesSec = !section || 
+          s.section === section || 
+          s.section === section.replace('Sec ', '') ||
+          `Sec ${s.section}` === section;
 
-        return matchesSearch && matchesDept && matchesYear && matchesSec;
+        return matchesSearch && matchesYear && matchesSec;
       })
       .sort((a, b) => {
         if (sortBy === 'totalSolved') return (b.totalSolved || 0) - (a.totalSolved || 0);
@@ -55,7 +59,7 @@ export default function AdminStudents() {
         }
         return 0;
       });
-  }, [students, searchTerm, department, year, section, sortBy]);
+  }, [students, searchTerm, year, section, sortBy]);
 
   const handleDeleteConfirm = () => {
     if (studentToDelete) {
@@ -75,10 +79,10 @@ export default function AdminStudents() {
         <div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
             <Users className="w-7 h-7 text-amber-400" />
-            <span>Student Roster Management</span>
+            <span>ECE Student Roster Management</span>
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Add, configure repositories, trigger syncs, and manage student tracking records.
+            Add, configure repositories, trigger syncs, and manage student tracking records across Sec A, Sec B, Sec V, Sec D, Sec E, Sec F.
           </p>
         </div>
 
@@ -114,22 +118,16 @@ export default function AdminStudents() {
 
           <div className="flex flex-wrap items-center gap-2">
             <FilterDropdown
-              label="Dept"
-              value={department}
-              onChange={setDepartment}
-              options={settings.departments || ['ECE', 'CSE', 'IT', 'AI&DS']}
+              label="Section"
+              value={section}
+              onChange={setSection}
+              options={settings.sections || defaultSections}
             />
             <FilterDropdown
               label="Year"
               value={year}
               onChange={setYear}
               options={settings.years || ['1st Year', '2nd Year', '3rd Year', '4th Year']}
-            />
-            <FilterDropdown
-              label="Sec"
-              value={section}
-              onChange={setSection}
-              options={settings.sections || ['A', 'B', 'C']}
             />
 
             <select
@@ -146,6 +144,26 @@ export default function AdminStudents() {
             </select>
           </div>
         </div>
+
+        {/* Section Quick Pills */}
+        <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-slate-800/60">
+          <span className="text-[11px] text-slate-400 mr-1 font-medium">Quick Section:</span>
+          <button
+            onClick={() => setSection('')}
+            className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${!section ? 'bg-amber-500 text-slate-950 font-bold' : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'}`}
+          >
+            All Sections
+          </button>
+          {defaultSections.map((s) => (
+            <button
+              key={s}
+              onClick={() => setSection(s)}
+              className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${section === s ? 'bg-amber-500 text-slate-950 font-bold' : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'}`}
+            >
+              {s}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Students Table */}
@@ -158,12 +176,12 @@ export default function AdminStudents() {
         onDelete={setStudentToDelete}
       />
 
-      {/* Delete Confirmation Modal (Requirement #30) */}
+      {/* Delete Confirmation Modal */}
       <ConfirmModal
         isOpen={Boolean(studentToDelete)}
         title="Delete Student Tracking Record?"
-        message={`Are you sure you want to delete ${studentToDelete?.name}? This will remove the student's tracking data from the dashboard. (Their actual GitHub repository will NOT be modified).`}
-        confirmText="Delete Student"
+        message={`Are you sure you want to delete ${studentToDelete?.name} (${studentToDelete?.registerNumber})? This will remove the student's profile and progress metrics from the dashboard. (Their actual GitHub repository will NOT be affected).`}
+        confirmText="Remove Profile"
         onConfirm={handleDeleteConfirm}
         onCancel={() => setStudentToDelete(null)}
         isDanger={true}

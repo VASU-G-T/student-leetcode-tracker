@@ -6,7 +6,8 @@ import {
   Download, 
   SlidersHorizontal, 
   Sparkles,
-  Award
+  Award,
+  Layers
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import LeaderboardTable from '../components/leaderboard/LeaderboardTable';
@@ -17,8 +18,9 @@ import { useData } from '../context/DataContext';
 export default function PublicLeaderboard() {
   const { students, settings } = useData();
 
+  const defaultSections = ['Sec A', 'Sec B', 'Sec V', 'Sec D', 'Sec E', 'Sec F'];
+
   const [searchTerm, setSearchTerm] = useState('');
-  const [department, setDepartment] = useState('');
   const [year, setYear] = useState('');
   const [section, setSection] = useState('');
 
@@ -30,13 +32,15 @@ export default function PublicLeaderboard() {
         s.registerNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (s.githubUsername && s.githubUsername.toLowerCase().includes(searchTerm.toLowerCase()));
 
-      const matchesDept = !department || s.department === department;
       const matchesYear = !year || s.year === year;
-      const matchesSec = !section || s.section === section;
+      const matchesSec = !section || 
+        s.section === section || 
+        s.section === section.replace('Sec ', '') ||
+        `Sec ${s.section}` === section;
 
-      return matchesSearch && matchesDept && matchesYear && matchesSec;
+      return matchesSearch && matchesYear && matchesSec;
     });
-  }, [students, searchTerm, department, year, section]);
+  }, [students, searchTerm, year, section]);
 
   const triggerCelebration = () => {
     try {
@@ -58,10 +62,10 @@ export default function PublicLeaderboard() {
           <div>
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-semibold mb-2">
               <Trophy className="w-3.5 h-3.5" />
-              <span>College Hall of Fame</span>
+              <span>ECE Department Hall of Fame</span>
             </div>
             <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
-              LeetCode Leaderboard
+              ECE LeetCode Leaderboard
             </h1>
             <p className="text-slate-400 text-xs sm:text-sm mt-1 max-w-xl">
               Rankings computed automatically from synchronized GitHub solution repositories. Tie-breaker rule: Higher Hard count → Higher Medium count → Higher Easy count.
@@ -91,10 +95,10 @@ export default function PublicLeaderboard() {
 
           <div className="flex flex-wrap items-center gap-2">
             <FilterDropdown
-              label="Dept"
-              value={department}
-              onChange={setDepartment}
-              options={settings.departments || ['ECE', 'CSE', 'IT', 'AI&DS']}
+              label="Section"
+              value={section}
+              onChange={setSection}
+              options={settings.sections || defaultSections}
             />
             <FilterDropdown
               label="Year"
@@ -102,13 +106,27 @@ export default function PublicLeaderboard() {
               onChange={setYear}
               options={settings.years || ['1st Year', '2nd Year', '3rd Year', '4th Year']}
             />
-            <FilterDropdown
-              label="Sec"
-              value={section}
-              onChange={setSection}
-              options={settings.sections || ['A', 'B', 'C']}
-            />
           </div>
+        </div>
+
+        {/* Section Quick Filter Pills */}
+        <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-slate-800/60">
+          <span className="text-[11px] text-slate-400 mr-1 font-medium">Filter Section:</span>
+          <button
+            onClick={() => setSection('')}
+            className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${!section ? 'bg-amber-500 text-slate-950 font-bold' : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'}`}
+          >
+            All Sections
+          </button>
+          {defaultSections.map((s) => (
+            <button
+              key={s}
+              onClick={() => setSection(s)}
+              className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${section === s ? 'bg-amber-500 text-slate-950 font-bold' : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'}`}
+            >
+              {s}
+            </button>
+          ))}
         </div>
       </div>
 

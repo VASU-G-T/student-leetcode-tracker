@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { 
   Users, 
   LayoutGrid, 
@@ -16,13 +17,22 @@ import { useData } from '../context/DataContext';
 
 export default function StudentDirectory() {
   const { students, settings, syncingStudentId, syncStudent } = useData();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const sectionParam = searchParams.get('section') || '';
 
   const [searchTerm, setSearchTerm] = useState('');
   const [department, setDepartment] = useState('');
   const [year, setYear] = useState('');
-  const [section, setSection] = useState('');
+  const [section, setSection] = useState(sectionParam);
   const [sortBy, setSortBy] = useState('totalSolved');
-  const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'table'
+  const [viewMode, setViewMode] = useState('grid');
+
+  useEffect(() => {
+    if (sectionParam) {
+      setSection(sectionParam);
+    }
+  }, [sectionParam]);
 
   // Filter and sort students
   const filteredStudents = useMemo(() => {
@@ -36,7 +46,12 @@ export default function StudentDirectory() {
 
         const matchesDept = !department || s.department === department;
         const matchesYear = !year || s.year === year;
-        const matchesSec = !section || s.section === section;
+        
+        // Flexible section matching (e.g. "Sec A" or "A")
+        const matchesSec = !section || 
+          s.section === section || 
+          s.section === section.replace('Sec ', '') ||
+          `Sec ${s.section}` === section;
 
         return matchesSearch && matchesDept && matchesYear && matchesSec;
       })
@@ -53,6 +68,8 @@ export default function StudentDirectory() {
       });
   }, [students, searchTerm, department, year, section, sortBy]);
 
+  const defaultSections = ['Sec A', 'Sec B', 'Sec V', 'Sec D', 'Sec E', 'Sec F'];
+
   return (
     <div className="space-y-6 animate-fade-in pb-12">
       {/* Header */}
@@ -60,10 +77,10 @@ export default function StudentDirectory() {
         <div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
             <Users className="w-7 h-7 text-amber-400" />
-            <span>Student Directory</span>
+            <span>ECE Student Directory</span>
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Browse and inspect college student coding profiles & repositories ({students.length} Total)
+            Browse and inspect ECE student coding profiles across Sec A, Sec B, Sec V, Sec D, Sec E, Sec F ({students.length} Total)
           </p>
         </div>
 
@@ -99,22 +116,16 @@ export default function StudentDirectory() {
 
           <div className="flex flex-wrap items-center gap-2">
             <FilterDropdown
-              label="Dept"
-              value={department}
-              onChange={setDepartment}
-              options={settings.departments || ['ECE', 'CSE', 'IT', 'AI&DS']}
+              label="Section"
+              value={section}
+              onChange={setSection}
+              options={settings.sections || defaultSections}
             />
             <FilterDropdown
               label="Year"
               value={year}
               onChange={setYear}
               options={settings.years || ['1st Year', '2nd Year', '3rd Year', '4th Year']}
-            />
-            <FilterDropdown
-              label="Sec"
-              value={section}
-              onChange={setSection}
-              options={settings.sections || ['A', 'B', 'C']}
             />
 
             {/* Sort Select */}
@@ -135,13 +146,33 @@ export default function StudentDirectory() {
           </div>
         </div>
 
+        {/* Section Quick Pills */}
+        <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-slate-800/60">
+          <span className="text-[11px] text-slate-400 mr-1 font-medium">Quick Section:</span>
+          <button
+            onClick={() => setSection('')}
+            className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${!section ? 'bg-amber-500 text-slate-950 font-bold' : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'}`}
+          >
+            All Sections
+          </button>
+          {defaultSections.map((s) => (
+            <button
+              key={s}
+              onClick={() => setSection(s)}
+              className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${section === s ? 'bg-amber-500 text-slate-950 font-bold' : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'}`}
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+
         {/* Active Filter Chips indicator */}
-        {(searchTerm || department || year || section) && (
+        {(searchTerm || year || section) && (
           <div className="flex items-center gap-2 pt-2 border-t border-slate-800/60 text-xs text-slate-400">
             <span>Filtering active:</span>
             <span className="font-semibold text-amber-400">{filteredStudents.length} matching students</span>
             <button
-              onClick={() => { setSearchTerm(''); setDepartment(''); setYear(''); setSection(''); }}
+              onClick={() => { setSearchTerm(''); setYear(''); setSection(''); setSearchParams({}); }}
               className="text-slate-400 hover:text-white underline ml-2"
             >
               Reset Filters

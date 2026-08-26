@@ -219,7 +219,7 @@ export default function AdminEditStudent() {
                   onChange={(e) => setSection(e.target.value)}
                   className="input-field"
                 >
-                  {(settings.sections || ['A', 'B', 'C', 'D']).map(s => (
+                  {(settings.sections || ['Sec A', 'Sec B', 'Sec V', 'Sec D', 'Sec E', 'Sec F']).map(s => (
                     <option key={s} value={s}>{s}</option>
                   ))}
                 </select>

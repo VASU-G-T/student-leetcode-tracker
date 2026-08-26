@@ -23,11 +23,11 @@ import { syncStudentRepository, syncAllStudents } from '../services/syncService'
 const DataContext = createContext();
 
 const STORAGE_KEYS = {
-  STUDENTS: 'leettrack_students_v1',
-  PROBLEMS: 'leettrack_problems_v1',
-  ACTIVITY: 'leettrack_activity_v1',
-  SETTINGS: 'leettrack_settings_v1',
-  LAST_SYNC: 'leettrack_last_sync_v1'
+  STUDENTS: 'leettrack_students_v2',
+  PROBLEMS: 'leettrack_problems_v2',
+  ACTIVITY: 'leettrack_activity_v2',
+  SETTINGS: 'leettrack_settings_v2',
+  LAST_SYNC: 'leettrack_last_sync_v2'
 };
 
 export function DataProvider({ children }) {
@@ -53,6 +53,13 @@ export function DataProvider({ children }) {
 
   // Initialize data on mount
   useEffect(() => {
+    // Clear old v1 demo keys if present
+    try {
+      localStorage.removeItem('leettrack_students_v1');
+      localStorage.removeItem('leettrack_problems_v1');
+      localStorage.removeItem('leettrack_activity_v1');
+    } catch (e) {}
+
     const loadInitialData = async () => {
       try {
         if (isFirebaseConfigured && db) {
@@ -61,14 +68,12 @@ export function DataProvider({ children }) {
           const studentSnapshot = await getDocs(studentsCol);
           
           if (!studentSnapshot.empty) {
-            const fetchedStudents = studentSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            const fetchedStudents = studentSnapshot.docs
+              .map(doc => ({ id: doc.id, ...doc.data() }))
+              .filter(s => !s.isSample);
             setStudents(fetchedStudents);
           } else {
-            // Seed initial sample data to Firestore if empty
-            for (const s of INITIAL_STUDENTS) {
-              await setDoc(doc(db, 'students', s.id), s);
-            }
-            setStudents(INITIAL_STUDENTS);
+            setStudents([]);
           }
 
           // Fetch Settings
@@ -83,27 +88,28 @@ export function DataProvider({ children }) {
           if (!actSnapshot.empty) {
             setActivities(actSnapshot.docs.map(d => ({ id: d.id, ...d.data() })));
           } else {
-            setActivities(INITIAL_ACTIVITY);
+            setActivities([]);
           }
         } else {
-          // Local fallback mode
+          // Local storage mode
           const localStudents = localStorage.getItem(STORAGE_KEYS.STUDENTS);
           const localProblems = localStorage.getItem(STORAGE_KEYS.PROBLEMS);
           const localActivity = localStorage.getItem(STORAGE_KEYS.ACTIVITY);
           const localSettings = localStorage.getItem(STORAGE_KEYS.SETTINGS);
           const localLastSync = localStorage.getItem(STORAGE_KEYS.LAST_SYNC);
 
-          setStudents(localStudents ? JSON.parse(localStudents) : INITIAL_STUDENTS);
-          setProblemsByStudent(localProblems ? JSON.parse(localProblems) : INITIAL_SAMPLE_PROBLEMS);
-          setActivities(localActivity ? JSON.parse(localActivity) : INITIAL_ACTIVITY);
+          const parsedStudents = localStudents ? JSON.parse(localStudents).filter(s => !s.isSample) : [];
+          setStudents(parsedStudents);
+          setProblemsByStudent(localProblems ? JSON.parse(localProblems) : {});
+          setActivities(localActivity ? JSON.parse(localActivity) : []);
           setSettings(localSettings ? JSON.parse(localSettings) : INITIAL_SETTINGS);
-          setLastGlobalSync(localLastSync || new Date(Date.now() - 1000 * 60 * 3).toISOString());
+          setLastGlobalSync(localLastSync || null);
         }
       } catch (err) {
         console.error('Error loading data:', err);
-        setStudents(INITIAL_STUDENTS);
-        setProblemsByStudent(INITIAL_SAMPLE_PROBLEMS);
-        setActivities(INITIAL_ACTIVITY);
+        setStudents([]);
+        setProblemsByStudent({});
+        setActivities([]);
       } finally {
         setLoading(false);
       }
