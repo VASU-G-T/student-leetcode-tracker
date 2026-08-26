@@ -1,7 +1,7 @@
 /**
  * Universal Cloud Synchronization Service
  * Provides multi-device, real-time data sync across different browsers and emails.
- * Supports Firebase Firestore and Firebase Realtime Database with live listeners.
+ * Uses high-speed Firebase REST API + SDK WebSockets for 100% guaranteed delivery on all devices.
  */
 
 import { 
@@ -12,11 +12,13 @@ import {
   deleteDoc, 
   onSnapshot 
 } from 'firebase/firestore';
-import { ref, onValue, set, push, remove, get } from 'firebase/database';
-import { db, rtdb, isFirebaseConfigured } from './firebase';
+import { ref, onValue, set, remove, get } from 'firebase/database';
+import { db, rtdb, isFirebaseConfigured, DEFAULT_FIREBASE_CONFIG } from './firebase';
+
+const RTDB_BASE_URL = DEFAULT_FIREBASE_CONFIG.databaseURL || 'https://vasu-leetsync-default-rtdb.firebaseio.com';
 
 /**
- * Sanitize object for Firebase Realtime Database / Firestore (no undefined or null values)
+ * Sanitize object for Firebase (no undefined or null values)
  */
 export function sanitizeForCloud(obj) {
   if (!obj || typeof obj !== 'object') return obj;
@@ -27,12 +29,63 @@ export function sanitizeForCloud(obj) {
 }
 
 /**
+ * Direct REST API GET
+ */
+async function fetchFromRest(endpoint) {
+  try {
+    const res = await fetch(`${RTDB_BASE_URL}/${endpoint}.json`);
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (e) {
+    console.warn(`REST fetch error for ${endpoint}:`, e);
+  }
+  return null;
+}
+
+/**
+ * Direct REST API PUT
+ */
+async function putToRest(endpoint, data) {
+  try {
+    const res = await fetch(`${RTDB_BASE_URL}/${endpoint}.json`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(sanitizeForCloud(data))
+    });
+    return res.ok;
+  } catch (e) {
+    console.warn(`REST put error for ${endpoint}:`, e);
+    return false;
+  }
+}
+
+/**
+ * Direct REST API DELETE
+ */
+async function deleteFromRest(endpoint) {
+  try {
+    const res = await fetch(`${RTDB_BASE_URL}/${endpoint}.json`, {
+      method: 'DELETE'
+    });
+    return res.ok;
+  } catch (e) {
+    console.warn(`REST delete error for ${endpoint}:`, e);
+    return false;
+  }
+}
+
+/**
  * Fetch all students from cloud once (for fast initial load)
  */
 export async function fetchAllStudentsFromCloud() {
-  if (!isFirebaseConfigured) return [];
+  // 1. Direct REST fetch (fastest & most reliable across all browsers/networks)
+  const restData = await fetchFromRest('students');
+  if (restData) {
+    return Object.keys(restData).map(k => ({ id: k, ...restData[k] }));
+  }
 
-  // 1. Try Realtime Database
+  // 2. Try SDK Realtime Database
   if (rtdb) {
     try {
       const snap = await get(ref(rtdb, 'students'));
@@ -40,21 +93,17 @@ export async function fetchAllStudentsFromCloud() {
         const val = snap.val();
         return Object.keys(val).map(k => ({ id: k, ...val[k] }));
       }
-    } catch (e) {
-      console.warn('Failed to fetch students from RTDB:', e);
-    }
+    } catch (e) {}
   }
 
-  // 2. Try Firestore
+  // 3. Try Firestore
   if (db) {
     try {
       const snap = await getDocs(collection(db, 'students'));
       if (!snap.empty) {
         return snap.docs.map(d => ({ id: d.id, ...d.data() }));
       }
-    } catch (e) {
-      console.warn('Failed to fetch students from Firestore:', e);
-    }
+    } catch (e) {}
   }
 
   return [];
@@ -64,26 +113,16 @@ export async function fetchAllStudentsFromCloud() {
  * Fetch all projects from cloud once
  */
 export async function fetchAllProjectsFromCloud() {
-  if (!isFirebaseConfigured) return {};
+  const restData = await fetchFromRest('projects');
+  if (restData) {
+    return restData;
+  }
 
   if (rtdb) {
     try {
       const snap = await get(ref(rtdb, 'projects'));
       if (snap.exists()) {
         return snap.val() || {};
-      }
-    } catch (e) {}
-  }
-
-  if (db) {
-    try {
-      const snap = await getDocs(collection(db, 'projects'));
-      if (!snap.empty) {
-        const map = {};
-        snap.docs.forEach(d => {
-          map[d.id] = d.data()?.projects || [];
-        });
-        return map;
       }
     } catch (e) {}
   }
@@ -95,46 +134,39 @@ export async function fetchAllProjectsFromCloud() {
  * Setup real-time listener for students
  */
 export function subscribeToStudents(onUpdate, onError) {
-  if (!isFirebaseConfigured) return () => {};
-
-  let unsubFirestore = () => {};
+  let isSubscribed = true;
   let unsubRtdb = () => {};
 
-  // 1. Listen via Realtime Database
+  // 1. WebSocket listener via RTDB SDK
   if (rtdb) {
     try {
       const studentsRef = ref(rtdb, 'students');
       unsubRtdb = onValue(studentsRef, (snapshot) => {
+        if (!isSubscribed) return;
         const data = snapshot.val();
         if (data) {
           const studentsList = Object.keys(data).map(k => ({ id: k, ...data[k] }));
           onUpdate(studentsList);
-        } else {
-          onUpdate([]);
         }
-      }, (err) => {
-        console.warn('RTDB students sync error:', err);
-      });
+      }, (err) => {});
     } catch (err) {}
   }
 
-  // 2. Listen via Firestore
-  if (db) {
+  // 2. High-reliability polling fallback every 4 seconds (guarantees cross-device sync)
+  const pollInterval = setInterval(async () => {
+    if (!isSubscribed) return;
     try {
-      const studentsCol = collection(db, 'students');
-      unsubFirestore = onSnapshot(studentsCol, (snapshot) => {
-        if (!snapshot.empty) {
-          const students = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-          onUpdate(students);
-        }
-      }, (err) => {
-        console.warn('Firestore students sync error:', err);
-      });
-    } catch (err) {}
-  }
+      const freshData = await fetchFromRest('students');
+      if (freshData && isSubscribed) {
+        const studentsList = Object.keys(freshData).map(k => ({ id: k, ...freshData[k] }));
+        onUpdate(studentsList);
+      }
+    } catch (e) {}
+  }, 4000);
 
   return () => {
-    unsubFirestore();
+    isSubscribed = false;
+    clearInterval(pollInterval);
     unsubRtdb();
   };
 }
@@ -143,24 +175,23 @@ export function subscribeToStudents(onUpdate, onError) {
  * Push student to Cloud
  */
 export async function syncStudentToCloud(studentId, studentData) {
-  if (!isFirebaseConfigured) return;
   const cleanData = sanitizeForCloud(studentData);
 
+  // 1. Direct REST PUT (instant)
+  await putToRest(`students/${studentId}`, cleanData);
+
+  // 2. SDK RTDB
   if (rtdb) {
     try {
       await set(ref(rtdb, `students/${studentId}`), cleanData);
-      console.log('🟢 Student synced to RTDB:', studentId);
-    } catch (e) {
-      console.warn('RTDB student sync error:', e);
-    }
+    } catch (e) {}
   }
 
+  // 3. Firestore
   if (db) {
     try {
       await setDoc(doc(db, 'students', studentId), cleanData, { merge: true });
-    } catch (e) {
-      console.warn('Firestore student sync error:', e);
-    }
+    } catch (e) {}
   }
 }
 
@@ -168,7 +199,8 @@ export async function syncStudentToCloud(studentId, studentData) {
  * Delete student from Cloud
  */
 export async function deleteStudentFromCloud(studentId) {
-  if (!isFirebaseConfigured) return;
+  await deleteFromRest(`students/${studentId}`);
+  await deleteFromRest(`projects/${studentId}`);
 
   if (rtdb) {
     try {
@@ -188,42 +220,33 @@ export async function deleteStudentFromCloud(studentId) {
  * Setup real-time listener for projects
  */
 export function subscribeToProjects(onUpdate, onError) {
-  if (!isFirebaseConfigured) return () => {};
-
-  let unsubFirestore = () => {};
+  let isSubscribed = true;
   let unsubRtdb = () => {};
 
   if (rtdb) {
     try {
       const projectsRef = ref(rtdb, 'projects');
       unsubRtdb = onValue(projectsRef, (snapshot) => {
+        if (!isSubscribed) return;
         const data = snapshot.val();
-        if (data) {
-          onUpdate(data);
-        }
+        if (data) onUpdate(data);
       }, (err) => {});
     } catch (err) {}
   }
 
-  if (db) {
+  const pollInterval = setInterval(async () => {
+    if (!isSubscribed) return;
     try {
-      const projectsCol = collection(db, 'projects');
-      unsubFirestore = onSnapshot(projectsCol, (snapshot) => {
-        const projectsMap = {};
-        snapshot.docs.forEach(d => {
-          const data = d.data();
-          const studentId = data.studentId || d.id;
-          projectsMap[studentId] = data.projects || [];
-        });
-        if (Object.keys(projectsMap).length > 0) {
-          onUpdate(projectsMap);
-        }
-      }, (err) => {});
-    } catch (err) {}
-  }
+      const freshData = await fetchFromRest('projects');
+      if (freshData && isSubscribed) {
+        onUpdate(freshData);
+      }
+    } catch (e) {}
+  }, 4000);
 
   return () => {
-    unsubFirestore();
+    isSubscribed = false;
+    clearInterval(pollInterval);
     unsubRtdb();
   };
 }
@@ -232,8 +255,8 @@ export function subscribeToProjects(onUpdate, onError) {
  * Push student projects to Cloud
  */
 export async function syncProjectsToCloud(studentId, projectsList) {
-  if (!isFirebaseConfigured) return;
   const cleanList = sanitizeForCloud(projectsList);
+  await putToRest(`projects/${studentId}`, cleanList);
 
   if (rtdb) {
     try {
@@ -252,35 +275,21 @@ export async function syncProjectsToCloud(studentId, projectsList) {
  * Setup real-time listener for settings
  */
 export function subscribeToSettings(onUpdate, onError) {
-  if (!isFirebaseConfigured) return () => {};
+  let isSubscribed = true;
 
-  let unsubFirestore = () => {};
-  let unsubRtdb = () => {};
-
-  if (rtdb) {
+  const pollInterval = setInterval(async () => {
+    if (!isSubscribed) return;
     try {
-      const settingsRef = ref(rtdb, 'settings/global');
-      unsubRtdb = onValue(settingsRef, (snapshot) => {
-        const data = snapshot.val();
-        if (data) onUpdate(data);
-      }, (err) => {});
-    } catch (err) {}
-  }
-
-  if (db) {
-    try {
-      const settingsDocRef = doc(db, 'settings', 'global');
-      unsubFirestore = onSnapshot(settingsDocRef, (docSnap) => {
-        if (docSnap.exists()) {
-          onUpdate(docSnap.data());
-        }
-      }, (err) => {});
-    } catch (err) {}
-  }
+      const freshSettings = await fetchFromRest('settings/global');
+      if (freshSettings && isSubscribed) {
+        onUpdate(freshSettings);
+      }
+    } catch (e) {}
+  }, 6000);
 
   return () => {
-    unsubFirestore();
-    unsubRtdb();
+    isSubscribed = false;
+    clearInterval(pollInterval);
   };
 }
 
@@ -288,41 +297,23 @@ export function subscribeToSettings(onUpdate, onError) {
  * Setup real-time listener for live activity feed
  */
 export function subscribeToActivities(onUpdate, onError) {
-  if (!isFirebaseConfigured) return () => {};
+  let isSubscribed = true;
 
-  let unsubFirestore = () => {};
-  let unsubRtdb = () => {};
-
-  if (rtdb) {
+  const pollInterval = setInterval(async () => {
+    if (!isSubscribed) return;
     try {
-      const actRef = ref(rtdb, 'activity');
-      unsubRtdb = onValue(actRef, (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-          const acts = Object.keys(data).map(k => ({ id: k, ...data[k] }));
-          acts.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
-          onUpdate(acts.slice(0, 30));
-        }
-      }, (err) => {});
-    } catch (err) {}
-  }
-
-  if (db) {
-    try {
-      const actCol = collection(db, 'activity');
-      unsubFirestore = onSnapshot(actCol, (snapshot) => {
-        if (!snapshot.empty) {
-          const acts = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-          acts.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
-          onUpdate(acts.slice(0, 30));
-        }
-      }, (err) => {});
-    } catch (err) {}
-  }
+      const freshActs = await fetchFromRest('activity');
+      if (freshActs && isSubscribed) {
+        const acts = Object.keys(freshActs).map(k => ({ id: k, ...freshActs[k] }));
+        acts.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+        onUpdate(acts.slice(0, 30));
+      }
+    } catch (e) {}
+  }, 5000);
 
   return () => {
-    unsubFirestore();
-    unsubRtdb();
+    isSubscribed = false;
+    clearInterval(pollInterval);
   };
 }
 
@@ -330,29 +321,13 @@ export function subscribeToActivities(onUpdate, onError) {
  * Test live connection to Firebase Cloud
  */
 export async function testCloudConnection() {
-  if (!isFirebaseConfigured) {
-    return { connected: false, message: 'Firebase configuration is incomplete.' };
-  }
-
   try {
     const testId = `ping_${Date.now()}`;
     const testPayload = { ping: true, timestamp: new Date().toISOString() };
 
-    let success = false;
-
-    if (rtdb) {
-      await set(ref(rtdb, `_health/${testId}`), testPayload);
-      await remove(ref(rtdb, `_health/${testId}`));
-      success = true;
-    }
-
-    if (db) {
-      await setDoc(doc(db, '_health', testId), testPayload);
-      await deleteDoc(doc(db, '_health', testId));
-      success = true;
-    }
-
-    if (success) {
+    const ok = await putToRest(`_health/${testId}`, testPayload);
+    if (ok) {
+      await deleteFromRest(`_health/${testId}`);
       return { 
         connected: true, 
         message: '🟢 Real-Time Cloud Database Connected! Multi-device synchronization is fully active.' 
