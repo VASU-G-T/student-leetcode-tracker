@@ -33,7 +33,7 @@ export default function PublicDashboard() {
 
   // Find creator student dynamically from roster
   const creatorStudent = useMemo(() => {
-    return students.find(s => s.id === 'vasu_gt_creator' || s.isCreator || s.username === 'VASU-G-T' || s.registerNumber === 'VASU-ECE') || CREATOR_PROFILE;
+    return students.find(s => s.id === 'vasu_gt_creator' || s.isCreator || s.username === 'VASU-G-T' || s.registerNumber === '922525106360' || s.registerNumber === 'VASU-ECE') || CREATOR_PROFILE;
   }, [students]);
 
   const isCreatorOrAdmin = isAdmin || (currentUser && (

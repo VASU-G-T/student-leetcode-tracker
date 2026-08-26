@@ -83,10 +83,14 @@ export function DataProvider({ children }) {
 
         let parsedStudents = localStudents ? JSON.parse(localStudents).filter(s => !s.isSample) : [];
         parsedStudents = parsedStudents.map(s => {
-          if (!s.goal || s.goal === 200 || s.goal === 250) {
-            return { ...s, goal: 4033 };
+          let updated = { ...s };
+          if (!updated.goal || updated.goal === 200 || updated.goal === 250) {
+            updated.goal = 4033;
           }
-          return s;
+          if (updated.id === 'vasu_gt_creator' || updated.registerNumber === 'VASU-ECE' || updated.username === 'VASU-G-T') {
+            updated.registerNumber = '922525106360';
+          }
+          return updated;
         });
 
         if (!parsedStudents.some(s => s.id === CREATOR_PROFILE.id || s.username === CREATOR_PROFILE.username || s.registerNumber === CREATOR_PROFILE.registerNumber)) {
@@ -105,17 +109,23 @@ export function DataProvider({ children }) {
         setSettings(localSettings ? JSON.parse(localSettings) : INITIAL_SETTINGS);
         setLastGlobalSync(localLastSync || null);
 
-        // 2. If Firebase Firestore is configured, setup Real-Time Cloud Listeners
-        if (isFirebaseConfigured && db) {
-          unsubStudents = subscribeToStudents((cloudStudents) => {
-            if (cloudStudents && cloudStudents.length > 0) {
-              const cleaned = cloudStudents.map(s => (!s.goal || s.goal === 200 || s.goal === 250) ? { ...s, goal: 4033 } : s);
-              if (!cleaned.some(s => s.id === CREATOR_PROFILE.id || s.username === CREATOR_PROFILE.username)) {
-                cleaned.unshift(CREATOR_PROFILE);
+        // 2. Setup Real-Time Cloud Listeners
+        unsubStudents = subscribeToStudents((cloudStudents) => {
+          if (cloudStudents && cloudStudents.length > 0) {
+            const cleaned = cloudStudents.map(s => {
+              let updated = { ...s };
+              if (!updated.goal || updated.goal === 200 || updated.goal === 250) updated.goal = 4033;
+              if (updated.id === 'vasu_gt_creator' || updated.registerNumber === 'VASU-ECE' || updated.username === 'VASU-G-T') {
+                updated.registerNumber = '922525106360';
               }
-              setStudents(cleaned);
+              return updated;
+            });
+            if (!cleaned.some(s => s.id === CREATOR_PROFILE.id || s.username === CREATOR_PROFILE.username || s.registerNumber === '922525106360')) {
+              cleaned.unshift(CREATOR_PROFILE);
             }
-          });
+            setStudents(cleaned);
+          }
+        });
 
           unsubProjects = subscribeToProjects((cloudProjects) => {
             if (cloudProjects && Object.keys(cloudProjects).length > 0) {
@@ -138,8 +148,7 @@ export function DataProvider({ children }) {
               setActivities(cloudActivities);
             }
           });
-        }
-      } catch (err) {
+        } catch (err) {
         console.error('Error initializing data store:', err);
       } finally {
         setLoading(false);

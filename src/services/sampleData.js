@@ -7,7 +7,7 @@ export const CREATOR_PROFILE = {
   id: 'vasu_gt_creator',
   name: 'Vasu G T',
   username: 'VASU-G-T',
-  registerNumber: 'VASU-ECE',
+  registerNumber: '922525106360',
   department: 'ECE',
   year: 'Lead Developer',
   section: 'Sec A',
