@@ -68,7 +68,7 @@ export default function PublicLeaderboard() {
               ECE LeetCode Leaderboard
             </h1>
             <p className="text-slate-600 text-xs sm:text-sm mt-1 max-w-xl font-medium leading-relaxed">
-              Rankings computed automatically from synchronized GitHub solution repositories. Tie-breaker rule: Higher Hard count → Higher Medium count → Higher Easy count.
+              Analytical-powered ranking computed directly from synchronized GitHub solution repositories based purely on <strong>Total Problems Solved</strong>.
             </p>
           </div>
 
