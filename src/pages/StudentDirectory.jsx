@@ -5,9 +5,10 @@ import {
   LayoutGrid, 
   List, 
   Search, 
-  SlidersHorizontal,
-  ArrowUpDown,
-  UserPlus
+  SlidersHorizontal, 
+  ArrowUpDown, 
+  UserPlus,
+  FileText
 } from 'lucide-react';
 import SearchBar from '../components/common/SearchBar';
 import FilterDropdown from '../components/common/FilterDropdown';
@@ -15,6 +16,7 @@ import StudentCard from '../components/students/StudentCard';
 import StudentTable from '../components/students/StudentTable';
 import Pagination from '../components/common/Pagination';
 import { useData } from '../context/DataContext';
+import { exportLeaderboardWordDoc } from '../utils/exportCsv';
 
 export default function StudentDirectory() {
   const { students, settings, syncingStudentId, syncStudent } = useData();
@@ -65,9 +67,9 @@ export default function StudentDirectory() {
       })
       .sort((a, b) => {
         if (sortBy === 'totalSolved') return (b.totalSolved || 0) - (a.totalSolved || 0);
-        if (sortBy === 'easySolved') return (b.easySolved || 0) - (a.easySolved || 0);
-        if (sortBy === 'mediumSolved') return (b.mediumSolved || 0) - (a.mediumSolved || 0);
         if (sortBy === 'hardSolved') return (b.hardSolved || 0) - (a.hardSolved || 0);
+        if (sortBy === 'mediumSolved') return (b.mediumSolved || 0) - (a.mediumSolved || 0);
+        if (sortBy === 'easySolved') return (b.easySolved || 0) - (a.easySolved || 0);
         if (sortBy === 'name') return a.name.localeCompare(b.name);
         if (sortBy === 'lastSynced') {
           return new Date(b.lastSynced || 0) - new Date(a.lastSynced || 0);
@@ -76,7 +78,8 @@ export default function StudentDirectory() {
       });
   }, [students, searchTerm, department, year, section, sortBy]);
 
-  const paginatedGridStudents = useMemo(() => {
+  // Paginated students
+  const paginatedStudents = useMemo(() => {
     return filteredStudents.slice((currentPage - 1) * pageSize, currentPage * pageSize);
   }, [filteredStudents, currentPage, pageSize]);
 
@@ -98,22 +101,34 @@ export default function StudentDirectory() {
           </p>
         </div>
 
-        {/* View Mode Toggle */}
-        <div className="flex items-center gap-1.5 p-1 bg-white border border-slate-200 rounded-xl shadow-sm">
+        <div className="flex items-center gap-2.5">
+          {/* Word Table Export Button */}
           <button
-            onClick={() => setViewMode('grid')}
-            className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-sky-500 text-white shadow-sm shadow-sky-500/25' : 'text-slate-500 hover:text-slate-800'}`}
-            title="Grid View"
+            onClick={() => exportLeaderboardWordDoc(filteredStudents)}
+            className="btn-secondary flex items-center gap-2 font-bold text-sky-700 hover:text-sky-800 bg-sky-50 hover:bg-sky-100/80 shadow-sm border-sky-200 text-xs"
+            title="Download formatted Microsoft Word Document table"
           >
-            <LayoutGrid className="w-4 h-4" />
+            <FileText className="w-3.5 h-3.5 text-sky-600" />
+            <span>Export Word Table (.doc)</span>
           </button>
-          <button
-            onClick={() => setViewMode('table')}
-            className={`p-2 rounded-lg transition-all ${viewMode === 'table' ? 'bg-sky-500 text-white shadow-sm shadow-sky-500/25' : 'text-slate-500 hover:text-slate-800'}`}
-            title="Table View"
-          >
-            <List className="w-4 h-4" />
-          </button>
+
+          {/* View Mode Toggle */}
+          <div className="flex items-center gap-1.5 p-1 bg-white border border-slate-200 rounded-xl shadow-sm">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-sky-500 text-white shadow-sm shadow-sky-500/25' : 'text-slate-500 hover:text-slate-800'}`}
+              title="Grid View"
+            >
+              <LayoutGrid className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setViewMode('table')}
+              className={`p-2 rounded-lg transition-all ${viewMode === 'table' ? 'bg-sky-500 text-white shadow-sm shadow-sky-500/25' : 'text-slate-500 hover:text-slate-800'}`}
+              title="Table View"
+            >
+              <List className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -142,7 +157,7 @@ export default function StudentDirectory() {
             <FilterDropdown
               label="Section"
               value={section}
-              onChange={(val) => { setSection(val); setSearchParams(val ? { section: val } : {}); }}
+              onChange={setSection}
               options={[
                 { value: '', label: 'All Sections' },
                 ...defaultSections.map(s => ({ value: s, label: s }))
@@ -154,10 +169,10 @@ export default function StudentDirectory() {
               value={sortBy}
               onChange={setSortBy}
               options={[
-                { value: 'totalSolved', label: 'Most Problems Solved' },
-                { value: 'hardSolved', label: 'Most Hard Solved' },
-                { value: 'mediumSolved', label: 'Most Medium Solved' },
-                { value: 'easySolved', label: 'Most Easy Solved' },
+                { value: 'totalSolved', label: 'Solved (Highest)' },
+                { value: 'hardSolved', label: 'Hard (Highest)' },
+                { value: 'mediumSolved', label: 'Medium (Highest)' },
+                { value: 'easySolved', label: 'Easy (Highest)' },
                 { value: 'name', label: 'Name (A-Z)' },
                 { value: 'lastSynced', label: 'Recently Synced' },
               ]}
@@ -165,11 +180,11 @@ export default function StudentDirectory() {
           </div>
         </div>
 
-        {/* Quick Section Filter Pills */}
+        {/* Section Quick Filters */}
         <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-slate-100">
-          <span className="text-[11px] text-slate-500 mr-1 font-bold">Quick Section:</span>
+          <span className="text-[11px] text-slate-500 mr-1 font-bold">Quick Filter:</span>
           <button
-            onClick={() => { setSection(''); setSearchParams({}); }}
+            onClick={() => setSection('')}
             className={`px-3 py-1 rounded-full text-xs font-bold transition-all shadow-sm ${!section ? 'bg-sky-500 text-white shadow-sky-500/25' : 'bg-white text-slate-600 hover:text-sky-700 hover:bg-sky-50 border border-slate-200'}`}
           >
             All Sections
@@ -177,71 +192,46 @@ export default function StudentDirectory() {
           {defaultSections.map((s) => (
             <button
               key={s}
-              onClick={() => { setSection(s); setSearchParams({ section: s }); }}
+              onClick={() => setSection(s)}
               className={`px-3 py-1 rounded-full text-xs font-bold transition-all shadow-sm ${section === s ? 'bg-sky-500 text-white shadow-sky-500/25' : 'bg-white text-slate-600 hover:text-sky-700 hover:bg-sky-50 border border-slate-200'}`}
             >
               {s}
             </button>
           ))}
         </div>
-
-        {/* Active Filter Chips indicator */}
-        {(searchTerm || year || section) && (
-          <div className="flex items-center gap-2 pt-2 border-t border-slate-100 text-xs text-slate-500">
-            <span>Filtering active:</span>
-            <span className="font-bold text-sky-700">{filteredStudents.length} matching students</span>
-            <button
-              onClick={() => { setSearchTerm(''); setYear(''); setSection(''); setSearchParams({}); }}
-              className="text-sky-600 hover:text-sky-800 underline ml-2 font-semibold"
-            >
-              Reset Filters
-            </button>
-          </div>
-        )}
       </div>
 
-      {/* Student List View */}
+      {/* Content: Grid or Table View */}
       {filteredStudents.length === 0 ? (
-        <div className="glass-card p-12 text-center text-slate-400 bg-white border-sky-100 shadow-sm">
-          <Users className="w-12 h-12 mx-auto text-sky-300 mb-3" />
-          <h3 className="text-base font-bold text-slate-800">No students found</h3>
-          <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto font-medium">
-            We couldn't find any students matching your search criteria. Try modifying or clearing your filters.
-          </p>
+        <div className="glass-card p-12 text-center bg-white border-sky-100 shadow-sm">
+          <p className="text-slate-500 text-sm font-medium">No students match your filter criteria.</p>
         </div>
       ) : viewMode === 'grid' ? (
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {paginatedGridStudents.map((student) => (
-              <StudentCard
-                key={student.id}
-                student={student}
-                isAdmin={false}
-                isSyncing={syncingStudentId === student.id}
-                onSync={syncStudent}
-              />
-            ))}
-          </div>
-
-          {filteredStudents.length > 30 && (
-            <div className="glass-card overflow-hidden shadow-sm">
-              <Pagination
-                currentPage={currentPage}
-                totalItems={filteredStudents.length}
-                pageSize={pageSize}
-                onPageChange={setCurrentPage}
-                onPageSizeChange={setPageSize}
-                pageSizeOptions={[30, 60, 120, 400]}
-              />
-            </div>
-          )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {paginatedStudents.map((student) => (
+            <StudentCard
+              key={student.id}
+              student={student}
+              isSyncing={syncingStudentId === student.id}
+              onSync={syncStudent}
+            />
+          ))}
         </div>
       ) : (
         <StudentTable
-          students={filteredStudents}
-          isAdmin={false}
+          students={paginatedStudents}
           syncingStudentId={syncingStudentId}
           onSync={syncStudent}
+        />
+      )}
+
+      {/* Pagination */}
+      {filteredStudents.length > pageSize && (
+        <Pagination
+          currentPage={currentPage}
+          totalItems={filteredStudents.length}
+          pageSize={pageSize}
+          onPageChange={setCurrentPage}
         />
       )}
     </div>
