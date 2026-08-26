@@ -10,12 +10,15 @@ import {
   SlidersHorizontal,
   Edit,
   Eye,
-  Layers
+  Layers,
+  UploadCloud,
+  FileSpreadsheet
 } from 'lucide-react';
 import SearchBar from '../../components/common/SearchBar';
 import FilterDropdown from '../../components/common/FilterDropdown';
 import StudentTable from '../../components/students/StudentTable';
 import ConfirmModal from '../../components/common/ConfirmModal';
+import BulkStudentModal from '../../components/admin/BulkStudentModal';
 import { useData } from '../../context/DataContext';
 import { exportLeaderboardCsv } from '../../utils/exportCsv';
 
@@ -30,6 +33,7 @@ export default function AdminStudents() {
   const [section, setSection] = useState('');
   const [sortBy, setSortBy] = useState('totalSolved');
   const [studentToDelete, setStudentToDelete] = useState(null);
+  const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
 
   const filteredStudents = useMemo(() => {
     return students
@@ -79,14 +83,23 @@ export default function AdminStudents() {
         <div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
             <Users className="w-7 h-7 text-amber-400" />
-            <span>ECE Student Roster Management</span>
+            <span>ECE Student Roster Management (Up to 400+)</span>
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Add, configure repositories, trigger syncs, and manage student tracking records across Sec A, Sec B, Sec C, Sec D, Sec E, Sec F.
+            Manage student tracking records across Sec A, Sec B, Sec C, Sec D, Sec E, Sec F ({students.length} Total Registered).
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <button
+            onClick={() => setIsBulkModalOpen(true)}
+            className="btn-secondary flex items-center gap-1.5 text-xs text-amber-400 border-amber-500/30 hover:bg-amber-500/10"
+            title="Import up to 400+ students via CSV / Excel"
+          >
+            <FileSpreadsheet className="w-3.5 h-3.5" />
+            <span>Bulk Import (CSV)</span>
+          </button>
+
           <button
             onClick={() => exportLeaderboardCsv(students)}
             className="btn-secondary flex items-center gap-1.5 text-xs"
@@ -100,7 +113,7 @@ export default function AdminStudents() {
             className="btn-primary flex items-center gap-2 text-xs font-semibold"
           >
             <UserPlus className="w-4 h-4" />
-            <span>Add Student</span>
+            <span>+ Add Student</span>
           </Link>
         </div>
       </div>
@@ -118,36 +131,44 @@ export default function AdminStudents() {
 
           <div className="flex flex-wrap items-center gap-2">
             <FilterDropdown
-              label="Section"
-              value={section}
-              onChange={setSection}
-              options={settings.sections || defaultSections}
-            />
-            <FilterDropdown
               label="Year"
               value={year}
               onChange={setYear}
-              options={settings.years || ['1st Year', '2nd Year', '3rd Year', '4th Year']}
+              options={[
+                { value: '', label: 'All Years' },
+                ...(settings.years || ['1st Year', '2nd Year', '3rd Year', '4th Year']).map(y => ({ value: y, label: y }))
+              ]}
             />
 
-            <select
+            <FilterDropdown
+              label="Section"
+              value={section}
+              onChange={setSection}
+              options={[
+                { value: '', label: 'All Sections' },
+                ...defaultSections.map(s => ({ value: s, label: s }))
+              ]}
+            />
+
+            <FilterDropdown
+              label="Sort By"
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="input-field py-2 text-xs font-medium cursor-pointer bg-slate-900/90 text-slate-200 border-slate-800"
-            >
-              <option value="totalSolved">Sort: Total Solved</option>
-              <option value="easySolved">Sort: Easy Solved</option>
-              <option value="mediumSolved">Sort: Medium Solved</option>
-              <option value="hardSolved">Sort: Hard Solved</option>
-              <option value="name">Sort: Name (A-Z)</option>
-              <option value="lastSynced">Sort: Recent Sync</option>
-            </select>
+              onChange={setSortBy}
+              options={[
+                { value: 'totalSolved', label: 'Solved (Highest)' },
+                { value: 'hardSolved', label: 'Hard (Highest)' },
+                { value: 'mediumSolved', label: 'Medium (Highest)' },
+                { value: 'easySolved', label: 'Easy (Highest)' },
+                { value: 'name', label: 'Name (A-Z)' },
+                { value: 'lastSynced', label: 'Recently Synced' },
+              ]}
+            />
           </div>
         </div>
 
-        {/* Section Quick Pills */}
+        {/* Section Quick Filters */}
         <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-slate-800/60">
-          <span className="text-[11px] text-slate-400 mr-1 font-medium">Quick Section:</span>
+          <span className="text-[11px] text-slate-400 mr-1 font-medium">Quick Filter:</span>
           <button
             onClick={() => setSection('')}
             className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${!section ? 'bg-amber-500 text-slate-950 font-bold' : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'}`}
@@ -166,7 +187,7 @@ export default function AdminStudents() {
         </div>
       </div>
 
-      {/* Students Table */}
+      {/* Student Table */}
       <StudentTable
         students={filteredStudents}
         isAdmin={true}
@@ -179,12 +200,18 @@ export default function AdminStudents() {
       {/* Delete Confirmation Modal */}
       <ConfirmModal
         isOpen={Boolean(studentToDelete)}
-        title="Delete Student Tracking Record?"
-        message={`Are you sure you want to delete ${studentToDelete?.name} (${studentToDelete?.registerNumber})? This will remove the student's profile and progress metrics from the dashboard. (Their actual GitHub repository will NOT be affected).`}
-        confirmText="Remove Profile"
+        title="Delete Student Profile"
+        message={`Are you sure you want to remove ${studentToDelete?.name} (${studentToDelete?.registerNumber}) from the tracker? This will remove their synchronized stats and project portfolio.`}
+        confirmText="Yes, Delete Profile"
+        type="danger"
         onConfirm={handleDeleteConfirm}
         onCancel={() => setStudentToDelete(null)}
-        isDanger={true}
+      />
+
+      {/* Bulk Import Modal */}
+      <BulkStudentModal
+        isOpen={isBulkModalOpen}
+        onClose={() => setIsBulkModalOpen(false)}
       />
     </div>
   );

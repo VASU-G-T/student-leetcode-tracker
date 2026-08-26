@@ -1,13 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Trophy, Medal, Crown, ExternalLink, Download, Sparkles } from 'lucide-react';
 import ProgressBar from '../common/ProgressBar';
+import Pagination from '../common/Pagination';
 import { sortLeaderboard } from '../../utils/helpers';
 import { exportLeaderboardCsv } from '../../utils/exportCsv';
 
 export default function LeaderboardTable({ students = [], showExport = true, limitCount = null }) {
   const sorted = sortLeaderboard(students);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(50);
+
   const displayList = limitCount ? sorted.slice(0, limitCount) : sorted;
+  const paginatedList = limitCount 
+    ? displayList 
+    : displayList.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const getRankBadge = (rank) => {
     if (rank === 1) {
@@ -90,19 +97,15 @@ export default function LeaderboardTable({ students = [], showExport = true, lim
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-800/60 text-sm">
-            {displayList.map((student, index) => {
-              const rank = index + 1;
-              const isTopThree = rank <= 3;
+            {paginatedList.map((student, index) => {
+              const rank = limitCount ? index + 1 : (currentPage - 1) * pageSize + index + 1;
 
               return (
                 <tr 
                   key={student.id}
                   className={`
-                    transition-colors group
-                    ${rank === 1 ? 'bg-amber-500/[0.04] hover:bg-amber-500/[0.08]' : ''}
-                    ${rank === 2 ? 'bg-slate-500/[0.03] hover:bg-slate-500/[0.06]' : ''}
-                    ${rank === 3 ? 'bg-orange-500/[0.03] hover:bg-orange-500/[0.06]' : ''}
-                    ${rank > 3 ? 'hover:bg-slate-850/50' : ''}
+                    hover:bg-slate-850/50 transition-colors group
+                    ${rank === 1 ? 'bg-amber-500/5' : ''}
                   `}
                 >
                   {/* Rank Badge */}
@@ -118,33 +121,32 @@ export default function LeaderboardTable({ students = [], showExport = true, lim
                       <img
                         src={student.profileImage || `https://api.dicebear.com/7.x/bottts/svg?seed=${student.githubUsername || student.name}`}
                         alt={student.name}
-                        className={`w-9 h-9 rounded-full object-cover border ${isTopThree ? 'border-amber-400/60' : 'border-slate-700'}`}
+                        className="w-9 h-9 rounded-xl object-cover border border-slate-700 shadow-sm shrink-0"
                       />
                       <div>
-                        <Link 
+                        <Link
                           to={`/student/${student.registerNumber || student.id}`}
-                          className="font-semibold text-white group-hover:text-amber-400 transition-colors flex items-center gap-1.5"
+                          className="font-bold text-white group-hover:text-amber-400 transition-colors line-clamp-1"
                         >
-                          <span>{student.name}</span>
-                          {rank === 1 && <Sparkles className="w-3 h-3 text-amber-400" />}
+                          {student.name}
                         </Link>
-                        <div className="flex items-center gap-2 text-xs text-slate-400">
-                          <span className="font-mono">{student.registerNumber}</span>
-                          {student.githubUsername && (
-                            <span className="text-slate-500 hidden sm:inline font-mono">
-                              @{student.githubUsername}
-                            </span>
-                          )}
+                        <div className="flex items-center gap-2 text-xs text-slate-400 mt-0.5">
+                          <span className="font-mono text-amber-400/90 font-medium">
+                            {student.registerNumber}
+                          </span>
+                          <span>•</span>
+                          <span>{student.section}</span>
                         </div>
                       </div>
                     </div>
                   </td>
 
-                  {/* Department & Year */}
-                  <td className="py-3.5 px-4 hidden md:table-cell">
-                    <span className="text-xs font-medium px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
-                      {student.department} - {student.year || '2nd Year'} ({student.section || 'A'})
-                    </span>
+                  {/* Dept & Year */}
+                  <td className="py-3.5 px-4 hidden md:table-cell text-slate-300 text-xs">
+                    <div>
+                      <span className="font-medium text-white">{student.department}</span>
+                      <span className="text-slate-500 block text-[11px]">{student.year || '2nd Year'}</span>
+                    </div>
                   </td>
 
                   {/* Total Solved */}
@@ -183,6 +185,17 @@ export default function LeaderboardTable({ students = [], showExport = true, lim
           </tbody>
         </table>
       </div>
+
+      {!limitCount && displayList.length > 25 && (
+        <Pagination
+          currentPage={currentPage}
+          totalItems={displayList.length}
+          pageSize={pageSize}
+          onPageChange={setCurrentPage}
+          onPageSizeChange={setPageSize}
+          pageSizeOptions={[25, 50, 100, 400]}
+        />
+      )}
     </div>
   );
 }

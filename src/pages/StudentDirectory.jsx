@@ -13,6 +13,7 @@ import SearchBar from '../components/common/SearchBar';
 import FilterDropdown from '../components/common/FilterDropdown';
 import StudentCard from '../components/students/StudentCard';
 import StudentTable from '../components/students/StudentTable';
+import Pagination from '../components/common/Pagination';
 import { useData } from '../context/DataContext';
 
 export default function StudentDirectory() {
@@ -27,12 +28,19 @@ export default function StudentDirectory() {
   const [section, setSection] = useState(sectionParam);
   const [sortBy, setSortBy] = useState('totalSolved');
   const [viewMode, setViewMode] = useState('grid');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(30);
 
   useEffect(() => {
     if (sectionParam) {
       setSection(sectionParam);
     }
   }, [sectionParam]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, department, year, section, sortBy]);
 
   // Filter and sort students
   const filteredStudents = useMemo(() => {
@@ -68,10 +76,14 @@ export default function StudentDirectory() {
       });
   }, [students, searchTerm, department, year, section, sortBy]);
 
+  const paginatedGridStudents = useMemo(() => {
+    return filteredStudents.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  }, [filteredStudents, currentPage, pageSize]);
+
   const defaultSections = ['Sec A', 'Sec B', 'Sec C', 'Sec D', 'Sec E', 'Sec F'];
 
   return (
-    <div className="space-y-6 animate-fade-in pb-12">
+    <div className="space-y-6 animate-fade-in pb-16">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
@@ -80,7 +92,7 @@ export default function StudentDirectory() {
             <span>ECE Student Directory</span>
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Browse and inspect ECE student coding profiles across Sec A, Sec B, Sec C, Sec D, Sec E, Sec F ({students.length} Total)
+            Browse and inspect up to 400+ ECE student profiles across Sec A, Sec B, Sec C, Sec D, Sec E, Sec F ({students.length} Registered)
           </p>
         </div>
 
@@ -103,54 +115,59 @@ export default function StudentDirectory() {
         </div>
       </div>
 
-      {/* Search & Filters Card */}
-      <div className="glass-card p-4 sm:p-5 space-y-3">
-        <div className="flex flex-col lg:flex-row gap-3">
+      {/* Filter and Search Toolbar */}
+      <div className="glass-card p-4 space-y-3">
+        <div className="flex flex-col md:flex-row gap-3">
           <div className="flex-1">
             <SearchBar
               value={searchTerm}
               onChange={setSearchTerm}
-              placeholder="Search by student name, register number, or GitHub username..."
+              placeholder="Search by student name, register number (e.g. 9276...), or GitHub username..."
             />
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
             <FilterDropdown
-              label="Section"
-              value={section}
-              onChange={setSection}
-              options={settings.sections || defaultSections}
-            />
-            <FilterDropdown
               label="Year"
               value={year}
               onChange={setYear}
-              options={settings.years || ['1st Year', '2nd Year', '3rd Year', '4th Year']}
+              options={[
+                { value: '', label: 'All Years' },
+                ...(settings.years || ['1st Year', '2nd Year', '3rd Year', '4th Year']).map(y => ({ value: y, label: y }))
+              ]}
             />
 
-            {/* Sort Select */}
-            <div className="flex items-center gap-1.5 min-w-[140px]">
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="input-field py-2 text-xs font-medium cursor-pointer bg-slate-900/90 text-slate-200 border-slate-800"
-              >
-                <option value="totalSolved">Sort: Total Solved</option>
-                <option value="easySolved">Sort: Easy Solved</option>
-                <option value="mediumSolved">Sort: Medium Solved</option>
-                <option value="hardSolved">Sort: Hard Solved</option>
-                <option value="name">Sort: Name (A-Z)</option>
-                <option value="lastSynced">Sort: Recent Sync</option>
-              </select>
-            </div>
+            <FilterDropdown
+              label="Section"
+              value={section}
+              onChange={(val) => { setSection(val); setSearchParams(val ? { section: val } : {}); }}
+              options={[
+                { value: '', label: 'All Sections' },
+                ...defaultSections.map(s => ({ value: s, label: s }))
+              ]}
+            />
+
+            <FilterDropdown
+              label="Sort By"
+              value={sortBy}
+              onChange={setSortBy}
+              options={[
+                { value: 'totalSolved', label: 'Most Problems Solved' },
+                { value: 'hardSolved', label: 'Most Hard Solved' },
+                { value: 'mediumSolved', label: 'Most Medium Solved' },
+                { value: 'easySolved', label: 'Most Easy Solved' },
+                { value: 'name', label: 'Name (A-Z)' },
+                { value: 'lastSynced', label: 'Recently Synced' },
+              ]}
+            />
           </div>
         </div>
 
-        {/* Section Quick Pills */}
+        {/* Quick Section Filter Pills */}
         <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-slate-800/60">
           <span className="text-[11px] text-slate-400 mr-1 font-medium">Quick Section:</span>
           <button
-            onClick={() => setSection('')}
+            onClick={() => { setSection(''); setSearchParams({}); }}
             className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${!section ? 'bg-amber-500 text-slate-950 font-bold' : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'}`}
           >
             All Sections
@@ -158,7 +175,7 @@ export default function StudentDirectory() {
           {defaultSections.map((s) => (
             <button
               key={s}
-              onClick={() => setSection(s)}
+              onClick={() => { setSection(s); setSearchParams({ section: s }); }}
               className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${section === s ? 'bg-amber-500 text-slate-950 font-bold' : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'}`}
             >
               {s}
@@ -191,16 +208,31 @@ export default function StudentDirectory() {
           </p>
         </div>
       ) : viewMode === 'grid' ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filteredStudents.map((student) => (
-            <StudentCard
-              key={student.id}
-              student={student}
-              isAdmin={false}
-              isSyncing={syncingStudentId === student.id}
-              onSync={syncStudent}
-            />
-          ))}
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {paginatedGridStudents.map((student) => (
+              <StudentCard
+                key={student.id}
+                student={student}
+                isAdmin={false}
+                isSyncing={syncingStudentId === student.id}
+                onSync={syncStudent}
+              />
+            ))}
+          </div>
+
+          {filteredStudents.length > 30 && (
+            <div className="glass-card overflow-hidden">
+              <Pagination
+                currentPage={currentPage}
+                totalItems={filteredStudents.length}
+                pageSize={pageSize}
+                onPageChange={setCurrentPage}
+                onPageSizeChange={setPageSize}
+                pageSizeOptions={[30, 60, 120, 400]}
+              />
+            </div>
+          )}
         </div>
       ) : (
         <StudentTable

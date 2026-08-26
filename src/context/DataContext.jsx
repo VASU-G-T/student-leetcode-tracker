@@ -238,6 +238,59 @@ export function DataProvider({ children }) {
   };
 
   /**
+   * Add multiple student records in bulk (up to 400+ students)
+   */
+  const addMultipleStudents = async (studentsList = []) => {
+    const newStudents = [];
+    const existingRegNos = new Set(students.map(s => s.registerNumber?.toUpperCase()));
+
+    for (const item of studentsList) {
+      const regUpper = (item.registerNumber || '').toUpperCase().trim();
+      if (!regUpper || existingRegNos.has(regUpper)) continue;
+      existingRegNos.add(regUpper);
+
+      const newId = `student_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+      const newStudent = {
+        id: newId,
+        name: item.name,
+        username: item.username || regUpper.toLowerCase(),
+        registerNumber: regUpper,
+        department: item.department || 'ECE',
+        year: item.year || '2nd Year',
+        section: item.section || 'Sec A',
+        email: item.email || '',
+        githubUsername: item.githubUsername || '',
+        githubRepoUrl: item.githubRepoUrl || '',
+        githubRepoOwner: item.githubRepoOwner || '',
+        githubRepoName: item.githubRepoName || '',
+        leetcodeUsername: item.leetcodeUsername || regUpper.toLowerCase(),
+        profileImage: item.profileImage || `https://api.dicebear.com/7.x/bottts/svg?seed=${item.githubUsername || item.name}`,
+        bio: item.bio || 'ECE Student • LeetCode & Developer',
+        skills: item.skills || ['C++', 'Python', 'Java', 'DSA'],
+        accessStatus: 'active',
+        totalSolved: 0,
+        easySolved: 0,
+        mediumSolved: 0,
+        hardSolved: 0,
+        goal: parseInt(item.goal, 10) || settings.defaultGoal || 4033,
+        lastSynced: null,
+        createdAt: new Date().toISOString()
+      };
+
+      if (isFirebaseConfigured && db) {
+        try {
+          await setDoc(doc(db, 'students', newId), newStudent);
+        } catch (e) {}
+      }
+
+      newStudents.push(newStudent);
+    }
+
+    setStudents(prev => [...newStudents, ...prev]);
+    return newStudents;
+  };
+
+  /**
    * Update student details (Admin or profile owner)
    */
   const updateStudent = async (id, updatedData) => {
@@ -575,6 +628,7 @@ export function DataProvider({ children }) {
         showToast,
         clearToast,
         addStudent,
+        addMultipleStudents,
         updateStudent,
         updateStudentProfile,
         updateStudentAccess,

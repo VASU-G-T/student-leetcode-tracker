@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Eye, 
@@ -10,6 +10,7 @@ import {
 import { GithubIcon } from '../common/Icons';
 import SyncStatus from '../dashboard/SyncStatus';
 import ProgressBar from '../common/ProgressBar';
+import Pagination from '../common/Pagination';
 import { formatRelativeTime } from '../../utils/helpers';
 
 export default function StudentTable({ 
@@ -20,6 +21,9 @@ export default function StudentTable({
   onEdit, 
   onDelete 
 }) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(50);
+
   if (!students.length) {
     return (
       <div className="glass-card p-12 text-center text-slate-400">
@@ -27,6 +31,8 @@ export default function StudentTable({
       </div>
     );
   }
+
+  const paginatedStudents = students.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   return (
     <div className="glass-card overflow-hidden">
@@ -37,7 +43,7 @@ export default function StudentTable({
               <th className="py-3 px-4 w-12 text-center">#</th>
               <th className="py-3 px-4">Student</th>
               <th className="py-3 px-4">Reg No</th>
-              <th className="py-3 px-4">Dept</th>
+              <th className="py-3 px-4">Dept & Sec</th>
               <th className="py-3 px-4 text-center">Solved</th>
               <th className="py-3 px-4 text-center text-emerald-400">Easy</th>
               <th className="py-3 px-4 text-center text-amber-400">Med</th>
@@ -47,7 +53,8 @@ export default function StudentTable({
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-800/60 text-sm">
-            {students.map((student, idx) => {
+            {paginatedStudents.map((student, idx) => {
+              const globalIndex = (currentPage - 1) * pageSize + idx + 1;
               const isSyncing = syncingStudentId === student.id;
 
               return (
@@ -56,7 +63,7 @@ export default function StudentTable({
                   className="hover:bg-slate-850/50 transition-colors group"
                 >
                   <td className="py-3 px-4 text-center font-mono text-xs text-slate-500">
-                    {idx + 1}
+                    {globalIndex}
                   </td>
 
                   {/* Student */}
@@ -65,12 +72,12 @@ export default function StudentTable({
                       <img
                         src={student.profileImage || `https://api.dicebear.com/7.x/bottts/svg?seed=${student.githubUsername || student.name}`}
                         alt={student.name}
-                        className="w-8 h-8 rounded-full object-cover border border-slate-700"
+                        className="w-8 h-8 rounded-full object-cover border border-slate-700 shrink-0"
                       />
                       <div>
                         <Link
                           to={`/student/${student.registerNumber || student.id}`}
-                          className="font-semibold text-white group-hover:text-amber-400 transition-colors"
+                          className="font-semibold text-white group-hover:text-amber-400 transition-colors line-clamp-1"
                         >
                           {student.name}
                         </Link>
@@ -88,9 +95,12 @@ export default function StudentTable({
                     {student.registerNumber}
                   </td>
 
-                  {/* Department */}
+                  {/* Department & Section */}
                   <td className="py-3 px-4 text-xs text-slate-300">
-                    {student.department} ({student.year || '2nd'})
+                    <div>
+                      <span className="font-medium text-white">{student.department}</span>
+                      <span className="text-slate-400 block text-[11px] font-mono">{student.section} • {student.year || '2nd Yr'}</span>
+                    </div>
                   </td>
 
                   {/* Solved */}
@@ -99,23 +109,27 @@ export default function StudentTable({
                   </td>
 
                   {/* Easy */}
-                  <td className="py-3 px-4 text-center font-mono text-emerald-400">
+                  <td className="py-3 px-4 text-center font-mono font-medium text-emerald-400">
                     {student.easySolved || 0}
                   </td>
 
                   {/* Medium */}
-                  <td className="py-3 px-4 text-center font-mono text-amber-400">
+                  <td className="py-3 px-4 text-center font-mono font-medium text-amber-400">
                     {student.mediumSolved || 0}
                   </td>
 
                   {/* Hard */}
-                  <td className="py-3 px-4 text-center font-mono text-rose-400">
+                  <td className="py-3 px-4 text-center font-mono font-medium text-rose-400">
                     {student.hardSolved || 0}
                   </td>
 
                   {/* Sync Status */}
                   <td className="py-3 px-4">
-                    <SyncStatus student={student} isSyncing={isSyncing} />
+                    <SyncStatus 
+                      status={student.syncStatus || 'success'} 
+                      lastSynced={student.lastSynced}
+                      isSyncing={isSyncing}
+                    />
                   </td>
 
                   {/* Actions */}
@@ -169,6 +183,17 @@ export default function StudentTable({
           </tbody>
         </table>
       </div>
+
+      {students.length > 25 && (
+        <Pagination
+          currentPage={currentPage}
+          totalItems={students.length}
+          pageSize={pageSize}
+          onPageChange={setCurrentPage}
+          onPageSizeChange={setPageSize}
+          pageSizeOptions={[25, 50, 100, 400]}
+        />
+      )}
     </div>
   );
 }
