@@ -8,7 +8,8 @@ import {
   SlidersHorizontal, 
   ArrowUpDown, 
   UserPlus,
-  FileText
+  FileText,
+  FileSpreadsheet
 } from 'lucide-react';
 import SearchBar from '../components/common/SearchBar';
 import FilterDropdown from '../components/common/FilterDropdown';
@@ -16,7 +17,7 @@ import StudentCard from '../components/students/StudentCard';
 import StudentTable from '../components/students/StudentTable';
 import Pagination from '../components/common/Pagination';
 import { useData } from '../context/DataContext';
-import { exportLeaderboardWordDoc } from '../utils/exportCsv';
+import { exportLeaderboardExcel, exportLeaderboardWordDoc } from '../utils/exportCsv';
 
 export default function StudentDirectory() {
   const { students, settings, syncingStudentId, syncStudent } = useData();
@@ -101,15 +102,25 @@ export default function StudentDirectory() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2.5">
+          {/* Sheet Table Export Button */}
+          <button
+            onClick={() => exportLeaderboardExcel(filteredStudents)}
+            className="btn-secondary flex items-center gap-1.5 font-bold text-purple-700 hover:text-purple-800 bg-purple-50 hover:bg-purple-100/80 shadow-sm border-purple-200 text-xs"
+            title="Download clean Google Sheets / Excel formatted table with separate columns and proper spacing"
+          >
+            <FileSpreadsheet className="w-3.5 h-3.5 text-purple-600" />
+            <span>Export Sheet Table (.xls)</span>
+          </button>
+
           {/* Word Table Export Button */}
           <button
             onClick={() => exportLeaderboardWordDoc(filteredStudents)}
-            className="btn-secondary flex items-center gap-2 font-bold text-sky-700 hover:text-sky-800 bg-sky-50 hover:bg-sky-100/80 shadow-sm border-sky-200 text-xs"
+            className="btn-secondary flex items-center gap-1.5 font-bold text-sky-700 hover:text-sky-800 bg-sky-50 hover:bg-sky-100/80 shadow-sm border-sky-200 text-xs"
             title="Download formatted Microsoft Word Document table"
           >
             <FileText className="w-3.5 h-3.5 text-sky-600" />
-            <span>Export Word Table (.doc)</span>
+            <span>Word Doc (.doc)</span>
           </button>
 
           {/* View Mode Toggle */}

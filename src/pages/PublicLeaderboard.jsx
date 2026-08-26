@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   Trophy, 
   Crown, 
@@ -9,8 +9,7 @@ import {
   Award, 
   Layers,
   FileText,
-  FileSpreadsheet,
-  ChevronDown
+  FileSpreadsheet
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import LeaderboardTable from '../components/leaderboard/LeaderboardTable';
@@ -18,8 +17,8 @@ import FilterDropdown from '../components/common/FilterDropdown';
 import SearchBar from '../components/common/SearchBar';
 import { useData } from '../context/DataContext';
 import { 
-  exportLeaderboardWordDoc, 
-  exportLeaderboardExcel 
+  exportLeaderboardExcel, 
+  exportLeaderboardWordDoc 
 } from '../utils/exportCsv';
 
 export default function PublicLeaderboard() {
@@ -80,6 +79,16 @@ export default function PublicLeaderboard() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
+            {/* Sheet Table Export Button */}
+            <button
+              onClick={() => exportLeaderboardExcel(filteredStudents)}
+              className="btn-secondary flex items-center gap-2 font-bold text-purple-700 hover:text-purple-800 bg-purple-50 hover:bg-purple-100/80 shadow-sm border-purple-200"
+              title="Download clean Google Sheets / Excel formatted table with separate columns and proper spacing"
+            >
+              <FileSpreadsheet className="w-4 h-4 text-purple-600" />
+              <span>Export Sheet Table (.xls)</span>
+            </button>
+
             {/* Word Document Table Export Button */}
             <button
               onClick={() => exportLeaderboardWordDoc(filteredStudents)}
@@ -87,7 +96,7 @@ export default function PublicLeaderboard() {
               title="Download formatted Microsoft Word Document table"
             >
               <FileText className="w-4 h-4 text-sky-600" />
-              <span>Export Word Table (.doc)</span>
+              <span>Word Doc (.doc)</span>
             </button>
 
             <button
