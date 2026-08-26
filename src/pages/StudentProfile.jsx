@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { 
   ArrowLeft, 
@@ -6,21 +6,43 @@ import {
   Target, 
   Calendar, 
   BookOpen, 
-  CheckCircle2,
-  FolderGit2
+  CheckCircle2, 
+  FolderGit2,
+  Layers,
+  Plus,
+  Sparkles
 } from 'lucide-react';
 import ProfileHeader from '../components/profile/ProfileHeader';
 import ProblemTable from '../components/profile/ProblemTable';
 import DifficultyChart from '../components/dashboard/DifficultyChart';
+import ProjectCard from '../components/profile/ProjectCard';
+import ProjectModal from '../components/profile/ProjectModal';
 import { ProfileSkeleton } from '../components/common/LoadingSkeleton';
 import { useData } from '../context/DataContext';
+import { useAuth } from '../context/AuthContext';
 
 export default function StudentProfile() {
   const { id } = useParams();
-  const { getStudentById, getStudentProblems, syncStudent, syncingStudentId, loading } = useData();
+  const { 
+    getStudentById, 
+    getStudentProblems, 
+    getStudentProjects,
+    addStudentProject,
+    updateStudentProject,
+    deleteStudentProject,
+    syncStudent, 
+    syncingStudentId, 
+    loading 
+  } = useData();
+  const { currentUser, isAdmin } = useAuth();
 
   const student = useMemo(() => getStudentById(id), [id, getStudentById]);
   const problems = useMemo(() => student ? getStudentProblems(student.id) : [], [student, getStudentProblems]);
+  const projects = useMemo(() => student ? getStudentProjects(student.id) : [], [student, getStudentProjects]);
+
+  // Project Modal State
+  const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
+  const [editingProject, setEditingProject] = useState(null);
 
   if (loading) {
     return <ProfileSkeleton />;
@@ -42,10 +64,41 @@ export default function StudentProfile() {
     );
   }
 
+  const isOwner = currentUser && (
+    currentUser.studentId === student.id ||
+    currentUser.username?.toLowerCase() === student.username?.toLowerCase() ||
+    currentUser.registerNumber?.toLowerCase() === student.registerNumber?.toLowerCase() ||
+    isAdmin
+  );
+
   const isSyncing = syncingStudentId === student.id;
 
+  const handleAddProject = () => {
+    setEditingProject(null);
+    setIsProjectModalOpen(true);
+  };
+
+  const handleEditProject = (proj) => {
+    setEditingProject(proj);
+    setIsProjectModalOpen(true);
+  };
+
+  const handleSaveProject = (projectData) => {
+    if (editingProject) {
+      updateStudentProject(student.id, editingProject.id, projectData);
+    } else {
+      addStudentProject(student.id, projectData);
+    }
+  };
+
+  const handleDeleteProject = (proj) => {
+    if (window.confirm(`Delete "${proj.title}" from your project showcase?`)) {
+      deleteStudentProject(student.id, proj.id);
+    }
+  };
+
   return (
-    <div className="space-y-6 animate-fade-in pb-16">
+    <div className="space-y-8 animate-fade-in pb-20">
       {/* Back button link */}
       <div>
         <Link
@@ -62,9 +115,70 @@ export default function StudentProfile() {
         student={student}
         isSyncing={isSyncing}
         onSync={syncStudent}
+        onAddProject={isOwner ? handleAddProject : null}
       />
 
-      {/* Analytics Breakdown & Solved Problems */}
+      {/* Unlimited Projects & Portfolio Showcase Section */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Layers className="w-5 h-5 text-amber-400" />
+            <div>
+              <h2 className="text-lg font-bold text-white tracking-tight">
+                Featured Projects & Engineering Portfolio
+              </h2>
+              <p className="text-xs text-slate-400">
+                Software applications, IoT builds, and GitHub repositories created by {student.name}.
+              </p>
+            </div>
+          </div>
+
+          {isOwner && (
+            <button
+              onClick={handleAddProject}
+              className="btn-primary flex items-center gap-1.5 text-xs font-semibold"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Add Project</span>
+            </button>
+          )}
+        </div>
+
+        {projects.length === 0 ? (
+          <div className="glass-card p-8 text-center border-dashed border-slate-800">
+            <Layers className="w-8 h-8 text-slate-600 mx-auto mb-2" />
+            <p className="text-sm font-semibold text-slate-300">No external projects showcased yet</p>
+            <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
+              {isOwner 
+                ? 'Click "Add Project" above to showcase your apps, hardware builds, and GitHub repositories on your profile!'
+                : `${student.name} hasn't added external project showcases yet.`}
+            </p>
+            {isOwner && (
+              <button
+                onClick={handleAddProject}
+                className="btn-secondary text-xs mt-4 inline-flex items-center gap-1.5 text-amber-400"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>+ Add Your First Project</span>
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {projects.map((proj) => (
+              <ProjectCard
+                key={proj.id}
+                project={proj}
+                isOwner={isOwner}
+                onEdit={handleEditProject}
+                onDelete={handleDeleteProject}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* LeetCode Analytics Breakdown & Solved Problems */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Difficulty Breakdown */}
         <div className="lg:col-span-1 space-y-6">
@@ -72,7 +186,7 @@ export default function StudentProfile() {
             easy={student.easySolved || 0}
             medium={student.mediumSolved || 0}
             hard={student.hardSolved || 0}
-            title="Problem Complexity"
+            title="LeetCode Problem Breakdown"
           />
 
           {/* Quick Insights Card */}
@@ -111,6 +225,14 @@ export default function StudentProfile() {
           />
         </div>
       </div>
+
+      {/* Project Modal */}
+      <ProjectModal
+        isOpen={isProjectModalOpen}
+        project={editingProject}
+        onClose={() => setIsProjectModalOpen(false)}
+        onSave={handleSaveProject}
+      />
     </div>
   );
 }

@@ -11,16 +11,28 @@ import {
   LogOut,
   ChevronRight,
   ShieldCheck,
-  Globe
+  Globe,
+  User,
+  Edit3,
+  Layers,
+  LogIn
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
 
 export default function Sidebar({ isOpen, onClose }) {
-  const { isAdmin, logout } = useAuth();
-  const { isSyncingAll } = useData();
+  const { currentUser, isAdmin, isStudent, currentStudentId, logout } = useAuth();
+  const { isSyncingAll, students } = useData();
   const navigate = useNavigate();
   const location = useLocation();
+
+  const loggedInStudent = isStudent 
+    ? students.find(s => 
+        s.id === currentStudentId || 
+        s.username?.toLowerCase() === currentUser?.username?.toLowerCase() ||
+        s.registerNumber?.toLowerCase() === currentUser?.registerNumber?.toLowerCase()
+      )
+    : null;
 
   const handleLogout = async () => {
     await logout();
@@ -37,6 +49,19 @@ export default function Sidebar({ isOpen, onClose }) {
     { name: 'Analytics', path: '/analytics', icon: BarChart3 },
   ];
 
+  const studentLinks = [
+    { name: 'Dashboard', path: '/', icon: LayoutDashboard },
+    { 
+      name: 'My Profile', 
+      path: `/student/${loggedInStudent?.registerNumber || loggedInStudent?.id || currentUser?.username || 'me'}`, 
+      icon: User 
+    },
+    { name: 'Edit Profile & Projects', path: '/student/edit-profile', icon: Edit3 },
+    { name: 'All Students', path: '/students', icon: Users },
+    { name: 'Leaderboard', path: '/leaderboard', icon: Trophy },
+    { name: 'Analytics', path: '/analytics', icon: BarChart3 },
+  ];
+
   const adminLinks = [
     { name: 'Overview', path: '/admin/dashboard', icon: LayoutDashboard },
     { name: 'Manage Students', path: '/admin/students', icon: Users },
@@ -47,7 +72,11 @@ export default function Sidebar({ isOpen, onClose }) {
     { name: 'Settings', path: '/admin/settings', icon: Settings },
   ];
 
-  const linksToRender = isAdmin && isInAdminSection ? adminLinks : publicLinks;
+  const linksToRender = isAdmin && isInAdminSection 
+    ? adminLinks 
+    : isStudent 
+      ? studentLinks 
+      : publicLinks;
 
   return (
     <>
@@ -73,11 +102,16 @@ export default function Sidebar({ isOpen, onClose }) {
           {/* Section Header */}
           <div className="flex items-center justify-between px-2 pt-2">
             <span className="text-[11px] font-semibold tracking-wider uppercase text-slate-400">
-              {isAdmin && isInAdminSection ? 'Admin Console' : 'Navigation'}
+              {isAdmin && isInAdminSection ? 'Admin Console' : isStudent ? 'Student Space' : 'Navigation'}
             </span>
             {isAdmin && (
               <span className="text-[10px] bg-amber-500/10 text-amber-400 font-mono px-2 py-0.5 rounded border border-amber-500/20">
                 ADMIN
+              </span>
+            )}
+            {isStudent && (
+              <span className="text-[10px] bg-emerald-500/10 text-emerald-400 font-mono px-2 py-0.5 rounded border border-emerald-500/20">
+                STUDENT
               </span>
             )}
           </div>
@@ -106,6 +140,26 @@ export default function Sidebar({ isOpen, onClose }) {
               );
             })}
           </nav>
+
+          {/* Student Profile Quick Callout if guest */}
+          {!currentUser && (
+            <div className="p-3.5 rounded-xl bg-gradient-to-br from-amber-500/10 to-orange-500/5 border border-amber-500/20 space-y-2">
+              <div className="flex items-center gap-2 text-amber-400 font-semibold text-xs">
+                <UserPlus className="w-4 h-4" />
+                <span>Join ECE Tracker</span>
+              </div>
+              <p className="text-[11px] text-slate-400 leading-relaxed">
+                Create your student profile to track your LeetCode progress and showcase projects.
+              </p>
+              <NavLink
+                to="/register"
+                onClick={() => onClose && onClose()}
+                className="btn-primary !py-1.5 !px-3 text-xs w-full flex items-center justify-center gap-1.5"
+              >
+                <span>Register Now</span>
+              </NavLink>
+            </div>
+          )}
 
           {/* Section Switcher for Logged In Admin */}
           {isAdmin && (
@@ -138,22 +192,32 @@ export default function Sidebar({ isOpen, onClose }) {
           )}
         </div>
 
-        {/* Footer info / Logout */}
-        <div className="p-4 border-t border-slate-800/80 bg-slate-950/40 space-y-3">
-          {isAdmin ? (
+        {/* Footer info & Logout */}
+        <div className="p-4 border-t border-slate-800/60 space-y-2">
+          {currentUser ? (
             <button
               onClick={handleLogout}
-              className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-lg border border-rose-500/20 transition-colors"
+              className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
             >
               <LogOut className="w-3.5 h-3.5" />
-              <span>Logout Admin</span>
+              <span>Sign Out</span>
             </button>
           ) : (
-            <div className="text-center">
-              <p className="text-[11px] text-slate-500">LeetTrack College Suite</p>
-              <p className="text-[10px] text-slate-600 font-mono mt-0.5">LeetSync Automated</p>
-            </div>
+            <NavLink
+              to="/login"
+              onClick={() => onClose && onClose()}
+              className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-slate-300 hover:text-amber-400 hover:bg-slate-900 transition-colors"
+            >
+              <LogIn className="w-3.5 h-3.5" />
+              <span>Sign In</span>
+            </NavLink>
           )}
+
+          <div className="text-center">
+            <span className="text-[10px] font-mono text-slate-400">
+              ECE Dept Tracker • V2.0
+            </span>
+          </div>
         </div>
       </aside>
     </>

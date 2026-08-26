@@ -27,6 +27,7 @@ const STORAGE_KEYS = {
   PROBLEMS: 'leettrack_problems_v2',
   ACTIVITY: 'leettrack_activity_v2',
   SETTINGS: 'leettrack_settings_v2',
+  PROJECTS: 'leettrack_projects_v2',
   LAST_SYNC: 'leettrack_last_sync_v2'
 };
 
@@ -34,6 +35,7 @@ export function DataProvider({ children }) {
   // State
   const [students, setStudents] = useState([]);
   const [problemsByStudent, setProblemsByStudent] = useState({});
+  const [projectsByStudent, setProjectsByStudent] = useState({});
   const [activities, setActivities] = useState([]);
   const [settings, setSettings] = useState(INITIAL_SETTINGS);
   const [lastGlobalSync, setLastGlobalSync] = useState(null);
@@ -53,13 +55,6 @@ export function DataProvider({ children }) {
 
   // Initialize data on mount
   useEffect(() => {
-    // Clear old v1 demo keys if present
-    try {
-      localStorage.removeItem('leettrack_students_v1');
-      localStorage.removeItem('leettrack_problems_v1');
-      localStorage.removeItem('leettrack_activity_v1');
-    } catch (e) {}
-
     const loadInitialData = async () => {
       try {
         if (isFirebaseConfigured && db) {
@@ -90,10 +85,17 @@ export function DataProvider({ children }) {
           } else {
             setActivities([]);
           }
+
+          // Load local projects
+          const localProjects = localStorage.getItem(STORAGE_KEYS.PROJECTS);
+          if (localProjects) {
+            setProjectsByStudent(JSON.parse(localProjects));
+          }
         } else {
           // Local storage mode
           const localStudents = localStorage.getItem(STORAGE_KEYS.STUDENTS);
           const localProblems = localStorage.getItem(STORAGE_KEYS.PROBLEMS);
+          const localProjects = localStorage.getItem(STORAGE_KEYS.PROJECTS);
           const localActivity = localStorage.getItem(STORAGE_KEYS.ACTIVITY);
           const localSettings = localStorage.getItem(STORAGE_KEYS.SETTINGS);
           const localLastSync = localStorage.getItem(STORAGE_KEYS.LAST_SYNC);
@@ -101,6 +103,7 @@ export function DataProvider({ children }) {
           const parsedStudents = localStudents ? JSON.parse(localStudents).filter(s => !s.isSample) : [];
           setStudents(parsedStudents);
           setProblemsByStudent(localProblems ? JSON.parse(localProblems) : {});
+          setProjectsByStudent(localProjects ? JSON.parse(localProjects) : {});
           setActivities(localActivity ? JSON.parse(localActivity) : []);
           setSettings(localSettings ? JSON.parse(localSettings) : INITIAL_SETTINGS);
           setLastGlobalSync(localLastSync || null);
@@ -109,6 +112,7 @@ export function DataProvider({ children }) {
         console.error('Error loading data:', err);
         setStudents([]);
         setProblemsByStudent({});
+        setProjectsByStudent({});
         setActivities([]);
       } finally {
         setLoading(false);
@@ -118,79 +122,130 @@ export function DataProvider({ children }) {
     loadInitialData();
   }, []);
 
-  // Save to LocalStorage whenever state updates (for fallback mode)
+  // Save to LocalStorage whenever state updates
   useEffect(() => {
-    if (!isFirebaseConfigured && !loading) {
+    if (!loading) {
       localStorage.setItem(STORAGE_KEYS.STUDENTS, JSON.stringify(students));
       localStorage.setItem(STORAGE_KEYS.PROBLEMS, JSON.stringify(problemsByStudent));
+      localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(projectsByStudent));
       localStorage.setItem(STORAGE_KEYS.ACTIVITY, JSON.stringify(activities));
       localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
       if (lastGlobalSync) {
         localStorage.setItem(STORAGE_KEYS.LAST_SYNC, lastGlobalSync);
       }
     }
-  }, [students, problemsByStudent, activities, settings, lastGlobalSync, loading]);
+  }, [students, problemsByStudent, projectsByStudent, activities, settings, lastGlobalSync, loading]);
 
   /**
    * Add a new student
    */
   const addStudent = async (studentData) => {
-    const studentId = `student_${Date.now()}`;
+    // Check for duplicate register number
+    const existing = students.find(
+      s => s.registerNumber.toLowerCase() === studentData.registerNumber.toLowerCase()
+    );
+    if (existing) {
+      throw new Error(`A student with register number "${studentData.registerNumber}" already exists.`);
+    }
+
+    const newId = `student_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
     const newStudent = {
-      id: studentId,
+      id: newId,
+      name: studentData.name,
+      username: studentData.username || studentData.registerNumber.toLowerCase(),
+      registerNumber: studentData.registerNumber.toUpperCase(),
+      department: studentData.department || 'ECE',
+      year: studentData.year || '2nd Year',
+      section: studentData.section || 'Sec A',
+      email: studentData.email || '',
+      githubUsername: studentData.githubUsername || '',
+      githubRepoUrl: studentData.githubRepoUrl || '',
+      githubRepoOwner: studentData.githubRepoOwner || '',
+      githubRepoName: studentData.githubRepoName || '',
+      leetcodeUsername: studentData.leetcodeUsername || '',
+      profileImage: studentData.profileImage || `https://api.dicebear.com/7.x/bottts/svg?seed=${studentData.githubUsername || studentData.name}`,
+      bio: studentData.bio || 'ECE Student • LeetCode & Developer',
+      skills: studentData.skills || ['C++', 'Python', 'Java', 'Data Structures', 'Algorithms'],
+      accessStatus: studentData.accessStatus || 'active', // 'active', 'approved', 'pending', 'suspended'
       totalSolved: 0,
       easySolved: 0,
       mediumSolved: 0,
       hardSolved: 0,
-      goal: studentData.goal ? parseInt(studentData.goal, 10) : settings.defaultGoal || 200,
+      goal: parseInt(studentData.goal, 10) || 200,
       lastSynced: null,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      ...studentData
+      createdAt: new Date().toISOString()
     };
 
     if (isFirebaseConfigured && db) {
-      await setDoc(doc(db, 'students', studentId), newStudent);
+      await setDoc(doc(db, 'students', newId), newStudent);
     }
 
-    const updated = [newStudent, ...students];
-    setStudents(updated);
-    showToast(`Student ${newStudent.name} added successfully!`, 'success');
+    const updatedList = [newStudent, ...students];
+    setStudents(updatedList);
+    showToast(`Student ${newStudent.name} registered successfully!`, 'success');
 
-    // Automatically trigger initial synchronization
-    try {
-      await syncStudent(studentId, updated);
-    } catch (e) {
-      console.warn('Initial sync warning:', e);
+    // Trigger initial repository sync in background
+    if (newStudent.githubRepoUrl) {
+      setTimeout(() => {
+        syncStudent(newId, updatedList);
+      }, 500);
     }
 
     return newStudent;
   };
 
   /**
-   * Update student details
+   * Update student profile details (photo, bio, skills, repo, info)
    */
-  const updateStudent = async (id, updatedFields) => {
-    const now = new Date().toISOString();
-    const updated = students.map(s => {
-      if (s.id === id) {
-        const repoChanged = updatedFields.githubRepoUrl && updatedFields.githubRepoUrl !== s.githubRepoUrl;
-        return {
-          ...s,
-          ...updatedFields,
-          updatedAt: now,
-          ...(repoChanged ? { syncNotice: 'Repository changed. Run Sync to update progress.' } : {})
-        };
-      }
-      return s;
-    });
+  const updateStudentProfile = async (id, updatedFields) => {
+    const targetStudent = students.find(s => s.id === id);
+    if (!targetStudent) return;
+
+    const merged = { ...targetStudent, ...updatedFields, updatedAt: new Date().toISOString() };
 
     if (isFirebaseConfigured && db) {
-      await updateDoc(doc(db, 'students', id), { ...updatedFields, updatedAt: now });
+      try {
+        await setDoc(doc(db, 'students', id), merged, { merge: true });
+      } catch (e) {
+        console.warn('Firestore update error:', e);
+      }
     }
 
-    setStudents(updated);
-    showToast('Student information updated successfully', 'success');
+    const updatedStudents = students.map(s => s.id === id ? merged : s);
+    setStudents(updatedStudents);
+    showToast('Profile updated successfully!', 'success');
+
+    // If repo URL was changed, re-sync repository
+    if (updatedFields.githubRepoUrl && updatedFields.githubRepoUrl !== targetStudent.githubRepoUrl) {
+      setTimeout(() => {
+        syncStudent(id, updatedStudents);
+      }, 500);
+    }
+
+    return merged;
+  };
+
+  /**
+   * Update Student (Admin form)
+   */
+  const updateStudent = async (id, studentData) => {
+    return updateStudentProfile(id, studentData);
+  };
+
+  /**
+   * Update student access status (approved, active, suspended)
+   */
+  const updateStudentAccess = async (id, accessStatus) => {
+    const target = students.find(s => s.id === id);
+    if (!target) return;
+    const updated = { ...target, accessStatus };
+    if (isFirebaseConfigured && db) {
+      try {
+        await updateDoc(doc(db, 'students', id), { accessStatus });
+      } catch (e) {}
+    }
+    setStudents(prev => prev.map(s => s.id === id ? updated : s));
+    showToast(`Access status updated for ${target.name}: ${accessStatus}`, 'info');
   };
 
   /**
@@ -201,20 +256,105 @@ export function DataProvider({ children }) {
     if (!studentToDelete) return;
 
     if (isFirebaseConfigured && db) {
-      await deleteDoc(doc(db, 'students', id));
+      try {
+        await deleteDoc(doc(db, 'students', id));
+      } catch (e) {}
     }
 
     const updatedStudents = students.filter(s => s.id !== id);
     setStudents(updatedStudents);
 
-    // Clean up local problems
+    // Clean up local problems & projects
     setProblemsByStudent(prev => {
       const copy = { ...prev };
       delete copy[id];
       return copy;
     });
 
-    showToast(`Student ${studentToDelete.name} deleted`, 'info');
+    setProjectsByStudent(prev => {
+      const copy = { ...prev };
+      delete copy[id];
+      return copy;
+    });
+
+    showToast(`Student profile ${studentToDelete.name} deleted`, 'info');
+  };
+
+  /**
+   * Add a project to a student profile (unlimited projects)
+   */
+  const addStudentProject = (studentId, projectData) => {
+    const projectId = `proj_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
+    const newProject = {
+      id: projectId,
+      title: projectData.title.trim(),
+      description: projectData.description.trim(),
+      techStack: Array.isArray(projectData.techStack) ? projectData.techStack : (projectData.techStack || '').split(',').map(s => s.trim()).filter(Boolean),
+      githubUrl: (projectData.githubUrl || '').trim(),
+      liveUrl: (projectData.liveUrl || '').trim(),
+      imageUrl: projectData.imageUrl || '',
+      category: projectData.category || 'Web / Software',
+      createdAt: new Date().toISOString()
+    };
+
+    setProjectsByStudent(prev => {
+      const existing = prev[studentId] || [];
+      return {
+        ...prev,
+        [studentId]: [newProject, ...existing]
+      };
+    });
+
+    showToast(`Project "${newProject.title}" added to showcase!`, 'success');
+    return newProject;
+  };
+
+  /**
+   * Update an existing project
+   */
+  const updateStudentProject = (studentId, projectId, projectData) => {
+    setProjectsByStudent(prev => {
+      const existing = prev[studentId] || [];
+      const updated = existing.map(p => {
+        if (p.id === projectId) {
+          return {
+            ...p,
+            ...projectData,
+            techStack: Array.isArray(projectData.techStack) ? projectData.techStack : (projectData.techStack || '').split(',').map(s => s.trim()).filter(Boolean),
+            updatedAt: new Date().toISOString()
+          };
+        }
+        return p;
+      });
+      return {
+        ...prev,
+        [studentId]: updated
+      };
+    });
+
+    showToast('Project details updated', 'success');
+  };
+
+  /**
+   * Delete a project from student profile
+   */
+  const deleteStudentProject = (studentId, projectId) => {
+    setProjectsByStudent(prev => {
+      const existing = prev[studentId] || [];
+      return {
+        ...prev,
+        [studentId]: existing.filter(p => p.id !== projectId)
+      };
+    });
+
+    showToast('Project removed from showcase', 'info');
+  };
+
+  /**
+   * Get all projects for a student
+   */
+  const getStudentProjects = (studentId) => {
+    return projectsByStudent[studentId] || [];
   };
 
   /**
@@ -230,17 +370,14 @@ export function DataProvider({ children }) {
       const syncResult = await syncStudentRepository(targetStudent, true);
 
       if (syncResult.success) {
-        // Update student in state
         setStudents(prev => prev.map(s => s.id === id ? syncResult.student : s));
 
-        // Update problems in state
         if (syncResult.problems && syncResult.problems.length > 0) {
           setProblemsByStudent(prev => ({
             ...prev,
             [id]: syncResult.problems
           }));
 
-          // Add newly found problem to recent activity
           const latestProblem = syncResult.problems[syncResult.problems.length - 1];
           if (latestProblem) {
             const newActivity = {
@@ -295,7 +432,6 @@ export function DataProvider({ children }) {
         });
       });
 
-      // Update state with results
       const updatedMap = new Map();
       const newProblemsMap = { ...problemsByStudent };
 
@@ -325,13 +461,14 @@ export function DataProvider({ children }) {
   };
 
   /**
-   * Look up student by id or slug (registerNumber or githubUsername)
+   * Look up student by id or slug (registerNumber, username, or githubUsername)
    */
   const getStudentById = (idOrSlug) => {
     if (!idOrSlug) return null;
     const lower = idOrSlug.toLowerCase();
     return students.find(s => 
       s.id === idOrSlug ||
+      (s.username && s.username.toLowerCase() === lower) ||
       (s.registerNumber && s.registerNumber.toLowerCase() === lower) ||
       (s.githubUsername && s.githubUsername.toLowerCase() === lower)
     );
@@ -356,8 +493,6 @@ export function DataProvider({ children }) {
     showToast('Settings updated successfully', 'success');
   };
 
-
-
   // Setup auto sync interval timer
   useEffect(() => {
     const minutes = settings.autoSyncInterval || 15;
@@ -365,7 +500,6 @@ export function DataProvider({ children }) {
 
     const intervalId = setInterval(() => {
       if (students.length > 0 && !isSyncingAll && !syncingStudentId) {
-        console.log(`[Auto Sync] Running background sync every ${minutes} minutes...`);
         syncAll();
       }
     }, minutes * 60 * 1000);
@@ -376,6 +510,7 @@ export function DataProvider({ children }) {
   const value = {
     students,
     problemsByStudent,
+    projectsByStudent,
     activities,
     settings,
     lastGlobalSync,
@@ -388,7 +523,13 @@ export function DataProvider({ children }) {
     clearToast,
     addStudent,
     updateStudent,
+    updateStudentProfile,
+    updateStudentAccess,
     deleteStudent,
+    addStudentProject,
+    updateStudentProject,
+    deleteStudentProject,
+    getStudentProjects,
     syncStudent,
     syncAll,
     getStudentById,

@@ -5,13 +5,15 @@ import Sidebar from './components/common/Sidebar';
 import BottomNav from './components/common/BottomNav';
 import Toast from './components/common/Toast';
 
-// Public Pages
+// Public & Student Pages
 import PublicDashboard from './pages/PublicDashboard';
 import StudentDirectory from './pages/StudentDirectory';
 import StudentProfile from './pages/StudentProfile';
 import PublicLeaderboard from './pages/PublicLeaderboard';
 import PublicAnalytics from './pages/PublicAnalytics';
 import Login from './pages/Login';
+import Register from './pages/Register';
+import StudentEditProfile from './pages/student/StudentEditProfile';
 import NotFound from './pages/NotFound';
 
 // Admin Pages
@@ -68,14 +70,17 @@ export default function App() {
         {/* Main Content Area */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 min-w-0 max-w-full overflow-x-hidden">
           <Routes>
-            {/* Public Routes */}
+            {/* Public & Student Routes */}
             <Route path="/" element={<PublicDashboard />} />
             <Route path="/dashboard" element={<PublicDashboard />} />
             <Route path="/students" element={<StudentDirectory />} />
             <Route path="/student/:id" element={<StudentProfile />} />
+            <Route path="/student/edit-profile" element={<StudentEditProfile />} />
+            <Route path="/student/edit/:id" element={<StudentEditProfile />} />
             <Route path="/leaderboard" element={<PublicLeaderboard />} />
             <Route path="/analytics" element={<PublicAnalytics />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
 
             {/* Admin Protected Routes */}
             <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { 
   RefreshCw, 
   ExternalLink, 
@@ -7,17 +8,30 @@ import {
   Mail, 
   GraduationCap, 
   Sparkles, 
-  Share2 
+  Share2,
+  Edit3,
+  Plus,
+  Layers,
+  CheckCircle2
 } from 'lucide-react';
 import { GithubIcon, LeetCodeIcon } from '../common/Icons';
 import ProgressBar from '../common/ProgressBar';
 import { formatDateTime, formatRelativeTime } from '../../utils/helpers';
 import { useData } from '../../context/DataContext';
+import { useAuth } from '../../context/AuthContext';
 
-export default function ProfileHeader({ student, isSyncing, onSync }) {
+export default function ProfileHeader({ student, isSyncing, onSync, onAddProject }) {
   const { showToast } = useData();
+  const { currentUser, isAdmin } = useAuth();
 
   if (!student) return null;
+
+  const isOwner = currentUser && (
+    currentUser.studentId === student.id ||
+    currentUser.username?.toLowerCase() === student.username?.toLowerCase() ||
+    currentUser.registerNumber?.toLowerCase() === student.registerNumber?.toLowerCase() ||
+    isAdmin
+  );
 
   const handleShare = () => {
     if (navigator.clipboard) {
@@ -27,7 +41,7 @@ export default function ProfileHeader({ student, isSyncing, onSync }) {
   };
 
   return (
-    <div className="glass-card p-6 border-slate-800 relative overflow-hidden">
+    <div className="glass-card p-6 border-slate-800 relative overflow-hidden space-y-5">
       {/* Top Background Glow */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
 
@@ -38,11 +52,11 @@ export default function ProfileHeader({ student, isSyncing, onSync }) {
             <img
               src={student.profileImage || `https://api.dicebear.com/7.x/bottts/svg?seed=${student.githubUsername || student.name}`}
               alt={student.name}
-              className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover border-2 border-amber-500/40 shadow-xl shadow-amber-500/10"
+              className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover border-2 border-amber-500/40 shadow-xl shadow-amber-500/10 bg-slate-950"
             />
-            {student.isSample && (
-              <span className="absolute -bottom-2 -right-2 text-[9px] bg-slate-800 text-amber-400 border border-slate-700 px-1.5 py-0.5 rounded font-mono">
-                Sample
+            {student.accessStatus === 'pending' && (
+              <span className="absolute -bottom-2 -right-2 text-[9px] bg-amber-500/20 text-amber-400 border border-amber-500/30 px-1.5 py-0.5 rounded font-mono">
+                Pending Review
               </span>
             )}
           </div>
@@ -60,7 +74,7 @@ export default function ProfileHeader({ student, isSyncing, onSync }) {
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-1.5 text-xs text-slate-300">
               <div className="flex items-center gap-1.5">
                 <GraduationCap className="w-4 h-4 text-slate-400" />
-                <span>{student.department} • {student.year || '2nd Year'} (Sec {student.section || 'A'})</span>
+                <span>{student.department || 'ECE'} • {student.year || '2nd Year'} ({student.section || 'Sec A'})</span>
               </div>
               {student.email && (
                 <div className="flex items-center gap-1.5">
@@ -70,7 +84,14 @@ export default function ProfileHeader({ student, isSyncing, onSync }) {
               )}
             </div>
 
-            {/* Social / External Links */}
+            {/* Student Bio */}
+            {student.bio && (
+              <p className="text-xs text-slate-300 max-w-xl line-clamp-2">
+                {student.bio}
+              </p>
+            )}
+
+            {/* Social / External Links & Owner Actions */}
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5 pt-1">
               {student.githubRepoUrl && (
                 <a
@@ -80,7 +101,7 @@ export default function ProfileHeader({ student, isSyncing, onSync }) {
                   className="btn-secondary !py-1.5 !px-3 text-xs flex items-center gap-1.5 bg-slate-900"
                 >
                   <GithubIcon className="w-3.5 h-3.5 text-slate-300" />
-                  <span>GitHub Repository</span>
+                  <span>LeetCode Repo</span>
                   <ExternalLink className="w-3 h-3 text-slate-500" />
                 </a>
               )}
@@ -93,9 +114,30 @@ export default function ProfileHeader({ student, isSyncing, onSync }) {
                   className="btn-secondary !py-1.5 !px-3 text-xs flex items-center gap-1.5 bg-slate-900 hover:text-amber-400"
                 >
                   <LeetCodeIcon className="w-3.5 h-3.5 text-amber-500" />
-                  <span>LeetCode Profile</span>
+                  <span>LeetCode</span>
                   <ExternalLink className="w-3 h-3 text-slate-500" />
                 </a>
+              )}
+
+              {isOwner && (
+                <>
+                  <Link
+                    to="/student/edit-profile"
+                    className="btn-primary !py-1.5 !px-3 text-xs flex items-center gap-1.5"
+                  >
+                    <Edit3 className="w-3 h-3" />
+                    <span>Edit Profile</span>
+                  </Link>
+                  {onAddProject && (
+                    <button
+                      onClick={onAddProject}
+                      className="btn-secondary !py-1.5 !px-3 text-xs flex items-center gap-1.5 text-amber-400 border-amber-500/30 hover:bg-amber-500/10"
+                    >
+                      <Plus className="w-3 h-3" />
+                      <span>+ Add Project</span>
+                    </button>
+                  )}
+                </>
               )}
 
               <button
@@ -141,37 +183,20 @@ export default function ProfileHeader({ student, isSyncing, onSync }) {
         </div>
       </div>
 
-      {/* Numerical Stats Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 mt-6 pt-6 border-t border-slate-800/80">
-        <div className="p-3.5 rounded-xl bg-slate-950/40 border border-slate-800/60">
-          <span className="text-[11px] font-semibold uppercase text-slate-400 tracking-wider">Total Solved</span>
-          <p className="text-2xl font-bold text-white mt-1 font-mono">{student.totalSolved || 0}</p>
+      {/* Skills Badges */}
+      {student.skills && student.skills.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-slate-800/60 text-xs">
+          <span className="text-slate-400 text-xs font-medium">Skills:</span>
+          {student.skills.map((skill, idx) => (
+            <span
+              key={idx}
+              className="px-2.5 py-0.5 rounded-md bg-slate-900 border border-slate-800 text-[11px] font-mono text-amber-300"
+            >
+              {skill}
+            </span>
+          ))}
         </div>
-
-        <div className="p-3.5 rounded-xl bg-slate-950/40 border border-emerald-500/20">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-semibold uppercase text-emerald-400 tracking-wider">Easy</span>
-            <span className="w-2 h-2 rounded-full bg-emerald-400" />
-          </div>
-          <p className="text-2xl font-bold text-emerald-400 mt-1 font-mono">{student.easySolved || 0}</p>
-        </div>
-
-        <div className="p-3.5 rounded-xl bg-slate-950/40 border border-amber-500/20">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-semibold uppercase text-amber-400 tracking-wider">Medium</span>
-            <span className="w-2 h-2 rounded-full bg-amber-400" />
-          </div>
-          <p className="text-2xl font-bold text-amber-400 mt-1 font-mono">{student.mediumSolved || 0}</p>
-        </div>
-
-        <div className="p-3.5 rounded-xl bg-slate-950/40 border border-rose-500/20">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-semibold uppercase text-rose-400 tracking-wider">Hard</span>
-            <span className="w-2 h-2 rounded-full bg-rose-400" />
-          </div>
-          <p className="text-2xl font-bold text-rose-400 mt-1 font-mono">{student.hardSolved || 0}</p>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

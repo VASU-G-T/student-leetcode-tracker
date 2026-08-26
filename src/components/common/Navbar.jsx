@@ -7,18 +7,27 @@ import {
   LogIn, 
   LogOut, 
   Menu, 
-  Search,
-  CheckCircle,
-  ExternalLink
+  UserPlus,
+  User,
+  Edit3,
+  Layers
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
 import { formatRelativeTime } from '../../utils/helpers';
 
 export default function Navbar({ onMobileMenuToggle }) {
-  const { currentUser, isAdmin, logout } = useAuth();
-  const { lastGlobalSync, isSyncingAll, syncProgress, syncAll } = useData();
+  const { currentUser, isAdmin, isStudent, currentStudentId, logout } = useAuth();
+  const { lastGlobalSync, isSyncingAll, syncProgress, syncAll, students } = useData();
   const navigate = useNavigate();
+
+  const loggedInStudent = isStudent 
+    ? students.find(s => 
+        s.id === currentStudentId || 
+        s.username?.toLowerCase() === currentUser?.username?.toLowerCase() ||
+        s.registerNumber?.toLowerCase() === currentUser?.registerNumber?.toLowerCase()
+      )
+    : null;
 
   const handleLogout = async () => {
     await logout();
@@ -71,9 +80,10 @@ export default function Navbar({ onMobileMenuToggle }) {
           </span>
         </div>
 
-        {/* Right: Quick actions & Auth */}
+        {/* Right: Actions depending on Auth State */}
         <div className="flex items-center gap-2.5">
           {isAdmin ? (
+            /* Admin Logged In */
             <div className="flex items-center gap-2">
               <button
                 onClick={syncAll}
@@ -90,25 +100,73 @@ export default function Navbar({ onMobileMenuToggle }) {
                 className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-semibold hover:bg-amber-500/20 transition-colors"
               >
                 <ShieldCheck className="w-3.5 h-3.5" />
-                Admin Panel
+                <span>Admin Console</span>
               </Link>
 
               <button
                 onClick={handleLogout}
                 className="p-2 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition-colors"
-                title="Logout admin session"
+                title="Logout session"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            </div>
+          ) : isStudent ? (
+            /* Student Logged In */
+            <div className="flex items-center gap-2">
+              <Link
+                to={`/student/${loggedInStudent?.registerNumber || loggedInStudent?.id || currentUser?.username}`}
+                className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-800 hover:border-amber-500/40 transition-colors"
+              >
+                <img
+                  src={loggedInStudent?.profileImage || `https://api.dicebear.com/7.x/bottts/svg?seed=${currentUser?.username}`}
+                  alt="Student avatar"
+                  className="w-6 h-6 rounded-full object-cover border border-amber-500/50"
+                />
+                <span className="text-xs font-semibold text-white hidden sm:inline">
+                  {loggedInStudent?.name || currentUser?.displayName || currentUser?.username}
+                </span>
+                <span className="text-[10px] px-1 rounded bg-amber-500/10 text-amber-400 font-mono hidden md:inline">
+                  {loggedInStudent?.section || 'ECE'}
+                </span>
+              </Link>
+
+              <Link
+                to="/student/edit-profile"
+                className="hidden sm:flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-semibold hover:bg-amber-500/20 transition-colors"
+                title="Edit profile and portfolio"
+              >
+                <Edit3 className="w-3.5 h-3.5" />
+                <span>Edit Profile</span>
+              </Link>
+
+              <button
+                onClick={handleLogout}
+                className="p-2 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition-colors"
+                title="Logout student account"
               >
                 <LogOut className="w-4 h-4" />
               </button>
             </div>
           ) : (
-            <Link
-              to="/login"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-800 text-xs font-medium transition-colors"
-            >
-              <LogIn className="w-3.5 h-3.5 text-amber-400" />
-              <span>Admin Login</span>
-            </Link>
+            /* Guest (Not Logged In) */
+            <div className="flex items-center gap-2">
+              <Link
+                to="/register"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition-all shadow-md shadow-amber-500/20"
+              >
+                <UserPlus className="w-3.5 h-3.5 stroke-[2.5]" />
+                <span>Register Profile</span>
+              </Link>
+
+              <Link
+                to="/login"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-800 text-xs font-medium transition-colors"
+              >
+                <LogIn className="w-3.5 h-3.5 text-amber-400" />
+                <span>Sign In</span>
+              </Link>
+            </div>
           )}
         </div>
       </div>
