@@ -3,7 +3,7 @@
  * Validates problem extraction and deduplication logic against various LeetSync patterns.
  */
 
-import { parseProblemFile, parseRepositoryTree } from '../services/leetcodeParser.js';
+import { parseProblemFile, parseRepositoryTree, extractDifficultyFromReadme } from '../services/leetcodeParser.js';
 
 function runTests() {
   console.log('Running LeetCode Parser Unit Tests...\n');
@@ -75,6 +75,22 @@ function runTests() {
 
   const hardFile1 = parseProblemFile({ path: '0023-merge-k-sorted-lists/0023-merge-k-sorted-lists.java', type: 'blob' });
   assert(hardFile1 && hardFile1.difficulty === 'Hard', 'Problem 23 accurately classified as Hard');
+
+  // Test 7: GitHub Problem README.md Difficulty Extraction (LeetSync & LeetHub formats)
+  const readmeBadgeEasy = '# Running Sum of 1d Array\n\n![Difficulty: Easy](https://img.shields.io/badge/Difficulty-Easy-brightgreen)\n\nGiven an array nums...';
+  assert(extractDifficultyFromReadme(readmeBadgeEasy) === 'Easy', 'Extract Easy difficulty from LeetSync shields badge');
+
+  const readmeHtmlEasy = '<h2><a href="https://leetcode.com/problems/running-sum-of-1d-array/">1480. Running Sum of 1d Array</a></h2><h3>Easy</h3><hr><p>Given an array...</p>';
+  assert(extractDifficultyFromReadme(readmeHtmlEasy) === 'Easy', 'Extract Easy difficulty from LeetSync HTML header <h3>Easy</h3>');
+
+  const readmeTextEasy = '# Running Sum of 1d Array\n\nDifficulty Easy\n\nTime Complexity: O(N)';
+  assert(extractDifficultyFromReadme(readmeTextEasy) === 'Easy', 'Extract Easy difficulty from raw "Difficulty Easy" text in README');
+
+  const readmeMedium = '# 3Sum\n\n**Difficulty:** Medium\n\nGiven an integer array...';
+  assert(extractDifficultyFromReadme(readmeMedium) === 'Medium', 'Extract Medium difficulty from markdown **Difficulty:** Medium');
+
+  const readmeHard = '<h2>Trapping Rain Water</h2><hr><strong>Difficulty: Hard</strong>';
+  assert(extractDifficultyFromReadme(readmeHard) === 'Hard', 'Extract Hard difficulty from strong tag Difficulty: Hard');
 
   console.log(`\nResults: ${passed} Passed, ${failed} Failed`);
   return failed === 0;

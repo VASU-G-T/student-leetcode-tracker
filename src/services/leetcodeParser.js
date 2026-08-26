@@ -160,6 +160,55 @@ function detectDifficulty(path, filename, problemNumber) {
 }
 
 /**
+ * Extract exact difficulty level from a problem's README.md file
+ * LeetSync / LeetHub formats:
+ * - Badges: https://img.shields.io/badge/Difficulty-Easy-brightgreen
+ * - HTML: <h3>Easy</h3>, <strong>Easy</strong>
+ * - Text: Difficulty Easy, Difficulty: Easy, **Difficulty:** Easy
+ */
+export function extractDifficultyFromReadme(readmeContent) {
+  if (!readmeContent || typeof readmeContent !== 'string') return null;
+
+  // 1. Shields badge pattern: e.g. Difficulty-Easy, Difficulty-Medium, Difficulty-Hard, Difficulty%20Easy
+  const badgeMatch = readmeContent.match(/Difficulty(?:%20|[-_:\s])+(Easy|Medium|Hard)/i);
+  if (badgeMatch) {
+    const diff = badgeMatch[1].toLowerCase();
+    if (diff === 'easy') return 'Easy';
+    if (diff === 'medium') return 'Medium';
+    if (diff === 'hard') return 'Hard';
+  }
+
+  // 2. HTML header/tag pattern: e.g. <h3>Easy</h3>, <strong>Medium</strong>, <span>Hard</span>
+  const htmlMatch = readmeContent.match(/<(?:h[1-6]|strong|b|span|p|div|em)[^>]*>\s*(Easy|Medium|Hard)\s*<\//i);
+  if (htmlMatch) {
+    const diff = htmlMatch[1].toLowerCase();
+    if (diff === 'easy') return 'Easy';
+    if (diff === 'medium') return 'Medium';
+    if (diff === 'hard') return 'Hard';
+  }
+
+  // 3. Markdown / text patterns: e.g. **Difficulty:** Medium, **Difficulty**: Medium, Difficulty: Medium, Difficulty Easy
+  const textMatch = readmeContent.match(/(?:\*\*|\*|###|##)?\s*Difficulty\s*(?:\*\*|\*)?\s*[:\-\s]\s*(?:\*\*|\*)?\s*(Easy|Medium|Hard)\b/i);
+  if (textMatch) {
+    const diff = textMatch[1].toLowerCase();
+    if (diff === 'easy') return 'Easy';
+    if (diff === 'medium') return 'Medium';
+    if (diff === 'hard') return 'Hard';
+  }
+
+  // 4. Standalone Markdown heading / bold tag: e.g. ### Easy, **Easy**
+  const standaloneMatch = readmeContent.match(/(?:###|##|\*\*)\s*(Easy|Medium|Hard)\s*(?:\*\*|$)/i);
+  if (standaloneMatch) {
+    const diff = standaloneMatch[1].toLowerCase();
+    if (diff === 'easy') return 'Easy';
+    if (diff === 'medium') return 'Medium';
+    if (diff === 'hard') return 'Hard';
+  }
+
+  return null;
+}
+
+/**
  * Format title case from slug or words
  */
 function formatTitle(rawTitle) {
