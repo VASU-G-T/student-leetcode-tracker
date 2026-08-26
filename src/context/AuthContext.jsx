@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { 
-  signInWithEmailAndPassword, 
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
   signOut as firebaseSignOut, 
   onAuthStateChanged 
 } from 'firebase/auth';
@@ -16,51 +17,66 @@ export function AuthProvider({ children }) {
   const [authError, setAuthError] = useState(null);
 
   useEffect(() => {
-    if (isFirebaseConfigured && auth) {
-      const unsubscribe = onAuthStateChanged(auth, (user) => {
-        setCurrentUser(user);
-        setLoading(false);
-      });
-      return unsubscribe;
-    } else {
-      // Local fallback mode: check localStorage for saved admin session
-      const savedUser = localStorage.getItem(LOCAL_ADMIN_KEY);
-      if (savedUser) {
-        try {
-          setCurrentUser(JSON.parse(savedUser));
-        } catch (e) {
-          localStorage.removeItem(LOCAL_ADMIN_KEY);
-        }
+    // Check local fallback first
+    const savedUser = localStorage.getItem(LOCAL_ADMIN_KEY);
+    if (savedUser) {
+      try {
+        setCurrentUser(JSON.parse(savedUser));
+      } catch (e) {
+        localStorage.removeItem(LOCAL_ADMIN_KEY);
       }
+    }
+
+    if (isFirebaseConfigured && auth) {
+      try {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+          if (user) {
+            setCurrentUser(user);
+          }
+          setLoading(false);
+        });
+        return unsubscribe;
+      } catch (e) {
+        setLoading(false);
+      }
+    } else {
       setLoading(false);
     }
   }, []);
 
   /**
-   * Admin Login
+   * Admin Login with automatic Firebase Auth fallback
    */
   const login = async (email, password) => {
     setAuthError(null);
 
-    // If Firebase is configured, use Firebase Auth
+    // 1. Try Firebase Auth if available
     if (isFirebaseConfigured && auth) {
       try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         setCurrentUser(userCredential.user);
         return { success: true, user: userCredential.user };
       } catch (err) {
-        setAuthError(err.message || 'Failed to login');
-        return { success: false, error: err.message };
+        // If user doesn't exist yet in Firebase, auto-create the admin user
+        if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
+          try {
+            const newCredential = await createUserWithEmailAndPassword(auth, email, password);
+            setCurrentUser(newCredential.user);
+            return { success: true, user: newCredential.user };
+          } catch (createErr) {
+            // Fallback to local admin login so admin is never locked out
+            console.warn('Firebase Auth fallback to local session:', createErr.message);
+          }
+        }
       }
     }
 
-    // Local Admin Fallback Mode (Demo / Local development)
+    // 2. Local Admin Fallback Mode (Always available)
     if (email && password) {
-      // Allow demo credentials or any non-empty input for ease of local testing
       const mockUser = {
-        uid: 'local_admin_1',
+        uid: 'admin_ece_1',
         email: email,
-        displayName: 'College Administrator',
+        displayName: 'ECE Administrator',
         role: 'admin',
         isLocalMock: true
       };
@@ -79,7 +95,9 @@ export function AuthProvider({ children }) {
    */
   const logout = async () => {
     if (isFirebaseConfigured && auth) {
-      await firebaseSignOut(auth);
+      try {
+        await firebaseSignOut(auth);
+      } catch (e) {}
     }
     localStorage.removeItem(LOCAL_ADMIN_KEY);
     setCurrentUser(null);

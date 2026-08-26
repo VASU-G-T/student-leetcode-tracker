@@ -9,7 +9,9 @@ import {
   ArrowRight, 
   Sparkles,
   RefreshCw,
-  Layers
+  Layers,
+  UserPlus,
+  ShieldCheck
 } from 'lucide-react';
 import StatCard from '../components/common/StatCard';
 import DifficultyChart from '../components/dashboard/DifficultyChart';
@@ -54,7 +56,6 @@ export default function PublicDashboard() {
   
   const sectionMetrics = useMemo(() => {
     return sectionsList.map(sec => {
-      // match "Sec A" or "A", "Sec C" or "C", etc.
       const rawLetter = sec.replace('Sec ', '');
       const secStudents = students.filter(s => s.section === sec || s.section === rawLetter);
       const totalSolved = secStudents.reduce((sum, s) => sum + (s.totalSolved || 0), 0);
@@ -105,11 +106,11 @@ export default function PublicDashboard() {
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
-              to="/leaderboard"
+              to="/admin/students/add"
               className="btn-secondary flex items-center gap-2"
             >
-              <Trophy className="w-4 h-4 text-amber-400" />
-              <span>Leaderboard</span>
+              <UserPlus className="w-4 h-4 text-amber-400" />
+              <span>Add Student (Admin)</span>
             </Link>
           </div>
         </div>
@@ -120,7 +121,7 @@ export default function PublicDashboard() {
         <StatCard
           title="Total ECE Students"
           value={stats.totalStudents}
-          subtitle="Across Sec A, B, V, D, E, F"
+          subtitle="Across Sec A, B, C, D, E, F"
           icon={Users}
           color="amber"
         />
@@ -141,13 +142,13 @@ export default function PublicDashboard() {
         <StatCard
           title="Active Repos"
           value={stats.activeRepos}
-          subtitle={`Last sync: ${formatRelativeTime(lastGlobalSync)}`}
+          subtitle={`Last sync: ${lastGlobalSync ? formatRelativeTime(lastGlobalSync) : 'Ready to sync'}`}
           icon={FolderGit2}
           color="purple"
         />
       </div>
 
-      {/* Section-Wise Quick Breakdown Grid (Sec A, Sec B, Sec V, Sec D, Sec E, Sec F) */}
+      {/* Section-Wise Quick Breakdown Grid (Sec A, Sec B, Sec C, Sec D, Sec E, Sec F) */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -184,6 +185,28 @@ export default function PublicDashboard() {
           ))}
         </div>
       </div>
+
+      {/* When no students exist yet: Show helpful start guide */}
+      {students.length === 0 && (
+        <div className="glass-card p-6 border-amber-500/20 bg-amber-500/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <h3 className="text-base font-bold text-white flex items-center gap-2">
+              <ShieldCheck className="w-5 h-5 text-amber-400" />
+              <span>Ready to add your first ECE student!</span>
+            </h3>
+            <p className="text-xs text-slate-300 max-w-xl">
+              Log into the Admin Console to register students with their GitHub repositories (where LeetSync pushes solutions). Progress will be calculated and displayed here automatically!
+            </p>
+          </div>
+          <Link
+            to="/admin/students/add"
+            className="btn-primary shrink-0 flex items-center gap-2 text-xs"
+          >
+            <UserPlus className="w-4 h-4" />
+            <span>+ Add Student Now</span>
+          </Link>
+        </div>
+      )}
 
       {/* Main Charts & Activity Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
