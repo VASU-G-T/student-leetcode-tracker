@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import StatCard from '../../components/common/StatCard';
 import DifficultyChart from '../../components/dashboard/DifficultyChart';
-import ActivityFeed from '../../components/dashboard/ActivityFeed';
+import StreakLeadersList from '../../components/dashboard/StreakLeadersList';
 import StudentTable from '../../components/students/StudentTable';
 import ExportMenu from '../../components/common/ExportMenu';
 import { useData } from '../../context/DataContext';
@@ -152,7 +152,7 @@ export default function AdminDashboard() {
         />
       </div>
 
-      {/* Charts & Activity */}
+      {/* Charts & Streak Leaders */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1">
           <DifficultyChart
@@ -164,7 +164,7 @@ export default function AdminDashboard() {
         </div>
 
         <div className="lg:col-span-2">
-          <ActivityFeed activities={activities} />
+          <StreakLeadersList students={students} />
         </div>
       </div>
 

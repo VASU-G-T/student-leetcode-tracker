@@ -20,7 +20,7 @@ import {
 import { GithubIcon, LeetCodeIcon } from '../components/common/Icons';
 import StatCard from '../components/common/StatCard';
 import DifficultyChart from '../components/dashboard/DifficultyChart';
-import ActivityFeed from '../components/dashboard/ActivityFeed';
+import StreakLeadersList from '../components/dashboard/StreakLeadersList';
 import LeaderboardTable from '../components/leaderboard/LeaderboardTable';
 import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
@@ -289,7 +289,7 @@ export default function PublicDashboard() {
         </div>
       </div>
 
-      {/* Main Grid: Difficulty Chart & Activity Feed */}
+      {/* Main Grid: Difficulty Chart & Streak Leaders */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1">
           <DifficultyChart
@@ -301,7 +301,7 @@ export default function PublicDashboard() {
         </div>
 
         <div className="lg:col-span-2">
-          <ActivityFeed activities={activities} />
+          <StreakLeadersList students={students} />
         </div>
       </div>
 
