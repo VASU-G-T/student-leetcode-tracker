@@ -36,7 +36,7 @@ export default function Navbar({ onMobileMenuToggle }) {
 
   return (
     <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-sky-100 px-4 sm:px-6 py-3 shadow-sm shadow-sky-500/5">
-      <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      <div className="max-w-[1720px] mx-auto flex items-center justify-between gap-4">
         {/* Left: Mobile Toggle & Brand */}
         <div className="flex items-center gap-3">
           <button

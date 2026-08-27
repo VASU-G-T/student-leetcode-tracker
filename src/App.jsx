@@ -65,7 +65,7 @@ export default function App() {
       {/* Top Navbar */}
       <Navbar onMobileMenuToggle={() => setMobileMenuOpen(prev => !prev)} />
 
-      <div className="flex-1 flex w-full max-w-7xl mx-auto">
+      <div className="flex-1 flex w-full max-w-[1720px] mx-auto px-2 sm:px-4">
         {/* Responsive Desktop Sidebar */}
         <Sidebar
           isOpen={mobileMenuOpen}
