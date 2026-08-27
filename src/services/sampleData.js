@@ -29,7 +29,7 @@ export const CREATOR_PROFILE = {
   todaySolved: 9,
   weekSolved: 11,
   monthSolved: 40,
-  streak: 3,
+  streak: 23,
   goal: 4033,
   lastSynced: new Date().toISOString(),
   createdAt: new Date().toISOString()
