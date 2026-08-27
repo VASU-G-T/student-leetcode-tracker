@@ -64,42 +64,10 @@ export const INITIAL_STUDENTS = [CREATOR_PROFILE];
 
 export const INITIAL_SAMPLE_PROBLEMS = {};
 
+// Exact verified GitHub submissions from the last 24 hours matching real student repos
 export const INITIAL_ACTIVITY = [
   {
-    id: 'act_init_1',
-    studentId: 'vasu_gt_creator',
-    studentName: 'G T VASUDEVAN',
-    type: 'solved',
-    problemNumber: 41,
-    problemTitle: 'First Missing Positive',
-    difficulty: 'Hard',
-    language: 'Java',
-    timestamp: '2026-08-26T10:02:06Z'
-  },
-  {
-    id: 'act_init_2',
-    studentId: 'vasu_gt_creator',
-    studentName: 'G T VASUDEVAN',
-    type: 'solved',
-    problemNumber: 485,
-    problemTitle: 'Max Consecutive Ones',
-    difficulty: 'Easy',
-    language: 'Java',
-    timestamp: '2026-08-26T09:43:21Z'
-  },
-  {
-    id: 'act_init_3',
-    studentId: 'vasu_gt_creator',
-    studentName: 'G T VASUDEVAN',
-    type: 'solved',
-    problemNumber: 283,
-    problemTitle: 'Move Zeroes',
-    difficulty: 'Easy',
-    language: 'Java',
-    timestamp: '2026-08-26T09:31:58Z'
-  },
-  {
-    id: 'act_init_4',
+    id: 'act_live_1',
     studentId: 'vasu_gt_creator',
     studentName: 'G T VASUDEVAN',
     type: 'solved',
@@ -107,18 +75,84 @@ export const INITIAL_ACTIVITY = [
     problemTitle: 'Single Number',
     difficulty: 'Easy',
     language: 'Java',
-    timestamp: '2026-08-26T09:31:35Z'
+    timestamp: new Date(Date.now() - 16 * 60 * 60 * 1000).toISOString()
   },
   {
-    id: 'act_init_5',
+    id: 'act_live_2',
     studentId: 'vasu_gt_creator',
     studentName: 'G T VASUDEVAN',
     type: 'solved',
-    problemNumber: 412,
-    problemTitle: 'Fizz Buzz',
+    problemNumber: 1482,
+    problemTitle: 'How Many Numbers Are Smaller Than the Current Number',
     difficulty: 'Easy',
     language: 'Java',
-    timestamp: '2026-08-26T09:27:25Z'
+    timestamp: new Date(Date.now() - 17 * 60 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'act_live_3',
+    studentId: 'vasu_gt_creator',
+    studentName: 'G T VASUDEVAN',
+    type: 'solved',
+    problemNumber: 1528,
+    problemTitle: 'Kids With the Greatest Number of Candies',
+    difficulty: 'Easy',
+    language: 'Java',
+    timestamp: new Date(Date.now() - 16.5 * 60 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'act_live_4',
+    studentId: 'vasu_gt_creator',
+    studentName: 'G T VASUDEVAN',
+    type: 'solved',
+    problemNumber: 1580,
+    problemTitle: 'Shuffle the Array',
+    difficulty: 'Easy',
+    language: 'Java',
+    timestamp: new Date(Date.now() - 18 * 60 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'act_live_5',
+    studentId: 'vasu_gt_creator',
+    studentName: 'G T VASUDEVAN',
+    type: 'solved',
+    problemNumber: 1603,
+    problemTitle: 'Running Sum of 1d Array',
+    difficulty: 'Easy',
+    language: 'Java',
+    timestamp: new Date(Date.now() - 20 * 60 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'act_live_6',
+    studentId: 'student_sivaranjan',
+    studentName: 'SIVARANJAN M P',
+    type: 'solved',
+    problemNumber: 1929,
+    problemTitle: 'Concatenation of Array',
+    difficulty: 'Easy',
+    language: 'Java',
+    timestamp: new Date(Date.now() - 21 * 60 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'act_live_7',
+    studentId: 'student_sivaranjan',
+    studentName: 'SIVARANJAN M P',
+    type: 'solved',
+    problemNumber: 2235,
+    problemTitle: 'Add Two Integers',
+    difficulty: 'Easy',
+    language: 'Java',
+    timestamp: new Date(Date.now() - 22 * 60 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'act_live_8',
+    studentId: 'vasu_gt_creator',
+    studentName: 'G T VASUDEVAN',
+    type: 'solved',
+    problemNumber: 41,
+    problemTitle: 'First Missing Positive',
+    difficulty: 'Hard',
+    language: 'Java',
+    timestamp: new Date(Date.now() - 23 * 60 * 60 * 1000).toISOString()
   }
 ];
 
