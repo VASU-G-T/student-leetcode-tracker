@@ -193,24 +193,54 @@ export default function StudentProfile() {
 
           {/* Quick Insights Card */}
           <div className="glass-card p-5 space-y-4 bg-white border-sky-100 shadow-sm">
-            <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-              <div className="p-1 rounded bg-orange-50 text-orange-600 border border-orange-200">
-                <Flame className="w-4 h-4" />
+            <h3 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="p-1 rounded-lg bg-orange-50 text-orange-600 border border-orange-200">
+                  <Flame className="w-4 h-4" />
+                </div>
+                <span>Progress Insights</span>
               </div>
-              <span>Progress Insights</span>
+              {student.streak > 0 && (
+                <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-orange-50 text-orange-700 font-bold border border-orange-200">
+                  🔥 {student.streak}d Streak
+                </span>
+              )}
             </h3>
 
             <div className="space-y-2.5 text-xs text-slate-700">
-              <div className="flex items-center justify-between p-3 rounded-xl bg-sky-50/50 border border-sky-100">
-                <span className="text-slate-600 font-medium">Target Goal</span>
-                <span className="font-mono font-extrabold text-sky-700">{student.goal || 4033} Solved</span>
+              {/* Goal & Progress Bar */}
+              <div className="p-3 rounded-xl bg-sky-50/50 border border-sky-100 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-600 font-medium">Target Goal</span>
+                  <span className="font-mono font-extrabold text-sky-700">{student.goal || 4033} Solved</span>
+                </div>
+                <div className="w-full bg-sky-100 rounded-full h-2 overflow-hidden">
+                  <div 
+                    className="bg-gradient-to-r from-sky-500 to-emerald-500 h-2 rounded-full transition-all duration-500"
+                    style={{ width: `${Math.min(100, Math.max(1, Math.round(((student.totalSolved || 0) / (student.goal || 4033)) * 100)))}%` }}
+                  />
+                </div>
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="text-slate-400">Completion</span>
+                  <span className="font-mono font-bold text-emerald-700">
+                    {Math.round(((student.totalSolved || 0) / (student.goal || 4033)) * 100)}%
+                  </span>
+                </div>
               </div>
-              <div className="flex items-center justify-between p-3 rounded-xl bg-sky-50/50 border border-sky-100">
-                <span className="text-slate-600 font-medium">Completion</span>
-                <span className="font-mono font-extrabold text-emerald-700">
-                  {Math.round(((student.totalSolved || 0) / (student.goal || 4033)) * 100)}%
-                </span>
+
+              {/* Velocity */}
+              <div className="grid grid-cols-2 gap-2">
+                <div className="p-2.5 rounded-xl bg-emerald-50/50 border border-emerald-100 text-center">
+                  <span className="text-[10px] text-slate-500 font-medium block">Today</span>
+                  <span className="font-mono font-extrabold text-emerald-700 text-sm">+{student.todaySolved || 0}</span>
+                </div>
+                <div className="p-2.5 rounded-xl bg-sky-50/50 border border-sky-100 text-center">
+                  <span className="text-[10px] text-slate-500 font-medium block">1 Week</span>
+                  <span className="font-mono font-extrabold text-sky-700 text-sm">{student.weekSolved || 0}</span>
+                </div>
               </div>
+
+              {/* Hard Ratio */}
               <div className="flex items-center justify-between p-3 rounded-xl bg-sky-50/50 border border-sky-100">
                 <span className="text-slate-600 font-medium">Hard Problem Ratio</span>
                 <span className="font-mono font-extrabold text-rose-700">

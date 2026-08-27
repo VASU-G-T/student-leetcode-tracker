@@ -26,7 +26,7 @@ export default function DifficultyChart({ easy = 0, medium = 0, hard = 0, title 
   const hardOffset = -(easyLen + medLen);
 
   return (
-    <div className="glass-card p-5 bg-white border-sky-100 flex flex-col justify-between shadow-sm h-full">
+    <div className="glass-card p-5 bg-white border-sky-100 flex flex-col justify-between shadow-sm h-auto">
       {/* Header */}
       <div>
         <div className="flex items-center justify-between mb-1 pb-2 border-b border-sky-100">
